@@ -8,6 +8,7 @@ const FOOTER_SECTIONS = [
       { href: "/rechner", label: "Küchenrechner" },
       { href: "/musterkuechen", label: "Musterküchen" },
       { href: "/ratgeber", label: "Ratgeber" },
+      { href: "/warum-kuechenwert", label: "Warum KüchenWert?" },
     ],
   },
   {
@@ -29,22 +30,25 @@ const FOOTER_SECTIONS = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-zinc-200 bg-white">
+    <footer className="bg-brand-950 text-zinc-400">
       <div className="section-container py-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <p className="text-lg font-bold text-brand-700">KüchenWert</p>
-            <p className="mt-2 text-sm text-zinc-500">
-              Transparenz schafft Wert. Ihre Traumküche zum Bestpreis.
+            <p className="text-lg font-bold">
+              <span className="text-accent-400">Küchen</span>
+              <span className="text-white">Wert</span>
+            </p>
+            <p className="mt-3 text-sm leading-relaxed">
+              Transparenz schafft Wert. Vergleichen Sie kostenlos regionale Küchenangebote und sparen Sie beim Küchenkauf.
             </p>
           </div>
           {FOOTER_SECTIONS.map((section) => (
             <div key={section.title}>
-              <p className="text-sm font-semibold text-zinc-900">{section.title}</p>
-              <ul className="mt-3 space-y-2">
+              <p className="text-sm font-semibold uppercase tracking-wider text-zinc-300">{section.title}</p>
+              <ul className="mt-4 space-y-2.5">
                 {section.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-zinc-500 hover:text-zinc-800">
+                    <Link href={link.href} className="text-sm transition hover:text-white">
                       {link.label}
                     </Link>
                   </li>
@@ -53,7 +57,7 @@ export function Footer() {
             </div>
           ))}
         </div>
-        <div className="mt-10 border-t border-zinc-100 pt-6 text-center text-xs text-zinc-400">
+        <div className="mt-10 border-t border-zinc-800 pt-6 text-center text-xs text-zinc-500">
           &copy; {new Date().getFullYear()} KüchenWert. Alle Rechte vorbehalten.
         </div>
       </div>

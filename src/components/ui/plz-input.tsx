@@ -29,11 +29,11 @@ export function PlzInput({ size = "default", className }: PlzInputProps) {
         inputMode="numeric"
         pattern="[0-9]{5}"
         maxLength={5}
-        placeholder="PLZ eingeben"
+        placeholder="Ihre PLZ"
         value={plz}
         onChange={(e) => setPlz(e.target.value.replace(/\D/g, "").slice(0, 5))}
         className={clsx(
-          "input-field",
+          "w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20",
           isLarge ? "px-5 py-4 text-lg" : "px-4 py-2.5 text-sm",
         )}
         required
@@ -42,11 +42,11 @@ export function PlzInput({ size = "default", className }: PlzInputProps) {
         type="submit"
         disabled={plz.length !== 5}
         className={clsx(
-          "btn-primary whitespace-nowrap",
+          "btn-accent whitespace-nowrap",
           isLarge && "px-8 py-4 text-base",
         )}
       >
-        Jetzt Küchenstudios finden
+        Jetzt Studios finden
       </button>
     </form>
   );

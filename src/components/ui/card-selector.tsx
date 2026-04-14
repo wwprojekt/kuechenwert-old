@@ -42,10 +42,10 @@ export function CardSelector({
           type="button"
           onClick={() => onSelect(opt.id)}
           className={clsx(
-            "flex flex-col items-center gap-2 rounded-xl border-2 p-5 text-center transition",
+            "flex flex-col items-center gap-2 rounded-lg border-2 p-5 text-center transition",
             isSelected(opt.id)
-              ? "border-brand-600 bg-brand-50 text-brand-800 shadow-sm"
-              : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:shadow-sm",
+              ? "border-brand-600 bg-brand-50 text-brand-800 shadow-md"
+              : "border-zinc-200 bg-white text-zinc-700 hover:border-brand-300 hover:shadow-sm",
           )}
         >
           {opt.icon && <span className="text-2xl">{opt.icon}</span>}
