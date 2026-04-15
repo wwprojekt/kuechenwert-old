@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { clsx } from "clsx";
 
 export interface CardOption {
@@ -14,6 +15,7 @@ interface CardStepProps {
   selected: string;
   onSelect: (id: string) => void;
   columns?: 2 | 3 | 4 | 5;
+  onAutoAdvance?: () => void;
 }
 
 export function CardStep({
@@ -21,7 +23,17 @@ export function CardStep({
   selected,
   onSelect,
   columns = 3,
+  onAutoAdvance,
 }: CardStepProps) {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleClick(id: string) {
+    onSelect(id);
+    if (onAutoAdvance) {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(onAutoAdvance, 400);
+    }
+  }
   const gridCols: Record<number, string> = {
     2: "grid-cols-1 sm:grid-cols-2",
     3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
@@ -38,7 +50,7 @@ export function CardStep({
           <button
             key={opt.id}
             type="button"
-            onClick={() => onSelect(opt.id)}
+            onClick={() => handleClick(opt.id)}
             className={clsx(
               "relative flex flex-col items-center gap-2.5 rounded-xl border-2 px-4 py-5 text-center transition-all",
               isActive

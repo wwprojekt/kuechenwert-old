@@ -27,6 +27,7 @@ import {
   createEmptyPlanungData,
   type PlanungFunnelData,
 } from "@/config/funnel-planung";
+import { getStoredUtm } from "@/lib/utm";
 
 const STORAGE_KEY = "kw_funnel_planung";
 
@@ -111,6 +112,7 @@ export function PlanungFunnelClient({ stepSlug }: { stepSlug: string }) {
           phone: data.phone,
           consentCall: data.consentCall,
           consentMarketing: data.consentMarketing,
+          ...getStoredUtm(),
         }),
       });
       if (res.ok) {
@@ -185,6 +187,7 @@ export function PlanungFunnelClient({ stepSlug }: { stepSlug: string }) {
           }))}
           selected={data.kitchenForm}
           onSelect={(id) => update({ kitchenForm: id })}
+          onAutoAdvance={goNext}
           columns={3}
         />
       )}
@@ -197,6 +200,7 @@ export function PlanungFunnelClient({ stepSlug }: { stepSlug: string }) {
           }))}
           selected={data.style}
           onSelect={(id) => update({ style: id })}
+          onAutoAdvance={goNext}
           columns={3}
         />
       )}
@@ -209,6 +213,7 @@ export function PlanungFunnelClient({ stepSlug }: { stepSlug: string }) {
           }))}
           selected={data.roomType}
           onSelect={(id) => update({ roomType: id })}
+          onAutoAdvance={goNext}
           columns={3}
         />
       )}
@@ -221,6 +226,7 @@ export function PlanungFunnelClient({ stepSlug }: { stepSlug: string }) {
           }))}
           selected={data.color}
           onSelect={(id) => update({ color: id })}
+          onAutoAdvance={goNext}
           columns={4}
         />
       )}
@@ -246,6 +252,7 @@ export function PlanungFunnelClient({ stepSlug }: { stepSlug: string }) {
           }))}
           selected={data.household}
           onSelect={(id) => update({ household: id })}
+          onAutoAdvance={goNext}
           columns={4}
         />
       )}
@@ -258,6 +265,7 @@ export function PlanungFunnelClient({ stepSlug }: { stepSlug: string }) {
           }))}
           selected={data.timeframe}
           onSelect={(id) => update({ timeframe: id })}
+          onAutoAdvance={goNext}
           columns={4}
         />
       )}
@@ -270,6 +278,7 @@ export function PlanungFunnelClient({ stepSlug }: { stepSlug: string }) {
           }))}
           selected={data.reason}
           onSelect={(id) => update({ reason: id })}
+          onAutoAdvance={goNext}
           columns={3}
         />
       )}
@@ -282,6 +291,7 @@ export function PlanungFunnelClient({ stepSlug }: { stepSlug: string }) {
           }))}
           selected={data.budget}
           onSelect={(id) => update({ budget: id })}
+          onAutoAdvance={goNext}
           columns={4}
         />
       )}

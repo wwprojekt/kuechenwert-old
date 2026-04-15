@@ -19,6 +19,7 @@ import {
   createEmptyAngeboteData,
   type AngeboteFunnelData,
 } from "@/config/funnel-angebote";
+import { getStoredUtm } from "@/lib/utm";
 
 const STORAGE_KEY = "kw_funnel_angebote";
 
@@ -93,6 +94,7 @@ export function AngeboteFunnelClient({
         body: JSON.stringify({
           funnel_type: FUNNEL_ANGEBOTE_ID,
           ...data,
+          ...getStoredUtm(),
         }),
       });
       if (res.ok) {
@@ -154,6 +156,7 @@ export function AngeboteFunnelClient({
           }))}
           selected={data.kitchenForm}
           onSelect={(id) => update({ kitchenForm: id })}
+          onAutoAdvance={goNext}
           columns={5}
         />
       )}
@@ -166,6 +169,7 @@ export function AngeboteFunnelClient({
           }))}
           selected={data.budget}
           onSelect={(id) => update({ budget: id })}
+          onAutoAdvance={goNext}
           columns={3}
         />
       )}
@@ -178,6 +182,7 @@ export function AngeboteFunnelClient({
           }))}
           selected={data.timeframe}
           onSelect={(id) => update({ timeframe: id })}
+          onAutoAdvance={goNext}
           columns={3}
         />
       )}

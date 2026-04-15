@@ -181,7 +181,10 @@ export function FunnelShell({
           <ProgressBar current={currentStep} total={totalSteps} />
 
           {/* Step Content Card */}
-          <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
+          <div
+            key={currentStep}
+            className="mt-6 animate-step-in rounded-xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8"
+          >
             <h2 className="text-xl font-bold text-zinc-900 sm:text-2xl">
               {stepLabel}
             </h2>

@@ -90,6 +90,8 @@ export async function POST(request: Request) {
       utm_source: body.utm_source ?? null,
       utm_medium: body.utm_medium ?? null,
       utm_campaign: body.utm_campaign ?? null,
+      utm_term: body.utm_term ?? null,
+      utm_content: body.utm_content ?? null,
     };
 
     // Extended fields for planung and quiz funnels

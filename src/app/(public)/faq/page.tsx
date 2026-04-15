@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Accordion } from "@/components/ui/accordion";
 import { CTABanner } from "@/components/ui/cta-banner";
+import { faqSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "FAQ – Häufig gestellte Fragen zum Küchenkauf",
@@ -123,8 +124,14 @@ const FAQ_SECTIONS = [
 ];
 
 export default function FAQPage() {
+  const allItems = FAQ_SECTIONS.flatMap((s) => s.items);
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: faqSchema(allItems) }}
+      />
       {/* Hero */}
       <section className="bg-brand-950 py-14">
         <div className="section-container text-center">

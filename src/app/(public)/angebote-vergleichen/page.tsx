@@ -1,6 +1,9 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { Accordion } from "@/components/ui/accordion";
+import { InlineCardEntry } from "@/components/funnel/inline-card-entry";
+import { ANGEBOTE_KITCHEN_FORMS } from "@/config/funnel-angebote";
+import { faqSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Bis zu 3 Küchenangebote vergleichen – kostenlos",
@@ -59,6 +62,10 @@ const TRUST_STATS = [
 export default function AngeboteVergleichenPage() {
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: faqSchema(FAQ_ITEMS) }}
+      />
       {/* Hero */}
       <section className="bg-gradient-to-b from-brand-950 to-brand-900 py-16 lg:py-24">
         <div className="section-container text-center">
@@ -74,13 +81,16 @@ export default function AngeboteVergleichenPage() {
             Beantworten Sie 5 einfache Fragen und erhalten Sie individuelle
             Angebote von geprüften Küchenstudios in Ihrer Nähe.
           </p>
-          <div className="mt-8">
-            <Link
-              href="/funnel/angebote/kuechenform"
-              className="btn-accent px-10 py-4 text-base"
-            >
-              Jetzt Angebote vergleichen
-            </Link>
+          <p className="mx-auto mt-8 max-w-lg text-sm font-medium text-brand-200">
+            Welche Küchenform schwebt Ihnen vor?
+          </p>
+          <div className="mx-auto mt-4 max-w-2xl">
+            <InlineCardEntry
+              options={[...ANGEBOTE_KITCHEN_FORMS]}
+              sessionKey="kw_funnel_angebote"
+              dataField="kitchenForm"
+              nextUrl="/funnel/angebote/budget"
+            />
           </div>
 
           {/* Trust stats */}

@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { InlineImageEntry } from "@/components/funnel/inline-image-entry";
+import { QUIZ_STYLE_OPTIONS } from "@/config/funnel-quiz";
 
 export const metadata: Metadata = {
   title: "Küchen Style-Quiz – Finden Sie Ihren Stil",
@@ -53,13 +55,15 @@ export default function StyleQuizPage() {
             Wählen Sie Bilder, die Sie ansprechen – unser Quiz findet Ihren
             persönlichen Küchenstil und passende Studios.
           </p>
-          <div className="mt-8">
-            <Link
-              href="/funnel/quiz/stil"
-              className="btn-accent px-10 py-4 text-base"
-            >
-              Quiz starten
-            </Link>
+          <p className="mx-auto mt-8 max-w-lg text-sm font-medium text-brand-200">
+            Welcher Stil spricht Sie an? Klicken Sie zum Starten:
+          </p>
+          <div className="mx-auto mt-4 max-w-2xl">
+            <InlineImageEntry
+              options={[...QUIZ_STYLE_OPTIONS]}
+              sessionKey="kw_funnel_quiz"
+              nextUrl="/funnel/quiz/farbe"
+            />
           </div>
         </div>
       </section>

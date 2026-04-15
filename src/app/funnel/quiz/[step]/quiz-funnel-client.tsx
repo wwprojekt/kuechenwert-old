@@ -24,6 +24,7 @@ import {
   calculateQuizResult,
   type QuizFunnelData,
 } from "@/config/funnel-quiz";
+import { getStoredUtm } from "@/lib/utm";
 
 const STORAGE_KEY = "kw_funnel_quiz";
 
@@ -105,6 +106,7 @@ export function QuizFunnelClient({ stepSlug }: { stepSlug: string }) {
           phone: data.phone,
           consentCall: data.consentCall,
           consentMarketing: data.consentMarketing,
+          ...getStoredUtm(),
         }),
       });
 
@@ -204,6 +206,7 @@ export function QuizFunnelClient({ stepSlug }: { stepSlug: string }) {
           }))}
           selected={data.kitchenForm}
           onSelect={(id) => update({ kitchenForm: id })}
+          onAutoAdvance={goNext}
           columns={5}
         />
       )}

@@ -3,6 +3,7 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { PriceTable } from "@/components/ui/price-table";
 import { CTABanner } from "@/components/ui/cta-banner";
 import { Accordion } from "@/components/ui/accordion";
+import { faqSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Was kostet eine Küche? – Preise, Faktoren & Spartipps",
@@ -82,6 +83,10 @@ const FAQ_ITEMS = [
 export default function KostenPage() {
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: faqSchema(FAQ_ITEMS) }}
+      />
       {/* Hero */}
       <section className="bg-brand-950 py-14 lg:py-20">
         <div className="section-container text-center">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { clsx } from "clsx";
+import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
   { href: "/angebote-vergleichen", label: "Angebote vergleichen" },
@@ -13,8 +13,41 @@ const NAV_LINKS = [
   { href: "/partner", label: "Für Händler" },
 ];
 
+const LANDING_PAGES: Record<string, { step: string; total: number }> = {
+  "/angebote-vergleichen": { step: "1", total: 5 },
+  "/kuechenplanung": { step: "1", total: 11 },
+  "/style-quiz": { step: "1", total: 7 },
+};
+
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const landingInfo = LANDING_PAGES[pathname];
+
+  if (landingInfo) {
+    return (
+      <header className="sticky top-0 z-50 border-b border-brand-900/10 bg-brand-950 text-white">
+        <div className="section-container flex h-14 items-center justify-between">
+          <Link
+            href="/"
+            className="flex items-center gap-1 text-lg font-bold tracking-tight"
+          >
+            <span className="text-accent-400">Küchen</span>
+            <span className="text-white">Wert</span>
+          </Link>
+          <span className="text-xs font-medium text-brand-300">
+            Schritt {landingInfo.step} von {landingInfo.total}
+          </span>
+          <span className="flex items-center gap-1.5 text-xs font-medium text-accent-400">
+            <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            100% kostenlos
+          </span>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-brand-900/10 bg-brand-950 text-white">

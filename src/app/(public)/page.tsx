@@ -2,6 +2,7 @@ import Link from "next/link";
 import { StatCounter } from "@/components/ui/stat-counter";
 import { Accordion } from "@/components/ui/accordion";
 import { ImageCard } from "@/components/ui/image-card";
+import { HeroPlzEntry } from "@/components/ui/hero-plz-entry";
 
 const THREE_PATHS = [
   {
@@ -152,6 +153,8 @@ export default function HomePage() {
               ),
             )}
           </div>
+
+          <HeroPlzEntry />
         </div>
       </section>
 

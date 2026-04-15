@@ -1,6 +1,9 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { Accordion } from "@/components/ui/accordion";
+import { InlineCardEntry } from "@/components/funnel/inline-card-entry";
+import { PLANUNG_KITCHEN_FORMS } from "@/config/funnel-planung";
+import { faqSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Küchenplanung starten – individuelle Beratung",
@@ -49,6 +52,10 @@ const FAQ_ITEMS = [
 export default function KuechenplanungPage() {
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: faqSchema(FAQ_ITEMS) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-brand-950 py-16 lg:py-24">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(59,130,246,0.15),_transparent_50%)]" />
@@ -65,20 +72,26 @@ export default function KuechenplanungPage() {
             Von der Küchenform über Materialien und Ausstattung bis zum Budget
             – in 11 Schritten erstellen wir Ihr persönliches Küchenprofil.
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/funnel/planung/kuechenform"
-              className="btn-accent px-10 py-4 text-base"
-            >
-              Küchenplanung starten
-            </Link>
+          <p className="mx-auto mt-8 max-w-lg text-sm font-medium text-brand-200">
+            Welche Küchenform gefällt Ihnen?
+          </p>
+          <div className="mx-auto mt-4 max-w-3xl">
+            <InlineCardEntry
+              options={[...PLANUNG_KITCHEN_FORMS]}
+              sessionKey="kw_funnel_planung"
+              dataField="kitchenForm"
+              nextUrl="/funnel/planung/stil"
+            />
+          </div>
+          <p className="mt-4 text-sm text-brand-400">
+            Oder:{" "}
             <Link
               href="/angebote-vergleichen"
-              className="inline-flex items-center gap-1 text-sm font-medium text-brand-300 underline underline-offset-4 transition hover:text-white"
+              className="font-medium text-white underline underline-offset-4 transition hover:text-accent-400"
             >
-              Oder: Schneller Angebotsvergleich
+              Schneller Angebotsvergleich
             </Link>
-          </div>
+          </p>
         </div>
       </section>
 
