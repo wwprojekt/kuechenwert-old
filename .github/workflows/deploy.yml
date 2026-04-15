@@ -1,0 +1,21 @@
+name: Deploy to Dokploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Dokploy deployment
+        run: |
+          TOKEN=$(curl -s -X POST "${{ secrets.DOKPLOY_URL }}/api/auth/sign-in/email" \
+            -H 'Content-Type: application/json' \
+            -d "{\"email\":\"${{ secrets.DOKPLOY_EMAIL }}\",\"password\":\"${{ secrets.DOKPLOY_PASSWORD }}\"}" \
+            | jq -r '.token')
+
+          curl -s -X POST "${{ secrets.DOKPLOY_URL }}/api/application.redeploy" \
+            -H 'Content-Type: application/json' \
+            -H "Cookie: better-auth.session_token=${TOKEN}" \
+            -d '{"applicationId":"${{ secrets.DOKPLOY_APP_ID }}"}'
