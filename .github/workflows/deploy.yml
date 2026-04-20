@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       force_env_sync:
-        description: "ENV auch dann neu pushen wenn sich nichts geändert hat"
+        description: "ENV auch ohne Änderung neu schreiben?"
         required: false
         default: "false"
         type: choice
@@ -16,33 +16,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Login to Dokploy
-        id: login
+      - name: Sync ENV + Redeploy
         env:
           DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
           DOKPLOY_EMAIL: ${{ secrets.DOKPLOY_EMAIL }}
           DOKPLOY_PASSWORD: ${{ secrets.DOKPLOY_PASSWORD }}
-        run: |
-          set -e
-          RESP=$(curl -s -X POST "$DOKPLOY_URL/api/auth/sign-in/email" \
-            -H 'Content-Type: application/json' \
-            -d "{\"email\":\"$DOKPLOY_EMAIL\",\"password\":\"$DOKPLOY_PASSWORD\"}")
-          TOKEN=$(echo "$RESP" | jq -r '.token // empty')
-          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-            echo "Login failed. Response: $RESP"
-            exit 1
-          fi
-          echo "::add-mask::$TOKEN"
-          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
-
-      # -------- ENV SYNC (nur wenn Service-Role-Key vorhanden) --------
-      - name: Sync environment variables
-        id: envsync
-        env:
-          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
           APP_ID: ${{ secrets.DOKPLOY_APP_ID }}
-          TOKEN: ${{ steps.login.outputs.token }}
-          SUPABASE_URL: "https://gzqayoalwtmypndrmqes.supabase.co"
+          SUPABASE_URL_PUB: "https://gzqayoalwtmypndrmqes.supabase.co"
           SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6cWF5b2Fsd3RteXBuZHJtcWVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxODM5ODksImV4cCI6MjA5MTc1OTk4OX0.N4xDAvaL2A2hggx8mjnwTq7YxpR_WqNptP-cBvxx-8s"
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
@@ -52,77 +32,72 @@ jobs:
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           STRIPE_PK: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          FORCE_SYNC: ${{ github.event.inputs.force_env_sync || 'false' }}
         run: |
           set -e
 
-          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
-            echo "::warning::SUPABASE_SERVICE_ROLE_KEY fehlt als GH-Secret. ENV-Sync übersprungen – nur Redeploy wird ausgeführt."
-            echo "changed=skipped" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          # 1) current env holen
-          APP_JSON=$(curl -s -X GET "$DOKPLOY_URL/api/application.one?applicationId=$APP_ID" \
-            -H "Cookie: better-auth.session_token=$TOKEN")
-          CUR_ENV=$(echo "$APP_JSON" | jq -r '.env // ""')
-          printf '%s' "$CUR_ENV" > current.env
-          cp current.env merged.env
-
-          # 2) Key-Value-Map aufbauen (optional keys nur wenn gesetzt)
-          declare -A NEW_VARS=(
-            ["NEXT_PUBLIC_SUPABASE_URL"]="$SUPABASE_URL"
-            ["NEXT_PUBLIC_SUPABASE_ANON_KEY"]="$SUPABASE_ANON_KEY"
-            ["SUPABASE_SERVICE_ROLE_KEY"]="$SUPABASE_SERVICE_ROLE_KEY"
-            ["CRON_SECRET"]="$CRON_SECRET"
-            ["NEXT_PUBLIC_SITE_URL"]="$SITE_URL"
-          )
-          [ -n "$RESEND_API_KEY" ]        && NEW_VARS["RESEND_API_KEY"]="$RESEND_API_KEY"
-          [ -n "$RESEND_FROM_EMAIL" ]     && NEW_VARS["RESEND_FROM_EMAIL"]="$RESEND_FROM_EMAIL"
-          [ -n "$STRIPE_SECRET_KEY" ]     && NEW_VARS["STRIPE_SECRET_KEY"]="$STRIPE_SECRET_KEY"
-          [ -n "$STRIPE_WEBHOOK_SECRET" ] && NEW_VARS["STRIPE_WEBHOOK_SECRET"]="$STRIPE_WEBHOOK_SECRET"
-          [ -n "$STRIPE_PK" ]             && NEW_VARS["NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"]="$STRIPE_PK"
-
-          # 3) merge: vorhandene Keys ersetzen, fehlende hinzufügen
-          for KEY in "${!NEW_VARS[@]}"; do
-            VAL="${NEW_VARS[$KEY]}"
-            if grep -qE "^${KEY}=" merged.env; then
-              ESC_VAL=$(printf '%s' "$VAL" | sed -e 's/[\/&]/\\&/g')
-              sed -i "s|^${KEY}=.*|${KEY}=${ESC_VAL}|" merged.env
-            else
-              printf '\n%s=%s' "$KEY" "$VAL" >> merged.env
-            fi
-          done
-          sed -i '/./,$!d' merged.env  # strip leading blank lines
-
-          # 4) diff check (nur pushen wenn sich was geändert hat, außer force)
-          if cmp -s current.env merged.env && [ "${{ github.event.inputs.force_env_sync || 'false' }}" != "true" ]; then
-            echo "ENV unchanged, skipping saveEnvironment."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          # 5) push zu Dokploy
-          PAYLOAD=$(jq -Rs --arg id "$APP_ID" '{applicationId:$id, env:.}' merged.env)
-          RESP=$(curl -s -w "\n%{http_code}" -X POST "$DOKPLOY_URL/api/application.saveEnvironment" \
+          # ---------- 1) Login ----------
+          TOKEN=$(curl -s -X POST "$DOKPLOY_URL/api/auth/sign-in/email" \
             -H 'Content-Type: application/json' \
-            -H "Cookie: better-auth.session_token=$TOKEN" \
-            -d "$PAYLOAD")
-          CODE=$(echo "$RESP" | tail -n1)
-          if [ "$CODE" != "200" ]; then
-            echo "saveEnvironment failed (HTTP $CODE): $(echo "$RESP" | sed '$d')"
+            -d "{\"email\":\"$DOKPLOY_EMAIL\",\"password\":\"$DOKPLOY_PASSWORD\"}" \
+            | jq -r '.token // empty')
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "Dokploy login failed"
             exit 1
           fi
-          echo "ENV synchronisiert."
-          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "Login OK"
 
-      # -------- REDEPLOY --------
-      - name: Trigger redeploy
-        env:
-          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
-          APP_ID: ${{ secrets.DOKPLOY_APP_ID }}
-          TOKEN: ${{ steps.login.outputs.token }}
-        run: |
-          set -e
+          # ---------- 2) ENV sync (nur wenn Service-Role-Key gesetzt) ----------
+          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "::warning::SUPABASE_SERVICE_ROLE_KEY fehlt -> ENV sync uebersprungen, nur Redeploy"
+          else
+            APP_JSON=$(curl -s -X GET "$DOKPLOY_URL/api/application.one?applicationId=$APP_ID" \
+              -H "Cookie: better-auth.session_token=$TOKEN")
+            echo "$APP_JSON" | jq -r '.env // ""' > current.env
+            cp current.env merged.env
+
+            declare -A NEW_VARS=(
+              ["NEXT_PUBLIC_SUPABASE_URL"]="$SUPABASE_URL_PUB"
+              ["NEXT_PUBLIC_SUPABASE_ANON_KEY"]="$SUPABASE_ANON_KEY"
+              ["SUPABASE_SERVICE_ROLE_KEY"]="$SUPABASE_SERVICE_ROLE_KEY"
+              ["CRON_SECRET"]="$CRON_SECRET"
+              ["NEXT_PUBLIC_SITE_URL"]="$SITE_URL"
+            )
+            [ -n "$RESEND_API_KEY" ]        && NEW_VARS["RESEND_API_KEY"]="$RESEND_API_KEY"
+            [ -n "$RESEND_FROM_EMAIL" ]     && NEW_VARS["RESEND_FROM_EMAIL"]="$RESEND_FROM_EMAIL"
+            [ -n "$STRIPE_SECRET_KEY" ]     && NEW_VARS["STRIPE_SECRET_KEY"]="$STRIPE_SECRET_KEY"
+            [ -n "$STRIPE_WEBHOOK_SECRET" ] && NEW_VARS["STRIPE_WEBHOOK_SECRET"]="$STRIPE_WEBHOOK_SECRET"
+            [ -n "$STRIPE_PK" ]             && NEW_VARS["NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"]="$STRIPE_PK"
+
+            for KEY in "${!NEW_VARS[@]}"; do
+              VAL="${NEW_VARS[$KEY]}"
+              if grep -qE "^${KEY}=" merged.env; then
+                ESC_VAL=$(printf '%s' "$VAL" | sed -e 's/[\/&|]/\\&/g')
+                sed -i "s|^${KEY}=.*|${KEY}=${ESC_VAL}|" merged.env
+              else
+                printf '\n%s=%s' "$KEY" "$VAL" >> merged.env
+              fi
+            done
+            sed -i '/./,$!d' merged.env
+
+            if cmp -s current.env merged.env && [ "$FORCE_SYNC" != "true" ]; then
+              echo "ENV unchanged, skipping saveEnvironment"
+            else
+              PAYLOAD=$(jq -Rs --arg id "$APP_ID" '{applicationId:$id, env:.}' merged.env)
+              RESP=$(curl -s -w "\n%{http_code}" -X POST "$DOKPLOY_URL/api/application.saveEnvironment" \
+                -H 'Content-Type: application/json' \
+                -H "Cookie: better-auth.session_token=$TOKEN" \
+                -d "$PAYLOAD")
+              CODE=$(echo "$RESP" | tail -n1)
+              if [ "$CODE" != "200" ]; then
+                echo "saveEnvironment failed (HTTP $CODE): $(echo "$RESP" | sed '$d')"
+                exit 1
+              fi
+              echo "ENV synchronisiert"
+            fi
+          fi
+
+          # ---------- 3) Redeploy ----------
           RESP=$(curl -s -w "\n%{http_code}" -X POST "$DOKPLOY_URL/api/application.redeploy" \
             -H 'Content-Type: application/json' \
             -H "Cookie: better-auth.session_token=$TOKEN" \
@@ -132,4 +107,4 @@ jobs:
             echo "Redeploy failed (HTTP $CODE): $(echo "$RESP" | sed '$d')"
             exit 1
           fi
-          echo "Redeploy triggered."
+          echo "Redeploy triggered"
