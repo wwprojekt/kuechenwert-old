@@ -15,3 +15,5 @@ next-env.d.ts
 cookies.txt
 *.cookies
 .smoke-output.log
+supabase/.temp/
+
