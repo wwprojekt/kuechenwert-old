@@ -39,12 +39,11 @@ export function Header() {
         <div className="section-container-wide flex h-[68px] items-center justify-between gap-4">
           <Link
             href="/"
-            className="flex items-center gap-2.5 font-display text-[1.35rem] font-extrabold tracking-tight-2 text-black"
+            className="group flex items-center gap-1 font-display text-[1.4rem] font-bold tracking-tight-2 text-black"
           >
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-sm">
-              K
-            </span>
-            KüchenWert
+            <span>Küchen</span>
+            <span className="text-black">Wert</span>
+            <span className="ml-0.5 inline-block h-2 w-2 translate-y-1.5 rounded-full bg-brand-500 transition group-hover:scale-125" aria-hidden />
           </Link>
 
           <nav className="hidden items-center gap-7 text-sm font-semibold text-ink-muted md:flex">

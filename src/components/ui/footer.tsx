@@ -1,17 +1,23 @@
 import Link from "next/link";
-import { ShieldCheck, Lock, MapPin, BadgeCheck } from "lucide-react";
+import {
+  BadgeTuevStyle,
+  BadgeEkomiStyle,
+  BadgeDsgvoStyle,
+  BadgeSslStyle,
+  BadgeStripeStyle,
+} from "./trust-badges";
 
 export function Footer() {
   return (
     <footer className="border-t border-neutral-200 bg-white">
       {/* ==================== TRUST-STRIP ==================== */}
       <div className="border-b border-neutral-200 bg-surface-soft">
-        <div className="section-container-wide flex flex-wrap items-center justify-center gap-x-8 gap-y-3 py-5 text-xs text-ink-muted">
-          <TrustItem icon={<ShieldCheck className="h-4 w-4 text-success-600" />} label="DSGVO-konform" />
-          <TrustItem icon={<Lock className="h-4 w-4 text-success-600" />} label="SSL-verschlüsselt" />
-          <TrustItem icon={<MapPin className="h-4 w-4 text-success-600" />} label="Server in Deutschland" />
-          <TrustItem icon={<BadgeCheck className="h-4 w-4 text-success-600" />} label="Verifizierte Händler" />
-          <TrustItem icon={<span className="text-[10px] font-bold text-success-700">€</span>} label="Stripe-gesicherte Zahlungen" />
+        <div className="section-container-wide flex flex-wrap items-center justify-center gap-x-8 gap-y-4 py-6 text-ink-subtle">
+          <BadgeTuevStyle />
+          <BadgeEkomiStyle />
+          <BadgeDsgvoStyle />
+          <BadgeSslStyle />
+          <BadgeStripeStyle />
         </div>
       </div>
 
@@ -20,12 +26,11 @@ export function Footer() {
           <div>
             <Link
               href="/"
-              className="flex items-center gap-2 font-display text-lg font-extrabold tracking-tight-2 text-black"
+              className="inline-flex items-center gap-1 font-display text-lg font-bold tracking-tight-2 text-black"
             >
-              <span className="grid h-8 w-8 place-items-center rounded-md bg-gradient-to-br from-brand-500 to-brand-600 text-white">
-                K
-              </span>
-              KüchenWert
+              <span>Küchen</span>
+              <span>Wert</span>
+              <span className="ml-0.5 inline-block h-1.5 w-1.5 translate-y-1 rounded-full bg-brand-500" aria-hidden />
             </Link>
             <p className="mt-3 text-sm text-ink-muted">
               Transparenz für Ihren Küchenkauf. Vergleichen Sie bestehende Angebote
@@ -63,15 +68,6 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  );
-}
-
-function TrustItem({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 font-medium">
-      {icon}
-      {label}
-    </span>
   );
 }
 

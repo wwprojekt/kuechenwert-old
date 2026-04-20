@@ -12,22 +12,42 @@ body {
 }
 
 @layer components {
-  /* ============ BUTTONS ============ */
+  /* ============ BUTTONS (größer, mehr Confidence, Hover-Microanimation) ============ */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-7 py-3.5 text-[15px] font-bold text-white shadow-[0_4px_14px_rgba(245,158,11,0.35)] transition hover:bg-brand-600 hover:shadow-[0_8px_22px_rgba(245,158,11,0.45)] hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-50 disabled:hover:translate-y-0;
+  }
+  .btn-primary-lg {
+    @apply inline-flex items-center justify-center gap-2.5 rounded-xl bg-brand-500 px-8 py-4 text-base font-bold text-white shadow-[0_4px_14px_rgba(245,158,11,0.35)] transition hover:bg-brand-600 hover:shadow-[0_10px_28px_rgba(245,158,11,0.5)] hover:-translate-y-0.5 active:translate-y-0;
   }
   .btn-accent {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-50;
+    @apply btn-primary;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-6 py-3 text-sm font-semibold text-ink shadow-sm transition hover:border-brand-300 hover:bg-brand-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-300 bg-white px-6 py-3 text-[15px] font-semibold text-ink shadow-sm transition hover:border-neutral-400 hover:bg-surface-soft hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400 disabled:opacity-50;
   }
   .btn-dark {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-700 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-neutral-900 px-7 py-3.5 text-[15px] font-bold text-white shadow-md transition hover:bg-black hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-700 disabled:opacity-50;
   }
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-ink-muted transition hover:bg-surface-strong hover:text-ink;
   }
+  .btn-link {
+    @apply inline-flex items-center gap-1.5 text-sm font-bold text-brand-700 underline-offset-4 transition hover:text-brand-800 hover:underline;
+  }
+  .btn-icon-arrow {
+    @apply transition-transform duration-200;
+  }
+}
+
+/* Hover-Slide-Animation für Pfeile in Buttons (CSS-Selektor, nicht @apply-fähig) */
+.btn-primary:hover .btn-icon-arrow,
+.btn-primary-lg:hover .btn-icon-arrow,
+.btn-link:hover .btn-icon-arrow,
+.btn-secondary:hover .btn-icon-arrow {
+  transform: translateX(0.25rem);
+}
+
+@layer components {
 
   /* ============ INPUTS ============ */
   .input-field {
@@ -62,8 +82,15 @@ body {
   .section-container-wide {
     @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
   }
+  /* Spacing-Rhythmus: tight (Trust-Strips), default (Content), generous (Hero/CTA) */
+  .section-tight {
+    @apply py-10 sm:py-12;
+  }
   .section-padding {
-    @apply py-16 sm:py-20 lg:py-24;
+    @apply py-20 sm:py-24 lg:py-28;
+  }
+  .section-generous {
+    @apply py-24 sm:py-32 lg:py-36;
   }
 
   /* ============ TRUST ELEMENTS ============ */
@@ -98,16 +125,16 @@ body {
 
   /* ============ HEADINGS ============ */
   .h-display {
-    @apply font-display text-4xl font-extrabold tracking-tight-3 text-black sm:text-5xl lg:text-[3.75rem] lg:leading-[1.05];
+    @apply font-display text-[2.5rem] font-bold leading-[1.1] tracking-tight-2 text-black sm:text-[3rem] lg:text-[3.5rem] lg:leading-[1.05];
   }
   .h-section {
-    @apply font-display text-3xl font-extrabold tracking-tight-2 text-black sm:text-4xl;
+    @apply font-display text-[1.875rem] font-bold leading-[1.15] tracking-tight-2 text-black sm:text-[2.25rem];
   }
   .h-card {
-    @apply font-display text-xl font-semibold text-black;
+    @apply font-display text-xl font-semibold leading-snug text-black;
   }
   .text-lead {
-    @apply text-base text-ink-muted sm:text-lg;
+    @apply text-base leading-relaxed text-ink-muted sm:text-[17px];
   }
 
   /* ============ HIGHLIGHT-MARKER ============ */
