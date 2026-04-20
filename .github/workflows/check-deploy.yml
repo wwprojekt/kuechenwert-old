@@ -7,17 +7,22 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch latest deployments
+      - name: Test application.deploy endpoint
         env:
           DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
           DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
           APP_ID: ${{ secrets.DOKPLOY_APP_ID }}
         run: |
           set -e
+          AUTH_HDR=(-H "x-api-key: $DOKPLOY_API_KEY")
+          echo "=== Trigger application.deploy (real build with source pull) ==="
+          RESP=$(curl -s -w "\nHTTP %{http_code}\n" -X POST "$DOKPLOY_URL/api/application.deploy" \
+            -H 'Content-Type: application/json' "${AUTH_HDR[@]}" \
+            -d "{\"applicationId\":\"$APP_ID\"}")
+          echo "$RESP"
+          echo ""
+          echo "=== Wait 5s, then list latest deployments ==="
+          sleep 5
           curl -s -X GET "$DOKPLOY_URL/api/application.one?applicationId=$APP_ID" \
             -H "x-api-key: $DOKPLOY_API_KEY" \
-            | jq '{
-                appName,
-                applicationStatus,
-                lastDeployments: [.deployments[]? | {status, title, startedAt, finishedAt, errorMessage: (.errorMessage // null)}] | .[0:5]
-              }'
+            | jq '{appName, applicationStatus, lastDeployments: [.deployments[]? | {status, title, startedAt, finishedAt}] | .[0:3]}'
