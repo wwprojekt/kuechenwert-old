@@ -1,14 +1,9 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { scoreLead } from "@/config/scoring-rules";
 import { BUDGET_RANGES, TIMEFRAMES } from "@/config/funnel-steps";
 import { getRegionByPlz } from "@/config/regions";
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+import { recordConsents, getClientIp } from "@/lib/consent";
 
 /**
  * Budget midpoint lookup that works across all funnel configs.
@@ -158,12 +153,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // DSGVO-Nachweis: Consent-Records persistieren (best-effort)
+    await recordConsents(
+      [
+        { purpose: "privacy_policy", granted: true },
+        { purpose: "marketing_call", granted: !!body.consentCall },
+        { purpose: "marketing_email", granted: !!body.consentMarketing },
+      ],
+      {
+        leadId: data.id,
+        source: dbFunnelType === "b" ? "funnel_b" : "funnel_a",
+        ip: getClientIp(request),
+        userAgent: request.headers.get("user-agent"),
+      },
+    );
+
     return NextResponse.json({
       id: data.id,
       score: scoringResult.score,
       tier: scoringResult.tier,
     });
   } catch (err) {
+    console.error("[api/leads] error:", err);
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 }

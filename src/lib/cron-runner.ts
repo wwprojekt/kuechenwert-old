@@ -98,11 +98,31 @@ export async function runCronJob(
 }
 
 function detectTrigger(req: Request): { authorized: boolean; kind: CronTrigger } {
-  const isVercelCron = req.headers.get("x-vercel-cron") === "1";
+  const isProduction = process.env.NODE_ENV === "production";
+  const isVercel = !!process.env.VERCEL;
   const cronSecret = process.env.CRON_SECRET;
   const auth = req.headers.get("authorization");
-  const isAuthorizedManual = !!cronSecret && auth === `Bearer ${cronSecret}`;
-  if (isVercelCron) return { authorized: true, kind: "vercel_cron" };
-  if (isAuthorizedManual) return { authorized: true, kind: "manual" };
+  const isVercelCronHeader = req.headers.get("x-vercel-cron") === "1";
+
+  const isAuthorizedBearer = !!cronSecret && auth === `Bearer ${cronSecret}`;
+
+  // Production-Hardening:
+  //   - x-vercel-cron Header ist NUR als Auth-Beweis akzeptiert wenn wir
+  //     tatsächlich auf Vercel laufen (sonst trivial fälschbar).
+  //   - Auf Self-Hosting (Dokploy etc.) ist Bearer ${CRON_SECRET} Pflicht.
+  //   - Im Dev-Mode dürfen beide Wege.
+  if (isVercelCronHeader && (isVercel || !isProduction)) {
+    return { authorized: true, kind: "vercel_cron" };
+  }
+  if (isAuthorizedBearer) {
+    return { authorized: true, kind: "manual" };
+  }
+
+  if (isProduction && !cronSecret) {
+    console.error(
+      "[cron] CRON_SECRET ist nicht gesetzt. Cron-Endpoints sind ungeschützt!",
+    );
+  }
+
   return { authorized: false, kind: "unknown" };
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fira_Sans } from "next/font/google";
 import "./globals.css";
+import { CookieBanner } from "@/components/cookie-banner";
 
 const fira = Fira_Sans({
   variable: "--font-fira",
@@ -21,7 +22,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de" className={fira.variable}>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        {children}
+        <CookieBanner />
+      </body>
     </html>
   );
 }

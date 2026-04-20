@@ -26,9 +26,10 @@ export async function POST(
   }
 
   // Auction laden + status prüfen
+  // ACHTUNG: Schema-Spalte heißt min_bid_eur (nicht min_bid_amount).
   const { data: auction, error: aErr } = await supabaseAdmin
     .from("auctions")
-    .select("id, status, ends_at, is_published, offer_price_eur, min_bid_amount")
+    .select("id, status, ends_at, is_published, offer_price_eur, min_bid_eur")
     .eq("id", auctionId)
     .single();
   if (aErr || !auction) {
@@ -41,7 +42,7 @@ export async function POST(
     return NextResponse.json({ error: "Auktion ist bereits beendet" }, { status: 400 });
   }
 
-  const minStep = Number(auction.min_bid_amount) || 50;
+  const minStep = Number(auction.min_bid_eur) || 50;
 
   // Aktuell niedrigstes Gebot
   const { data: lowest } = await supabaseAdmin

@@ -1,6 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Gavel, Clock, MapPin, ShieldCheck } from "lucide-react";
+import {
+  ChevronLeft,
+  Gavel,
+  Clock,
+  MapPin,
+  ShieldCheck,
+  Trophy,
+  User,
+  Mail,
+  Phone,
+  Home,
+} from "lucide-react";
 import { requireDealer } from "@/lib/supabase/dealer";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { BidForm } from "@/components/dealer/bid-form";
@@ -15,17 +26,19 @@ export default async function DealerAuctionDetailPage({
   const { id } = await params;
   const ctx = await requireDealer(`/dealer/auctions/${id}`);
 
+  // ACHTUNG: Schema hat min_bid_eur, NICHT min_bid_amount.
   const { data: auction } = await supabaseAdmin
     .from("auctions")
     .select(`
-      id, status, offer_price_eur, duration_hours, min_bid_amount,
+      id, status, offer_price_eur, duration_hours, min_bid_eur,
       starts_at, ends_at, is_published, won_bid_id,
       leads (
         id, postal_code, city, region, tier, housing_type,
         kitchen_form, kitchen_style, budget_midpoint,
         existing_offer_price_cents, payment_financing,
         delivery_mode, desired_delivery_at, waste_separation_system,
-        funnel_answers
+        funnel_answers,
+        first_name, last_name, email, phone, address_line
       )
     `)
     .eq("id", id)
@@ -57,10 +70,11 @@ export default async function DealerAuctionDetailPage({
   const isWinner = isCompleted && auction.won_bid_id && bids.some((b) => b.id === auction.won_bid_id && b.dealer_id === ctx.dealer.id);
 
   // Maximaler Bid = aktuelles Lowest (oder Studio-Preis - 1€); Default-Mindeststep
+  const minBidStep = Number(auction.min_bid_eur) || 50;
   const maxAllowedEur = lowestBid
-    ? Math.max(0, Number(lowestBid.price_eur) - (Number(auction.min_bid_amount) || 50))
+    ? Math.max(0, Number(lowestBid.price_eur) - minBidStep)
     : auction.offer_price_eur
-      ? Math.max(0, Number(auction.offer_price_eur) - (Number(auction.min_bid_amount) || 50))
+      ? Math.max(0, Number(auction.offer_price_eur) - minBidStep)
       : null;
 
   return (
@@ -82,10 +96,59 @@ export default async function DealerAuctionDetailPage({
       </div>
 
       {isWinner && (
-        <div className="mt-4 rounded-md border border-accent-200 bg-accent-50 p-3 text-sm text-accent-800">
-          🏆 Sie haben diese Auktion gewonnen! Kontaktdaten des Verbrauchers stehen
-          Ihnen zur Verfügung.
-        </div>
+        <section className="mt-4 overflow-hidden rounded-2xl border-2 border-success-500/40 bg-gradient-to-br from-success-500/10 via-white to-brand-50 shadow-card">
+          <header className="flex items-center gap-3 border-b border-success-500/20 bg-success-500/5 px-5 py-3">
+            <Trophy className="h-5 w-5 text-success-700" />
+            <h2 className="font-display text-lg font-bold text-success-700">
+              Sie haben gewonnen — Kundendaten freigeschaltet
+            </h2>
+          </header>
+          <div className="grid gap-4 p-5 sm:grid-cols-2">
+            <ContactRow
+              icon={<User className="h-4 w-4" />}
+              label="Name"
+              value={[lead?.first_name, lead?.last_name].filter(Boolean).join(" ") || "–"}
+            />
+            <ContactRow
+              icon={<Phone className="h-4 w-4" />}
+              label="Telefon"
+              value={
+                lead?.phone ? (
+                  <a href={`tel:${lead.phone}`} className="font-bold text-brand-700 hover:underline">
+                    {lead.phone as string}
+                  </a>
+                ) : (
+                  "–"
+                )
+              }
+            />
+            <ContactRow
+              icon={<Mail className="h-4 w-4" />}
+              label="E-Mail"
+              value={
+                lead?.email ? (
+                  <a href={`mailto:${lead.email}`} className="font-bold text-brand-700 hover:underline">
+                    {lead.email as string}
+                  </a>
+                ) : (
+                  "–"
+                )
+              }
+            />
+            <ContactRow
+              icon={<Home className="h-4 w-4" />}
+              label="Lieferadresse"
+              value={[lead?.address_line, [lead?.postal_code, lead?.city].filter(Boolean).join(" ")]
+                .filter(Boolean)
+                .join(", ") || "–"}
+            />
+          </div>
+          <footer className="border-t border-success-500/20 bg-success-500/5 px-5 py-3 text-xs text-ink-muted">
+            <strong>Verbindlichkeitshinweis:</strong> Mit dem gewonnenen Gebot ist die
+            Auftragserteilung verbindlich. Bitte kontaktieren Sie den Kunden binnen
+            48 Stunden zur Auftragsabwicklung.
+          </footer>
+        </section>
       )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
@@ -216,12 +279,12 @@ export default async function DealerAuctionDetailPage({
               <h3 className="mb-2 font-semibold text-ink">Verbindliches Gebot abgeben</h3>
               <p className="mb-3 text-xs text-ink-muted">
                 Ihr Gebot ist nach Abgabe verbindlich. Mindeststep:{" "}
-                <strong>{auction.min_bid_amount ?? 50} €</strong> unter dem aktuell besten Preis.
+                <strong>{minBidStep} €</strong> unter dem aktuell besten Preis.
               </p>
               <BidForm
                 auctionId={auction.id}
                 maxAllowedEur={maxAllowedEur}
-                minBidStep={Number(auction.min_bid_amount) || 50}
+                minBidStep={minBidStep}
                 offerPriceEur={auction.offer_price_eur ? Number(auction.offer_price_eur) : null}
                 lowestBidEur={lowestBid ? Number(lowestBid.price_eur) : null}
               />
@@ -244,6 +307,26 @@ function Item({ label, value }: { label: string; value: string | number | null |
     <div>
       <dt className="text-xs uppercase tracking-wider text-ink-subtle">{label}</dt>
       <dd className="text-ink">{value ?? "–"}</dd>
+    </div>
+  );
+}
+
+function ContactRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-success-500/15 bg-white px-4 py-3">
+      <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-ink-subtle">
+        <span className="text-success-700">{icon}</span>
+        {label}
+      </div>
+      <div className="mt-1 text-sm text-ink">{value}</div>
     </div>
   );
 }

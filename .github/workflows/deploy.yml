@@ -21,11 +21,13 @@ jobs:
           DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
           DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
           APP_ID: ${{ secrets.DOKPLOY_APP_ID }}
-          SUPABASE_URL_PUB: "https://gzqayoalwtmypndrmqes.supabase.co"
-          SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6cWF5b2Fsd3RteXBuZHJtcWVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxODM5ODksImV4cCI6MjA5MTc1OTk4OX0.N4xDAvaL2A2hggx8mjnwTq7YxpR_WqNptP-cBvxx-8s"
+          # Alle Supabase- und Site-URLs ebenfalls aus Secrets (NIE im Klartext im Repo!)
+          SUPABASE_URL_PUB: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SITE_URL: "https://küchenwert.de"
+          INVOICE_SIGN_SECRET: ${{ secrets.INVOICE_SIGN_SECRET }}
+          SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
@@ -69,7 +71,9 @@ jobs:
               ["SUPABASE_SERVICE_ROLE_KEY"]="$SUPABASE_SERVICE_ROLE_KEY"
               ["CRON_SECRET"]="$CRON_SECRET"
               ["NEXT_PUBLIC_SITE_URL"]="$SITE_URL"
+              ["NODE_ENV"]="production"
             )
+            [ -n "$INVOICE_SIGN_SECRET" ]   && NEW_VARS["INVOICE_SIGN_SECRET"]="$INVOICE_SIGN_SECRET"
             [ -n "$RESEND_API_KEY" ]        && NEW_VARS["RESEND_API_KEY"]="$RESEND_API_KEY"
             [ -n "$RESEND_FROM_EMAIL" ]     && NEW_VARS["RESEND_FROM_EMAIL"]="$RESEND_FROM_EMAIL"
             [ -n "$STRIPE_SECRET_KEY" ]     && NEW_VARS["STRIPE_SECRET_KEY"]="$STRIPE_SECRET_KEY"

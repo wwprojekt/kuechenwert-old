@@ -1,13 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getRegionByPlz } from "@/config/regions";
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  { auth: { persistSession: false } },
-);
+import { recordConsents, getClientIp } from "@/lib/consent";
 
 export const runtime = "nodejs"; // need Node runtime for FormData with files
 
@@ -372,6 +366,21 @@ export async function POST(request: Request) {
       },
     });
     if (auditErr) console.error("[funnel-b] audit_log insert failed:", auditErr);
+
+    // DSGVO-Nachweis: Consent-Records persistieren (best-effort)
+    await recordConsents(
+      [
+        { purpose: "privacy_policy", granted: true },
+        { purpose: "marketing_call", granted: !!payload.consentCall },
+        { purpose: "marketing_email", granted: !!payload.consentMarketing },
+      ],
+      {
+        leadId: lead.id,
+        source: "funnel_b",
+        ip: getClientIp(request),
+        userAgent: request.headers.get("user-agent"),
+      },
+    );
 
     return NextResponse.json({
       id: lead.id,
