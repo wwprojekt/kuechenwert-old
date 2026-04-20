@@ -575,7 +575,7 @@ export default async function HomePage() {
 
       {/* ======================== BOTTOM-CTA ======================== */}
       <section className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-900 to-black py-16 text-white lg:py-20">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(31,185,122,0.12),_transparent_60%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(245,158,11,0.18),_transparent_60%)]" />
         <div className="section-container relative text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold text-accent-200 backdrop-blur">
             <span className="relative flex h-2 w-2">
@@ -587,7 +587,7 @@ export default async function HomePage() {
           <h2 className="mt-5 font-display text-3xl font-extrabold tracking-tight-2 sm:text-4xl">
             Starten Sie jetzt – kostenlos und in 2 Minuten
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-slate-300">
+          <p className="mx-auto mt-3 max-w-xl text-neutral-300">
             Wählen Sie Ihren Pfad und vergleichen Sie schon heute Ihr Angebot
             mit verifizierten Küchenstudios.
           </p>
@@ -604,7 +604,7 @@ export default async function HomePage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-slate-400">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-neutral-400">
             <span className="inline-flex items-center gap-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-accent-400" />
               Kostenlos &amp; unverbindlich

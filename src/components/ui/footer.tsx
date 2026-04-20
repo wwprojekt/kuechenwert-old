@@ -3,7 +3,7 @@ import { ShieldCheck, Lock, MapPin, BadgeCheck } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-white">
+    <footer className="border-t border-neutral-200 bg-white">
       {/* ==================== TRUST-STRIP ==================== */}
       <div className="border-b border-neutral-200 bg-surface-soft">
         <div className="section-container-wide flex flex-wrap items-center justify-center gap-x-8 gap-y-3 py-5 text-xs text-ink-muted">
@@ -57,7 +57,7 @@ export function Footer() {
           </FooterCol>
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-slate-200 pt-6 text-xs text-ink-subtle md:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-neutral-200 pt-6 text-xs text-ink-subtle md:flex-row">
           <span>© {new Date().getFullYear()} KüchenWert. Alle Rechte vorbehalten.</span>
           <span>Bezahlung gesichert via Stripe · DSGVO-konform</span>
         </div>
