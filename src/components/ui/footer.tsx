@@ -5,13 +5,13 @@ export function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-white">
       {/* ==================== TRUST-STRIP ==================== */}
-      <div className="border-b border-slate-200 bg-surface-soft">
+      <div className="border-b border-neutral-200 bg-surface-soft">
         <div className="section-container-wide flex flex-wrap items-center justify-center gap-x-8 gap-y-3 py-5 text-xs text-ink-muted">
-          <TrustItem icon={<ShieldCheck className="h-4 w-4 text-accent-600" />} label="DSGVO-konform" />
-          <TrustItem icon={<Lock className="h-4 w-4 text-accent-600" />} label="SSL-verschlüsselt" />
-          <TrustItem icon={<MapPin className="h-4 w-4 text-accent-600" />} label="Server in Deutschland" />
-          <TrustItem icon={<BadgeCheck className="h-4 w-4 text-accent-600" />} label="Verifizierte Händler" />
-          <TrustItem icon={<span className="text-[10px] font-bold text-accent-700">€</span>} label="Stripe-gesicherte Zahlungen" />
+          <TrustItem icon={<ShieldCheck className="h-4 w-4 text-success-600" />} label="DSGVO-konform" />
+          <TrustItem icon={<Lock className="h-4 w-4 text-success-600" />} label="SSL-verschlüsselt" />
+          <TrustItem icon={<MapPin className="h-4 w-4 text-success-600" />} label="Server in Deutschland" />
+          <TrustItem icon={<BadgeCheck className="h-4 w-4 text-success-600" />} label="Verifizierte Händler" />
+          <TrustItem icon={<span className="text-[10px] font-bold text-success-700">€</span>} label="Stripe-gesicherte Zahlungen" />
         </div>
       </div>
 
@@ -20,9 +20,9 @@ export function Footer() {
           <div>
             <Link
               href="/"
-              className="flex items-center gap-2 font-display text-lg font-extrabold tracking-tight-2 text-brand-900"
+              className="flex items-center gap-2 font-display text-lg font-extrabold tracking-tight-2 text-black"
             >
-              <span className="grid h-8 w-8 place-items-center rounded-md bg-gradient-to-br from-brand-700 to-brand-800 text-white">
+              <span className="grid h-8 w-8 place-items-center rounded-md bg-gradient-to-br from-brand-500 to-brand-600 text-white">
                 K
               </span>
               KüchenWert
@@ -31,7 +31,7 @@ export function Footer() {
               Transparenz für Ihren Küchenkauf. Vergleichen Sie bestehende Angebote
               oder erhalten Sie neue von verifizierten Studios.
             </p>
-            <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-accent-50 px-3 py-1 text-xs font-medium text-accent-700">
+            <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-800">
               <span aria-hidden>🇩🇪</span> Made in Germany
             </div>
           </div>

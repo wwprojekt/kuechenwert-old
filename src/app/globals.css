@@ -4,7 +4,7 @@
 
 :root {
   color-scheme: light;
-  --kw-radius-card: 0.875rem;
+  --kw-radius-card: 1rem;
 }
 
 body {
@@ -12,23 +12,26 @@ body {
 }
 
 @layer components {
-  /* Buttons */
+  /* ============ BUTTONS ============ */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-700 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-50;
   }
   .btn-accent {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-accent-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-50;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-ink shadow-sm transition hover:bg-surface-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-6 py-3 text-sm font-semibold text-ink shadow-sm transition hover:border-brand-300 hover:bg-brand-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400 disabled:opacity-50;
+  }
+  .btn-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-700 disabled:opacity-50;
   }
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-ink-muted transition hover:bg-surface-strong hover:text-ink;
   }
 
-  /* Inputs */
+  /* ============ INPUTS ============ */
   .input-field {
-    @apply w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-subtle focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20;
+    @apply w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-subtle focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20;
   }
   .label-field {
     @apply mb-1.5 block text-sm font-medium text-ink;
@@ -37,26 +40,22 @@ body {
     @apply mt-1 text-xs text-ink-muted;
   }
 
-  /* Cards */
+  /* ============ CARDS ============ */
   .card {
-    @apply rounded-card border border-slate-200 bg-white p-6 shadow-card;
+    @apply rounded-card border border-neutral-200 bg-white p-6 shadow-card;
   }
   .card-clickable {
-    @apply cursor-pointer rounded-card border-2 border-slate-200 bg-white p-6 shadow-card transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-card-hover;
+    @apply cursor-pointer rounded-card border-2 border-neutral-200 bg-white p-6 shadow-card transition hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-card-hover;
   }
   .card-clickable[data-selected="true"],
   .card-clickable.is-selected {
-    @apply border-brand-700 shadow-card-active;
+    @apply border-brand-500 shadow-card-active;
   }
-
-  /* Hero choice cards (Startseite 2-Card-Hero)
-     Hinweis: 'group' ist ein Tailwind-Variant-Marker und darf nicht in @apply.
-     -> 'group' als zusaetzliche Klasse direkt am JSX-Element setzen. */
   .hero-choice-card {
     @apply relative flex h-full cursor-pointer flex-col gap-4 rounded-card border-2 border-transparent bg-white p-8 shadow-card transition hover:-translate-y-1 hover:border-brand-300 hover:shadow-card-hover sm:p-10;
   }
 
-  /* Layout */
+  /* ============ LAYOUT ============ */
   .section-container {
     @apply mx-auto max-w-6xl px-4 sm:px-6 lg:px-8;
   }
@@ -67,70 +66,70 @@ body {
     @apply py-16 sm:py-20 lg:py-24;
   }
 
-  /* Trust badges row */
+  /* ============ TRUST ELEMENTS ============ */
   .trust-row {
     @apply flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-ink-muted;
   }
   .trust-pill {
-    @apply inline-flex items-center gap-1.5 rounded-full bg-accent-50 px-3 py-1 text-xs font-medium text-accent-700;
+    @apply inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-800;
   }
 
-  /* Step / progress (Funnel) */
+  /* ============ FUNNEL ============ */
   .progress-track {
-    @apply h-1.5 w-full overflow-hidden rounded-full bg-slate-200;
+    @apply h-1.5 w-full overflow-hidden rounded-full bg-neutral-200;
   }
   .progress-fill {
-    @apply h-full rounded-full bg-accent-500 transition-all duration-500;
+    @apply h-full rounded-full bg-brand-500 transition-all duration-500;
   }
 
-  /* Tags / chips */
+  /* ============ CHIPS ============ */
   .chip {
     @apply inline-flex items-center gap-1 rounded-full bg-surface-strong px-2.5 py-0.5 text-xs font-medium text-ink-muted;
   }
   .chip-success {
-    @apply inline-flex items-center gap-1 rounded-full bg-accent-50 px-2.5 py-0.5 text-xs font-medium text-accent-700;
+    @apply inline-flex items-center gap-1 rounded-full bg-success-500/10 px-2.5 py-0.5 text-xs font-medium text-success-700;
   }
   .chip-warning {
-    @apply inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700;
+    @apply inline-flex items-center gap-1 rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-800;
   }
   .chip-danger {
     @apply inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700;
   }
 
-  /* Headings */
+  /* ============ HEADINGS ============ */
   .h-display {
-    @apply font-display text-4xl font-extrabold tracking-tight-3 text-ink sm:text-5xl lg:text-[3.75rem] lg:leading-[1.05];
+    @apply font-display text-4xl font-extrabold tracking-tight-3 text-black sm:text-5xl lg:text-[3.75rem] lg:leading-[1.05];
   }
   .h-section {
-    @apply font-display text-3xl font-extrabold tracking-tight-2 text-ink sm:text-4xl;
+    @apply font-display text-3xl font-extrabold tracking-tight-2 text-black sm:text-4xl;
   }
   .h-card {
-    @apply font-display text-xl font-semibold text-ink;
+    @apply font-display text-xl font-semibold text-black;
   }
   .text-lead {
     @apply text-base text-ink-muted sm:text-lg;
   }
 
-  /* Highlight-Marker (statt Gradient-Text) */
+  /* ============ HIGHLIGHT-MARKER ============ */
   .hl-mark {
-    @apply relative inline-block whitespace-nowrap text-ink;
+    @apply relative inline-block whitespace-nowrap text-black;
   }
   .hl-mark::after {
     content: "";
-    @apply absolute -bottom-1 left-0 right-0 -z-10 h-3 rounded-sm bg-accent-200/70;
+    @apply absolute -bottom-1 left-0 right-0 -z-10 h-3 rounded-sm bg-brand-300/70;
   }
 
-  /* Section Eyebrow (konsistent) */
+  /* ============ SECTION EYEBROW ============ */
   .eyebrow {
-    @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-accent-700;
+    @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-700;
   }
 
-  /* Top-Bar (über Header) */
+  /* ============ TOP-BAR (Header) ============ */
   .topbar {
-    @apply hidden border-b border-slate-100 bg-brand-900 text-slate-200 md:block;
+    @apply hidden border-b border-neutral-800 bg-neutral-900 text-neutral-200 md:block;
   }
   .topbar-link {
-    @apply inline-flex items-center gap-1.5 text-xs font-medium text-slate-200/90 transition hover:text-white;
+    @apply inline-flex items-center gap-1.5 text-xs font-medium text-neutral-200 transition hover:text-white;
   }
 }
 

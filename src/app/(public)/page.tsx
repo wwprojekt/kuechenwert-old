@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import {
   ArrowRight,
   CheckCircle2,
@@ -118,15 +118,15 @@ export default async function HomePage() {
     <>
       {/* ======================== HERO ======================== */}
       <section className="relative overflow-hidden bg-gradient-to-b from-surface-soft via-white to-surface-soft pb-16 pt-12 lg:pb-24 lg:pt-16">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(31,185,122,0.08),_transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[460px] bg-[radial-gradient(ellipse_at_top_left,_rgba(33,82,143,0.08),_transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(245,158,11,0.10),_transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[460px] bg-[radial-gradient(ellipse_at_top_left,_rgba(15,118,110,0.08),_transparent_55%)]" />
 
         <div className="section-container relative">
           {/* Live-Trust-Strip */}
-          <div className="mx-auto mb-8 flex max-w-fit items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm">
+          <div className="mx-auto mb-8 flex max-w-fit items-center gap-3 rounded-full border border-neutral-200 bg-white px-4 py-2 shadow-sm">
             <span className="relative flex h-2.5 w-2.5">
               <span className="absolute inset-0 animate-ping rounded-full bg-accent-500 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-500" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-brand-500" />
             </span>
             <span className="text-xs font-medium text-ink-muted">
               <span className="font-semibold text-ink">12 Händler</span> suchen
@@ -172,7 +172,7 @@ export default async function HomePage() {
                     key={item.text}
                     className="inline-flex items-center gap-2 text-sm text-ink-muted"
                   >
-                    <span className="text-accent-600">{item.icon}</span>
+                    <span className="text-success-600">{item.icon}</span>
                     {item.text}
                   </span>
                 ))}
@@ -203,19 +203,19 @@ export default async function HomePage() {
             <div className="relative order-1 lg:order-2">
               {/* Visual-Composition (Küchen-Tile-Look) hinter der Card */}
               <div
-                className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-br from-brand-100/70 via-accent-50/40 to-transparent blur-2xl"
+                className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-br from-brand-100/80 via-teal-50/40 to-transparent blur-2xl"
                 aria-hidden
               />
               <div
-                className="pointer-events-none absolute -right-6 -top-6 -z-10 hidden h-32 w-32 rotate-6 rounded-2xl bg-gradient-to-br from-brand-700 to-brand-900 opacity-90 shadow-card-active lg:block"
+                className="pointer-events-none absolute -right-6 -top-6 -z-10 hidden h-32 w-32 rotate-6 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 opacity-90 shadow-card-active lg:block"
                 aria-hidden
               />
               <div
-                className="pointer-events-none absolute -bottom-6 -left-6 -z-10 hidden h-24 w-24 -rotate-6 rounded-2xl bg-gradient-to-br from-accent-400 to-accent-600 opacity-90 shadow-card-active lg:block"
+                className="pointer-events-none absolute -bottom-6 -left-6 -z-10 hidden h-24 w-24 -rotate-6 rounded-2xl bg-gradient-to-br from-teal-500 to-teal-700 opacity-90 shadow-card-active lg:block"
                 aria-hidden
               />
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card-elevated sm:p-8">
+              <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-card-elevated sm:p-8">
                 <div className="mb-1 text-sm font-semibold text-brand-700">
                   Wie möchten Sie starten?
                 </div>
@@ -227,7 +227,7 @@ export default async function HomePage() {
                 <div className="grid gap-3">
                   <Link
                     href="/funnel/b"
-                    className="group flex items-start gap-4 rounded-xl border-2 border-slate-200 bg-surface-soft p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-white hover:shadow-card-hover"
+                    className="group flex items-start gap-4 rounded-xl border-2 border-neutral-200 bg-surface-soft p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-white hover:shadow-card-hover"
                   >
                     <span className="mt-0.5 grid h-11 w-11 flex-none place-items-center rounded-lg bg-brand-100 text-brand-700">
                       <ClipboardCheck className="h-5 w-5" />
@@ -253,7 +253,7 @@ export default async function HomePage() {
 
                   <Link
                     href="/funnel/a"
-                    className="group flex items-start gap-4 rounded-xl border-2 border-slate-200 bg-surface-soft p-5 transition hover:-translate-y-0.5 hover:border-accent-500 hover:bg-white hover:shadow-card-hover"
+                    className="group flex items-start gap-4 rounded-xl border-2 border-neutral-200 bg-surface-soft p-5 transition hover:-translate-y-0.5 hover:border-accent-500 hover:bg-white hover:shadow-card-hover"
                   >
                     <span className="mt-0.5 grid h-11 w-11 flex-none place-items-center rounded-lg bg-accent-100 text-accent-700">
                       <Search className="h-5 w-5" />
@@ -279,17 +279,17 @@ export default async function HomePage() {
                   </Link>
                 </div>
 
-                <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-xs text-ink-subtle">
+                <div className="mt-6 flex items-center justify-between border-t border-neutral-100 pt-4 text-xs text-ink-subtle">
                   <span className="inline-flex items-center gap-1">
-                    <ShieldCheck className="h-3.5 w-3.5 text-accent-600" />
+                    <ShieldCheck className="h-3.5 w-3.5 text-success-600" />
                     100 % kostenlos
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-accent-600" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-success-600" />
                     Unverbindlich
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5 text-accent-600" />
+                    <Clock className="h-3.5 w-3.5 text-success-600" />
                     In 2 Min. fertig
                   </span>
                 </div>
@@ -300,7 +300,7 @@ export default async function HomePage() {
       </section>
 
       {/* ======================== STATS-STRIP (slim, Zahlen-fokussiert) ======================== */}
-      <section className="border-y border-slate-200 bg-white">
+      <section className="border-y border-neutral-200 bg-white">
         <div className="section-container">
           <div className="grid grid-cols-2 gap-4 py-8 text-center sm:py-10 md:grid-cols-4">
             <Stat value="72 h" label="Auktionsdauer" />
@@ -329,7 +329,7 @@ export default async function HomePage() {
             {KITCHEN_BRANDS.map((brand) => (
               <div
                 key={brand}
-                className="flex h-16 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-center font-display text-sm font-semibold text-ink-muted shadow-card transition hover:border-brand-300 hover:text-brand-700 hover:shadow-card-hover"
+                className="flex h-16 items-center justify-center rounded-xl border border-neutral-200 bg-white px-3 text-center font-display text-sm font-semibold text-ink-muted shadow-card transition hover:border-brand-300 hover:text-brand-700 hover:shadow-card-hover"
               >
                 {brand}
               </div>
@@ -521,7 +521,7 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
-          <div className="rounded-card border border-slate-200 bg-white p-7 shadow-card-elevated">
+          <div className="rounded-card border border-neutral-200 bg-white p-7 shadow-card-elevated">
             <div className="flex items-center gap-1 text-amber-500">
               {[...Array(5)].map((_, i) => (
                 <span key={i} aria-hidden>★</span>
@@ -549,13 +549,13 @@ export default async function HomePage() {
       </section>
 
       {/* ======================== FAQ ======================== */}
-      <section className="border-t border-slate-200 bg-surface-soft section-padding">
+      <section className="border-t border-neutral-200 bg-surface-soft section-padding">
         <div className="section-container max-w-3xl">
           <div className="text-center">
             <span className="eyebrow">FAQ</span>
             <h2 className="mt-2 h-section">Häufig gestellte Fragen</h2>
           </div>
-          <div className="mt-10 divide-y divide-slate-200 rounded-card border border-slate-200 bg-white px-6">
+          <div className="mt-10 divide-y divide-neutral-200 rounded-card border border-neutral-200 bg-white px-6">
             {FAQ.map((item) => (
               <details key={item.q} className="group py-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-ink">
@@ -574,7 +574,7 @@ export default async function HomePage() {
       </section>
 
       {/* ======================== BOTTOM-CTA ======================== */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-900 py-16 text-white lg:py-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-900 to-black py-16 text-white lg:py-20">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(31,185,122,0.12),_transparent_60%)]" />
         <div className="section-container relative text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold text-accent-200 backdrop-blur">
@@ -671,7 +671,7 @@ function Step({
   text: string;
 }) {
   return (
-    <li className="relative rounded-card border border-slate-200 bg-white p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover">
+    <li className="relative rounded-card border border-neutral-200 bg-white p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover">
       <div className="flex items-center justify-between">
         <span className="grid h-10 w-10 place-items-center rounded-full bg-brand-700 font-bold text-white shadow-card-active">
           {num}
@@ -805,7 +805,7 @@ function AuctionTeaserCard({
   const tierLabel = (auction.tier ?? "standard").toUpperCase();
 
   return (
-    <article className="group relative flex flex-col rounded-card border border-slate-200 bg-white p-5 shadow-card transition hover:-translate-y-1 hover:shadow-card-elevated">
+    <article className="group relative flex flex-col rounded-card border border-neutral-200 bg-white p-5 shadow-card transition hover:-translate-y-1 hover:shadow-card-elevated">
       <div className="flex items-center justify-between">
         <span className="inline-flex items-center gap-1 rounded-full bg-accent-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-800">
           {tierLabel}
@@ -847,7 +847,7 @@ function AuctionTeaserCard({
         </div>
       </dl>
 
-      <div className="mt-5 pt-4 border-t border-slate-100">
+      <div className="mt-5 pt-4 border-t border-neutral-100">
         {live ? (
           <Link
             href={`/auktionen`}
