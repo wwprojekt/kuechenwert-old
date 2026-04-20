@@ -19,8 +19,7 @@ jobs:
       - name: Sync ENV + Redeploy
         env:
           DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
-          DOKPLOY_EMAIL: ${{ secrets.DOKPLOY_EMAIL }}
-          DOKPLOY_PASSWORD: ${{ secrets.DOKPLOY_PASSWORD }}
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
           APP_ID: ${{ secrets.DOKPLOY_APP_ID }}
           SUPABASE_URL_PUB: "https://gzqayoalwtmypndrmqes.supabase.co"
           SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6cWF5b2Fsd3RteXBuZHJtcWVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxODM5ODksImV4cCI6MjA5MTc1OTk4OX0.N4xDAvaL2A2hggx8mjnwTq7YxpR_WqNptP-cBvxx-8s"
@@ -36,24 +35,28 @@ jobs:
         run: |
           set -e
 
-          # ---------- 1) Login ----------
-          TOKEN=$(curl -s -X POST "$DOKPLOY_URL/api/auth/sign-in/email" \
-            -H 'Content-Type: application/json' \
-            -d "{\"email\":\"$DOKPLOY_EMAIL\",\"password\":\"$DOKPLOY_PASSWORD\"}" \
-            | jq -r '.token // empty')
-          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-            echo "Dokploy login failed"
+          if [ -z "$DOKPLOY_API_KEY" ]; then
+            echo "::error::DOKPLOY_API_KEY fehlt als GH-Secret. In Dokploy UI unter Settings > Profile > API/CLI generieren und dann: gh secret set DOKPLOY_API_KEY"
             exit 1
           fi
-          echo "Login OK"
 
-          # ---------- 2) ENV sync (nur wenn Service-Role-Key gesetzt) ----------
+          AUTH_HDR=(-H "x-api-key: $DOKPLOY_API_KEY")
+
+          # ---------- 1) Healthcheck (validiert API-Key) ----------
+          HC_RESP=$(curl -s -w "\n%{http_code}" -X GET "$DOKPLOY_URL/api/application.one?applicationId=$APP_ID" "${AUTH_HDR[@]}")
+          HC_CODE=$(echo "$HC_RESP" | tail -n1)
+          HC_BODY=$(echo "$HC_RESP" | sed '$d')
+          if [ "$HC_CODE" != "200" ]; then
+            echo "::error::API-Key oder APP_ID invalid (HTTP $HC_CODE): $HC_BODY"
+            exit 1
+          fi
+          echo "API auth OK"
+
+          # ---------- 2) ENV sync ----------
           if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
             echo "::warning::SUPABASE_SERVICE_ROLE_KEY fehlt -> ENV sync uebersprungen, nur Redeploy"
           else
-            APP_JSON=$(curl -s -X GET "$DOKPLOY_URL/api/application.one?applicationId=$APP_ID" \
-              -H "Cookie: better-auth.session_token=$TOKEN")
-            echo "$APP_JSON" | jq -r '.env // ""' > current.env
+            echo "$HC_BODY" | jq -r '.env // ""' > current.env
             cp current.env merged.env
 
             declare -A NEW_VARS=(
@@ -85,12 +88,11 @@ jobs:
             else
               PAYLOAD=$(jq -Rs --arg id "$APP_ID" '{applicationId:$id, env:.}' merged.env)
               RESP=$(curl -s -w "\n%{http_code}" -X POST "$DOKPLOY_URL/api/application.saveEnvironment" \
-                -H 'Content-Type: application/json' \
-                -H "Cookie: better-auth.session_token=$TOKEN" \
+                -H 'Content-Type: application/json' "${AUTH_HDR[@]}" \
                 -d "$PAYLOAD")
               CODE=$(echo "$RESP" | tail -n1)
               if [ "$CODE" != "200" ]; then
-                echo "saveEnvironment failed (HTTP $CODE): $(echo "$RESP" | sed '$d')"
+                echo "::error::saveEnvironment failed (HTTP $CODE): $(echo "$RESP" | sed '$d')"
                 exit 1
               fi
               echo "ENV synchronisiert"
@@ -99,12 +101,11 @@ jobs:
 
           # ---------- 3) Redeploy ----------
           RESP=$(curl -s -w "\n%{http_code}" -X POST "$DOKPLOY_URL/api/application.redeploy" \
-            -H 'Content-Type: application/json' \
-            -H "Cookie: better-auth.session_token=$TOKEN" \
+            -H 'Content-Type: application/json' "${AUTH_HDR[@]}" \
             -d "{\"applicationId\":\"$APP_ID\"}")
           CODE=$(echo "$RESP" | tail -n1)
           if [ "$CODE" != "200" ]; then
-            echo "Redeploy failed (HTTP $CODE): $(echo "$RESP" | sed '$d')"
+            echo "::error::Redeploy failed (HTTP $CODE): $(echo "$RESP" | sed '$d')"
             exit 1
           fi
           echo "Redeploy triggered"
