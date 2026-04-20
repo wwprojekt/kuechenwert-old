@@ -11,7 +11,6 @@ import {
   Wallet,
   Clock,
   MapPin,
-  PlayCircle,
 } from "lucide-react";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { BrandLogo } from "@/components/ui/brand-logo";
@@ -116,118 +115,103 @@ export default async function HomePage() {
   return (
     <>
       {/* ======================== HERO ======================== */}
-      <section className="relative overflow-hidden bg-white pb-16 pt-12 lg:pb-24 lg:pt-20">
+      <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/50 via-white to-white pb-12 pt-10 lg:pb-20 lg:pt-16">
         <div className="section-container relative">
-          <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-14">
-            {/* LINKS: Text + EIN klarer Primary-CTA */}
-            <div className="order-2 max-w-xl lg:order-1">
-              <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inset-0 animate-ping rounded-full bg-brand-500 opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-500" />
-                </span>
-                12 Händler aktuell aktiv in Ihrer Region
+          {/* Headline + Live-Counter */}
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inset-0 animate-ping rounded-full bg-brand-500 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-500" />
               </span>
+              12 Händler aktuell aktiv in Ihrer Region
+            </span>
 
-              <h1 className="mt-5 h-display">
-                Bis zu <span className="hl-mark">25 % sparen</span>
-                <br />
-                bei Ihrer neuen Küche.
-              </h1>
+            <h1 className="mt-5 h-display">
+              Bis zu <span className="hl-mark">25 % sparen</span> bei Ihrer
+              neuen Küche.
+            </h1>
 
-              <p className="mt-5 text-lead">
-                Vergleichen Sie ein bestehendes Studio-Angebot oder lassen
-                Sie sich neue Angebote von verifizierten Küchen­studios
-                machen. Kostenlos, unverbindlich, in 72 Stunden zur Klarheit.
-              </p>
+            <p className="mx-auto mt-5 max-w-2xl text-lead">
+              Wählen Sie Ihren Weg: bestehendes Studio-Angebot vergleichen
+              oder neue Angebote von verifizierten Küchenstudios erhalten.
+              Kostenlos, unverbindlich, in 72&nbsp;Stunden zur Klarheit.
+            </p>
 
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-                <Link href="/funnel/b" className="btn-primary-lg">
-                  Jetzt Angebot vergleichen
-                  <ArrowRight className="h-5 w-5 btn-icon-arrow" />
-                </Link>
-                <Link href="/funnel/a" className="btn-link">
-                  oder Angebot erhalten
-                  <ArrowRight className="h-4 w-4 btn-icon-arrow" />
-                </Link>
-              </div>
-
-              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-ink-muted">
-                <span className="inline-flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-success-600" />
-                  100 % kostenlos
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-success-600" />
-                  Unverbindlich
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-success-600" />
-                  72-h-Auktion
-                </span>
-              </div>
-
-              {/* Social Proof: Avatare + Bewertung */}
-              <div className="mt-8 flex items-center gap-4 border-t border-neutral-100 pt-6">
-                <div className="flex -space-x-2">
-                  {[AVATARS.martin, AVATARS.julia, AVATARS.thomas, AVATARS.anna].map((src, i) => (
-                    <span
-                      key={i}
-                      className="relative inline-block h-9 w-9 overflow-hidden rounded-full border-2 border-white shadow-sm"
-                    >
-                      <Image src={src} alt="" fill sizes="36px" className="object-cover" />
-                    </span>
-                  ))}
-                </div>
-                <div>
-                  <div className="flex items-center gap-1 text-amber-500" aria-hidden>
-                    {"★★★★★"}
-                    <span className="ml-1 text-xs font-bold text-ink">4,8 / 5,0</span>
-                  </div>
-                  <div className="text-xs text-ink-muted">
-                    aus 2.400+ Verbraucher-Bewertungen
-                  </div>
-                </div>
-              </div>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-ink-muted">
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-success-600" />
+                100&nbsp;% kostenlos
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-success-600" />
+                Unverbindlich
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-success-600" />
+                Ergebnis in 72&nbsp;h
+              </span>
             </div>
+          </div>
 
-            {/* RECHTS: Großes Küchen-Bild */}
-            <div className="relative order-1 lg:order-2">
-              <div className="relative aspect-[5/4] w-full overflow-hidden rounded-2xl shadow-card-elevated">
-                <Image
-                  src={KITCHEN_IMAGES.hero}
-                  alt="Moderne Küche mit Insel und Holz-Akzenten"
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 600px"
-                  className="object-cover"
-                />
-                {/* Floating-Badge: Live-Auktion */}
-                <div className="absolute bottom-4 left-4 flex items-center gap-3 rounded-xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
-                  <span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-100 text-brand-700">
-                    <Gavel className="h-5 w-5" />
+          {/* ============= 2 Pfad-Kästchen (Hauptaktion) ============= */}
+          <div className="mx-auto mt-12 grid max-w-5xl gap-5 md:mt-14 md:grid-cols-2 md:gap-6">
+            <HeroPathCard
+              href="/funnel/b"
+              variant="primary"
+              eyebrow="Reverse-Auktion · Beliebter Pfad"
+              title="Bestehendes Angebot vergleichen"
+              subtitle="Sie haben schon ein Angebot vom Küchenstudio? Lassen Sie verifizierte Händler in einer 72-h-Auktion unterbieten."
+              icon={<ClipboardCheck className="h-7 w-7" />}
+              imageSrc={KITCHEN_IMAGES.hero}
+              imageAlt="Moderne Küche mit Insel"
+              cta="Jetzt Angebot vergleichen"
+              meta={[
+                "Ø 18 % Ersparnis",
+                "72 h Auktionsdauer",
+                "Verbindlich & verifiziert",
+              ]}
+            />
+            <HeroPathCard
+              href="/funnel/a"
+              variant="secondary"
+              eyebrow="Lead-Vermittlung"
+              title="Angebot erhalten"
+              subtitle="Sie starten bei null? Erhalten Sie kostenfrei bis zu drei Angebote von verifizierten Küchenstudios in Ihrer Region."
+              icon={<Search className="h-7 w-7" />}
+              imageSrc={KITCHEN_IMAGES.ctaBackground}
+              imageAlt="Helle Küche mit Holzakzenten"
+              cta="Angebot erhalten"
+              meta={[
+                "Bis zu 3 Studios",
+                "Antwort < 24 h",
+                "100 % kostenlos",
+              ]}
+            />
+          </div>
+
+          {/* Social Proof unter den Karten */}
+          <div className="mx-auto mt-10 flex max-w-2xl flex-wrap items-center justify-center gap-4 border-t border-neutral-100 pt-6">
+            <div className="flex -space-x-2">
+              {[AVATARS.martin, AVATARS.julia, AVATARS.thomas, AVATARS.anna].map(
+                (src, i) => (
+                  <span
+                    key={i}
+                    className="relative inline-block h-9 w-9 overflow-hidden rounded-full border-2 border-white shadow-sm"
+                  >
+                    <Image src={src} alt="" fill sizes="36px" className="object-cover" />
                   </span>
-                  <div>
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-subtle">
-                      Auktion läuft
-                    </div>
-                    <div className="text-sm font-bold text-ink">
-                      noch 23h 14min
-                    </div>
-                  </div>
-                </div>
-                {/* Floating-Badge: Ersparnis */}
-                <div className="absolute right-4 top-4 flex items-center gap-2 rounded-full bg-success-500 px-3 py-1.5 text-xs font-bold text-white shadow-md">
-                  <ArrowRight className="h-3 w-3 -rotate-45" />
-                  −18 % Ersparnis
-                </div>
+                ),
+              )}
+            </div>
+            <div className="text-center sm:text-left">
+              <div className="flex items-center justify-center gap-1 text-amber-500 sm:justify-start" aria-hidden>
+                {"★★★★★"}
+                <span className="ml-1 text-xs font-bold text-ink">4,8 / 5,0</span>
               </div>
-
-              {/* Decoration: warmer Wand-Tint dahinter */}
-              <div
-                className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-brand-100 via-brand-50 to-transparent blur-2xl"
-                aria-hidden
-              />
+              <div className="text-xs text-ink-muted">
+                aus 2.400+ Verbraucher-Bewertungen
+              </div>
             </div>
           </div>
         </div>
@@ -290,15 +274,15 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ======================== ZWEI WEGE EXPLAINER ======================== */}
+      {/* ======================== SO LÄUFT'S IM DETAIL ======================== */}
       <section className="section-padding bg-white">
         <div className="section-container">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="eyebrow">Flexibel &amp; transparent</span>
-            <h2 className="mt-2 h-section">Zwei Wege zum besten Preis</h2>
+            <span className="eyebrow">So läuft es im Detail</span>
+            <h2 className="mt-2 h-section">Was Sie im jeweiligen Pfad erwartet</h2>
             <p className="mt-3 text-lead">
-              Egal ob Sie schon ein konkretes Angebot haben oder bei null
-              starten – wir bringen Sie zum fairen Marktpreis.
+              Beide Wege sind kostenlos und unverbindlich. Hier sehen Sie,
+              welche Schritte konkret auf Sie zukommen.
             </p>
           </div>
 
@@ -606,6 +590,113 @@ function Step({
       />
       <p className="mt-1.5 text-[15px] leading-relaxed text-ink-muted">{text}</p>
     </li>
+  );
+}
+
+function HeroPathCard({
+  href,
+  variant,
+  eyebrow,
+  title,
+  subtitle,
+  icon,
+  imageSrc,
+  imageAlt,
+  cta,
+  meta,
+}: {
+  href: string;
+  variant: "primary" | "secondary";
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  imageSrc: string;
+  imageAlt: string;
+  cta: string;
+  meta: string[];
+}) {
+  const isPrimary = variant === "primary";
+  return (
+    <Link
+      href={href}
+      className={`group relative flex flex-col overflow-hidden rounded-2xl border-2 bg-white shadow-card transition-all hover:-translate-y-1 hover:shadow-card-elevated ${
+        isPrimary
+          ? "border-brand-500/30 ring-1 ring-brand-500/10 hover:border-brand-500"
+          : "border-neutral-200 hover:border-neutral-400"
+      }`}
+    >
+      {/* Bild-Header */}
+      <div className="relative aspect-[16/9] w-full overflow-hidden bg-neutral-100">
+        <Image
+          src={imageSrc}
+          alt={imageAlt}
+          fill
+          priority={isPrimary}
+          sizes="(max-width: 768px) 100vw, 480px"
+          className="object-cover transition duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+
+        {/* Icon-Badge oben links */}
+        <span
+          className={`absolute left-4 top-4 grid h-12 w-12 place-items-center rounded-xl shadow-md backdrop-blur ${
+            isPrimary ? "bg-brand-500 text-white" : "bg-white text-ink"
+          }`}
+        >
+          {icon}
+        </span>
+
+        {/* Eyebrow oben rechts */}
+        {isPrimary && (
+          <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-700 shadow-md">
+            ★ Beliebt
+          </span>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-1 flex-col gap-4 p-6 sm:p-7">
+        <div>
+          <span className="text-xs font-semibold uppercase tracking-wider text-ink-subtle">
+            {eyebrow}
+          </span>
+          <h3 className="mt-1.5 font-display text-[1.5rem] font-bold leading-tight tracking-tight-2 text-black sm:text-[1.65rem]">
+            {title}
+          </h3>
+        </div>
+
+        <p className="text-[15px] leading-relaxed text-ink-muted">
+          {subtitle}
+        </p>
+
+        <ul className="flex flex-wrap gap-2 pt-1">
+          {meta.map((m) => (
+            <li
+              key={m}
+              className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-ink"
+            >
+              <CheckCircle2 className="h-3 w-3 text-success-600" />
+              {m}
+            </li>
+          ))}
+        </ul>
+
+        {/* CTA-Button am Boden */}
+        <div className="mt-auto pt-3">
+          <span
+            className={
+              isPrimary
+                ? "btn-primary w-full justify-center sm:w-auto"
+                : "btn-secondary w-full justify-center sm:w-auto"
+            }
+          >
+            {cta}
+            <ArrowRight className="h-4 w-4 btn-icon-arrow" />
+          </span>
+        </div>
+      </div>
+    </Link>
   );
 }
 
