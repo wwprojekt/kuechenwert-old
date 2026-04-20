@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin, audit } from "@/lib/supabase/admin";
+import { getSiteUrlAscii } from "@/lib/site-url";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,11 +30,12 @@ export async function POST(req: Request) {
     );
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.VERCEL_URL?.replace(/^https?:\/\//, "")
-      ? `https://${process.env.VERCEL_URL}`
-      : new URL(req.url).origin;
+  // ASCII-Form pflicht: Node-`fetch()` schlägt mit IDN-Hostnamen
+  // (`küchenwert.de`) bei manchen Versionen fehl bzw. baut den Host-Header
+  // falsch. URL-Konstruktor liefert automatisch Punycode.
+  const fromEnv = getSiteUrlAscii();
+  const fromVercel = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null;
+  const baseUrl = fromEnv || fromVercel || new URL(req.url).origin;
 
   const url = `${baseUrl}/api/cron/${job}`;
   const start = Date.now();

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireDealerApi } from "@/lib/supabase/dealer";
 import { supabaseAdmin, audit } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/stripe";
+import { getSiteUrlAscii } from "@/lib/site-url";
 
 export const runtime = "nodejs";
 
@@ -42,7 +43,10 @@ export async function POST(req: Request) {
     await supabaseAdmin.from("dealers").update({ stripe_customer_id: customerId }).eq("id", dealer.id);
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin;
+  // Stripe ruft success_url/cancel_url als Browser-Redirect auf — beide
+  // Schreibweisen funktionieren, ASCII ist aber kompatibler mit Stripes
+  // URL-Parser und vermeidet Probleme bei Status-Tracking.
+  const baseUrl = getSiteUrlAscii() || new URL(req.url).origin;
 
   const session = await s.checkout.sessions.create({
     mode: "payment",

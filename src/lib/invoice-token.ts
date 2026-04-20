@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { getSiteUrlPretty } from "@/lib/site-url";
 
 /**
  * HMAC-Secret für signierte Rechnungs-Druck-URLs.
@@ -50,6 +51,8 @@ export function verifyInvoiceToken(invoiceId: string, token: string): boolean {
 }
 
 export function invoicePublicUrl(invoiceId: string, baseUrl?: string): string {
-  const base = baseUrl ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  // Pretty-URL (mit Umlaut) — Empfänger sehen `https://küchenwert.de/invoice/...`
+  // in Mails, Rechnungs-PDFs und der Admin-UI.
+  const base = baseUrl ?? getSiteUrlPretty();
   return `${base}/invoice/${invoiceId}/${signInvoiceToken(invoiceId)}`;
 }

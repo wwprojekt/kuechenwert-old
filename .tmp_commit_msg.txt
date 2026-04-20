@@ -1,0 +1,15 @@
+feat(domain): überall küchenwert.de — IDN+Punycode sauber getrennt
+
+Hintergrund: küchenwert.de und xn--kchenwert-y5a.de sind technisch
+identisch (gleiche DNS-Zone). Wir wollen aber überall die schöne Form
+in Mails, Rechnungen und UI sehen, ohne Server-zu-Server-Calls zu
+brechen, die ASCII-Hostnames brauchen.
+
+- src/lib/site-url.ts: Helper mit getSiteUrlPretty() (Anzeige, Mails)
+  und getSiteUrlAscii() (fetch, Stripe, Webhooks). ASCII-Form wird über
+  den URL-Konstruktor automatisch aus dem IDN-Namen abgeleitet.
+- invoice-token: invoicePublicUrl() liefert Pretty-Form, Mail-Empfänger
+  sehen https://küchenwert.de/invoice/...
+- api/admin/cron/trigger: nutzt ASCII-Form, Node-fetch happy
+- api/dealer/wallet/topup: Stripe-success/cancel-URL bleibt ASCII
+- GH-Secret NEXT_PUBLIC_SITE_URL umgestellt auf https://küchenwert.de
