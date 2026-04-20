@@ -55,12 +55,17 @@ export default {
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        display: ["var(--font-inter)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-inter)", "system-ui", "sans-serif"],
+      },
+      letterSpacing: {
+        "tight-2": "-0.02em",
+        "tight-3": "-0.03em",
       },
       boxShadow: {
-        card: "0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06)",
-        "card-hover": "0 4px 12px -2px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06)",
-        "card-active": "0 8px 24px -4px rgb(33 82 143 / 0.18), 0 4px 8px -2px rgb(33 82 143 / 0.10)",
+        card: "0 2px 4px -1px rgb(15 23 42 / 0.06), 0 4px 12px -2px rgb(15 23 42 / 0.08)",
+        "card-hover": "0 8px 16px -4px rgb(15 23 42 / 0.10), 0 4px 8px -2px rgb(15 23 42 / 0.08)",
+        "card-active": "0 16px 40px -8px rgb(26 66 118 / 0.22), 0 6px 12px -3px rgb(26 66 118 / 0.14)",
+        "card-elevated": "0 20px 50px -12px rgb(15 23 42 / 0.18), 0 8px 18px -6px rgb(15 23 42 / 0.10)",
       },
       borderRadius: {
         card: "0.875rem",

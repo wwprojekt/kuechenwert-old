@@ -5,7 +5,6 @@ import {
   ShieldCheck,
   Gavel,
   Search,
-  Sparkles,
   ClipboardCheck,
   Headphones,
   Wallet,
@@ -13,7 +12,11 @@ import {
   Users,
   TrendingDown,
   Award,
+  MapPin,
 } from "lucide-react";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+
+export const dynamic = "force-dynamic";
 
 const FAQ = [
   {
@@ -42,14 +45,81 @@ const FAQ = [
   },
 ];
 
-export default function HomePage() {
+const KITCHEN_BRANDS = [
+  "Nobilia",
+  "Häcker",
+  "Schüller",
+  "Nolte",
+  "Bauformat",
+  "Bauknecht",
+  "Pino",
+  "Beckermann",
+  "Burger",
+  "ALNO",
+  "Leicht",
+  "next125",
+];
+
+type AuctionTeaser = {
+  id: string;
+  postal_code: string | null;
+  region: string | null;
+  tier: string | null;
+  kitchen_form: string | null;
+  budget_midpoint: number | null;
+  offer_price_eur: number | null;
+  ends_at: string | null;
+};
+
+async function fetchTeaserAuctions(): Promise<AuctionTeaser[]> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("auctions")
+      .select(
+        "id, offer_price_eur, ends_at, leads!inner(postal_code, region, tier, kitchen_form, budget_midpoint)"
+      )
+      .eq("status", "active")
+      .eq("is_published", true)
+      .order("ends_at", { ascending: true })
+      .limit(3);
+
+    type Row = {
+      id: string;
+      offer_price_eur: number | null;
+      ends_at: string | null;
+      leads: {
+        postal_code: string | null;
+        region: string | null;
+        tier: string | null;
+        kitchen_form: string | null;
+        budget_midpoint: number | null;
+      } | null;
+    };
+    const rows = (data ?? []) as unknown as Row[];
+    return rows.map((r) => ({
+      id: r.id,
+      postal_code: r.leads?.postal_code ?? null,
+      region: r.leads?.region ?? null,
+      tier: r.leads?.tier ?? null,
+      kitchen_form: r.leads?.kitchen_form ?? null,
+      budget_midpoint: r.leads?.budget_midpoint ?? null,
+      offer_price_eur: r.offer_price_eur,
+      ends_at: r.ends_at,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const liveAuctions = await fetchTeaserAuctions();
+
   return (
     <>
-      {/* ======================== HERO – HELL, 2-SPALTEN ======================== */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-surface-soft via-white to-surface-soft pb-16 pt-12 lg:pb-24 lg:pt-20">
-        {/* Subtile Grid-Pattern + Glow */}
+      {/* ======================== HERO ======================== */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-surface-soft via-white to-surface-soft pb-16 pt-12 lg:pb-24 lg:pt-16">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(31,185,122,0.08),_transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[460px] bg-[radial-gradient(ellipse_at_top_left,_rgba(33,82,143,0.06),_transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[460px] bg-[radial-gradient(ellipse_at_top_left,_rgba(33,82,143,0.08),_transparent_55%)]" />
 
         <div className="section-container relative">
           {/* Live-Trust-Strip */}
@@ -59,27 +129,37 @@ export default function HomePage() {
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-500" />
             </span>
             <span className="text-xs font-medium text-ink-muted">
-              <span className="font-semibold text-ink">12 Händler</span> suchen gerade Küchen-Anfragen in Ihrer Region
+              <span className="font-semibold text-ink">12 Händler</span> suchen
+              gerade Küchen-Anfragen in Ihrer Region
             </span>
           </div>
 
-          <div className="grid items-start gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+          {/* MOBILE-FIRST: Wahl-Wizard zuerst, Text danach */}
+          <div className="grid items-start gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
             {/* LINKS: Headline + Trust */}
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-accent-50 px-3 py-1.5 text-xs font-semibold text-accent-700">
-                <Sparkles className="h-3.5 w-3.5" /> Transparenz für Ihren Küchenkauf
-              </span>
-              <h1 className="mt-5 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl">
-                In 2 Minuten zum{" "}
-                <span className="bg-gradient-to-r from-brand-700 to-accent-600 bg-clip-text text-transparent">
-                  besten Küchenpreis
-                </span>
+            <div className="order-2 lg:order-1">
+              <span className="eyebrow">Transparenz für Ihren Küchenkauf</span>
+              <h1 className="mt-3 h-display">
+                Ihre neue Küche.
+                <br />
+                Zum{" "}
+                <span className="hl-mark">besten Preis</span>.
               </h1>
               <p className="mt-5 max-w-xl text-base text-ink-muted sm:text-lg">
-                Vergleichen Sie ein bestehendes Angebot Ihres Küchenstudios oder
-                erhalten Sie neue Angebote von verifizierten Händlern in Ihrer Region –
+                Vergleichen Sie ein bestehendes Studio-Angebot oder erhalten Sie
+                neue Angebote von verifizierten Händlern in Ihrer Region –
                 kostenlos, unverbindlich, in 72 Stunden Klarheit.
               </p>
+
+              <div className="mt-6 flex flex-wrap items-center gap-2.5">
+                <Link href="/funnel/b" className="btn-primary">
+                  Angebot vergleichen
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link href="/funnel/a" className="btn-secondary">
+                  Angebot erhalten
+                </Link>
+              </div>
 
               <div className="mt-7 grid grid-cols-2 gap-3 sm:max-w-md">
                 {[
@@ -112,20 +192,36 @@ export default function HomePage() {
                 </div>
                 <div className="text-sm">
                   <div className="font-semibold text-ink">2.400+ Verbraucher</div>
-                  <div className="text-xs text-ink-muted">haben bereits gespart – Ø 18 % Ersparnis</div>
+                  <div className="text-xs text-ink-muted">
+                    haben bereits gespart – Ø 18 % Ersparnis
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* RECHTS: Wahl-Wizard-Card */}
-            <div className="relative">
-              <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-brand-100/60 via-transparent to-accent-100/60 blur-2xl" />
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card-active sm:p-8">
+            <div className="relative order-1 lg:order-2">
+              {/* Visual-Composition (Küchen-Tile-Look) hinter der Card */}
+              <div
+                className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-br from-brand-100/70 via-accent-50/40 to-transparent blur-2xl"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute -right-6 -top-6 -z-10 hidden h-32 w-32 rotate-6 rounded-2xl bg-gradient-to-br from-brand-700 to-brand-900 opacity-90 shadow-card-active lg:block"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute -bottom-6 -left-6 -z-10 hidden h-24 w-24 -rotate-6 rounded-2xl bg-gradient-to-br from-accent-400 to-accent-600 opacity-90 shadow-card-active lg:block"
+                aria-hidden
+              />
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card-elevated sm:p-8">
                 <div className="mb-1 text-sm font-semibold text-brand-700">
                   Wie möchten Sie starten?
                 </div>
                 <div className="mb-6 text-xs text-ink-muted">
-                  Kostenloses Angebot in nur 2 Minuten · Geprüfte Händler aktuell in Ihrer Region
+                  Kostenloses Angebot in 2 Minuten · Geprüfte Händler aktuell
+                  in Ihrer Region
                 </div>
 
                 <div className="grid gap-3">
@@ -137,12 +233,12 @@ export default function HomePage() {
                       <ClipboardCheck className="h-5 w-5" />
                     </span>
                     <div className="flex-1">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <div className="text-base font-semibold text-ink">
                           Bestehendes Angebot vergleichen
                         </div>
-                        <span className="rounded-full bg-accent-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-700">
-                          –25 %
+                        <span className="rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-800">
+                          Ø –18 %
                         </span>
                       </div>
                       <p className="mt-1 text-sm text-ink-muted">
@@ -159,20 +255,21 @@ export default function HomePage() {
                     href="/funnel/a"
                     className="group flex items-start gap-4 rounded-xl border-2 border-slate-200 bg-surface-soft p-5 transition hover:-translate-y-0.5 hover:border-accent-500 hover:bg-white hover:shadow-card-hover"
                   >
-                    <span className="mt-0.5 grid h-11 w-11 flex-none place-items-center rounded-lg bg-accent-50 text-accent-700">
+                    <span className="mt-0.5 grid h-11 w-11 flex-none place-items-center rounded-lg bg-accent-100 text-accent-700">
                       <Search className="h-5 w-5" />
                     </span>
                     <div className="flex-1">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <div className="text-base font-semibold text-ink">
                           Angebot erhalten
                         </div>
-                        <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-700">
+                        <span className="rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-800">
                           2 Min
                         </span>
                       </div>
                       <p className="mt-1 text-sm text-ink-muted">
-                        Sie planen neu? Bis zu 3 Studios erstellen Angebote für Sie.
+                        Sie planen neu? Bis zu 3 Studios erstellen Angebote
+                        für Sie.
                       </p>
                       <span className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-accent-700 group-hover:text-accent-800">
                         Anfrage starten
@@ -202,14 +299,41 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ======================== STATS-STRIP ======================== */}
-      <section className="border-y border-slate-200 bg-white py-10">
+      {/* ======================== STATS-STRIP (slim, Zahlen-fokussiert) ======================== */}
+      <section className="border-y border-slate-200 bg-white">
         <div className="section-container">
-          <div className="grid grid-cols-2 gap-6 text-center md:grid-cols-4">
-            <Stat icon={<Clock className="h-5 w-5" />} value="72 h" label="Auktionsdauer" />
-            <Stat icon={<TrendingDown className="h-5 w-5" />} value="< 25 %" label="Ø Ersparnis" />
-            <Stat icon={<Wallet className="h-5 w-5" />} value="0 €" label="Kosten Verbraucher" />
-            <Stat icon={<Users className="h-5 w-5" />} value="100 %" label="Verifizierte Händler" />
+          <div className="grid grid-cols-2 gap-4 py-8 text-center sm:py-10 md:grid-cols-4">
+            <Stat value="72 h" label="Auktionsdauer" />
+            <Stat value="bis 25 %" label="Ø Ersparnis" />
+            <Stat value="0 €" label="für Verbraucher" />
+            <Stat value="100 %" label="verifizierte Händler" />
+          </div>
+        </div>
+      </section>
+
+      {/* ======================== MARKEN-WAND ======================== */}
+      <section className="bg-surface-soft py-12 lg:py-16">
+        <div className="section-container">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="eyebrow">Marken &amp; Hersteller</span>
+            <h2 className="mt-2 font-display text-2xl font-extrabold tracking-tight-2 text-ink sm:text-3xl">
+              Alle führenden deutschen Küchenmarken
+            </h2>
+            <p className="mt-3 text-sm text-ink-muted">
+              Egal welche Marke Ihnen Ihr Studio angeboten hat – unsere
+              Partner-Händler beziehen direkt vom Hersteller.
+            </p>
+          </div>
+
+          <div className="mt-8 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
+            {KITCHEN_BRANDS.map((brand) => (
+              <div
+                key={brand}
+                className="flex h-16 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-center font-display text-sm font-semibold text-ink-muted shadow-card transition hover:border-brand-300 hover:text-brand-700 hover:shadow-card-hover"
+              >
+                {brand}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -218,13 +342,11 @@ export default function HomePage() {
       <section className="section-padding">
         <div className="section-container">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-semibold uppercase tracking-wider text-accent-700">
-              Flexibel & Transparent
-            </span>
+            <span className="eyebrow">Flexibel &amp; transparent</span>
             <h2 className="mt-2 h-section">Zwei Wege zum besten Preis</h2>
             <p className="mt-3 text-lead">
-              Egal ob Sie schon ein konkretes Angebot haben oder bei null starten –
-              wir bringen Sie zum fairen Marktpreis.
+              Egal ob Sie schon ein konkretes Angebot haben oder bei null
+              starten – wir bringen Sie zum fairen Marktpreis.
             </p>
           </div>
 
@@ -236,8 +358,8 @@ export default function HomePage() {
               tag="Reverse-Auktion"
               title="Bestehendes Angebot vergleichen"
               steps={[
-                "Eckdaten Ihrer Wunschküche erfassen (Hersteller, Fronten, Arbeitsplatte, Geräte, Sanitär, Lieferung, Zahlung)",
-                "Optional: Angebot, Grundriss und Bild hochladen",
+                "Eckdaten erfassen (Hersteller, Fronten, Arbeitsplatte, Geräte, Sanitär, Lieferung, Zahlung)",
+                "Optional: Angebot, Grundriss und Foto hochladen",
                 "Experte ruft Sie an und ergänzt Details",
                 "72-h-Auktion: verifizierte Händler unterbieten Ihr Angebot",
                 "Sie nehmen das beste Gebot verbindlich an",
@@ -253,7 +375,7 @@ export default function HomePage() {
               steps={[
                 "Küchenform und Stil wählen",
                 "Anlass, Wünsche und Zeitrahmen angeben",
-                "Budget & Wohnsituation (Miete / Eigentum) angeben",
+                "Budget &amp; Wohnsituation (Miete / Eigentum) angeben",
                 "PLZ und Kontaktdaten",
                 "Bis zu 3 verifizierte Studios erstellen kostenlose Angebote",
               ]}
@@ -263,17 +385,55 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ======================== VORTEILE 6-GRID ======================== */}
+      {/* ======================== LIVE-AUKTIONEN-STRIP ======================== */}
       <section className="bg-surface-strong section-padding">
         <div className="section-container">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="max-w-xl">
+              <span className="eyebrow">
+                <span className="relative inline-block h-1.5 w-1.5 -translate-y-0.5 rounded-full bg-accent-500 align-middle">
+                  <span className="absolute inset-0 animate-ping rounded-full bg-accent-500 opacity-75" />
+                </span>{" "}
+                Live aus der Plattform
+              </span>
+              <h2 className="mt-2 h-section">
+                {liveAuctions.length > 0
+                  ? "Aktuelle Küchen-Auktionen"
+                  : "Beispiel-Auktionen"}
+              </h2>
+              <p className="mt-2 text-ink-muted">
+                {liveAuctions.length > 0
+                  ? "Verifizierte Händler bieten gerade auf diese anonymisierten Anfragen."
+                  : "So sehen aktive Auktionen auf KüchenWert aus. Ihre Auktion startet in 2 Minuten."}
+              </p>
+            </div>
+            <Link href="/auktionen" className="btn-secondary">
+              Alle Auktionen ansehen
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
+            {liveAuctions.length > 0
+              ? liveAuctions.map((a) => (
+                  <AuctionTeaserCard key={a.id} auction={a} live />
+                ))
+              : DEMO_AUCTIONS.map((a) => (
+                  <AuctionTeaserCard key={a.id} auction={a} live={false} />
+                ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ======================== VORTEILE 6-GRID ======================== */}
+      <section className="section-padding">
+        <div className="section-container">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-semibold uppercase tracking-wider text-accent-700">
-              Ihre Vorteile
-            </span>
+            <span className="eyebrow">Ihre Vorteile</span>
             <h2 className="mt-2 h-section">Warum KüchenWert?</h2>
             <p className="mt-3 text-lead">
-              Wir kombinieren Marktdruck mit echtem Service – damit Sie
-              nicht raten müssen, ob Ihr Preis fair ist.
+              Wir kombinieren Marktdruck mit echtem Service – damit Sie nicht
+              raten müssen, ob Ihr Preis fair ist.
             </p>
           </div>
 
@@ -312,76 +472,56 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ======================== 4-SCHRITTE-PROZESS MIT ZEIT-BADGES ======================== */}
-      <section className="section-padding">
+      {/* ======================== 4-SCHRITTE-PROZESS ======================== */}
+      <section className="bg-surface-soft section-padding">
         <div className="section-container">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-semibold uppercase tracking-wider text-accent-700">
-              Einfach & Schnell
-            </span>
+            <span className="eyebrow">Einfach &amp; schnell</span>
             <h2 className="mt-2 h-section">In 4 Schritten zum besten Preis</h2>
             <p className="mt-3 text-lead">
-              Unser optimierter Prozess macht den Vergleich so einfach und stressfrei
-              wie möglich.
+              Unser optimierter Prozess macht den Vergleich so einfach und
+              stressfrei wie möglich.
             </p>
           </div>
 
           <ol className="mx-auto mt-12 grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Step
-              num={1}
-              time="2 Min"
-              title="Pfad wählen & Daten eingeben"
-              text="Bestehendes Angebot vergleichen oder neues erhalten."
-            />
-            <Step
-              num={2}
-              time="optional"
-              title="Dokumente hochladen"
-              text="Angebot, Grundriss oder Foto Ihrer Küche – beschleunigt die Bewertung."
-            />
-            <Step
-              num={3}
-              time="24 h"
-              title="Experten-Check"
-              text="Wir prüfen, rufen Sie an und ergänzen fehlende Details kostenlos."
-            />
-            <Step
-              num={4}
-              time="72 h"
-              title="Angebote / Auktion"
-              text="Verifizierte Händler bieten – Sie wählen das beste Angebot."
-            />
+            <Step num={1} time="2 Min" title="Pfad wählen &amp; Daten eingeben" text="Bestehendes Angebot vergleichen oder neues erhalten." />
+            <Step num={2} time="optional" title="Dokumente hochladen" text="Angebot, Grundriss oder Foto Ihrer Küche – beschleunigt die Bewertung." />
+            <Step num={3} time="24 h" title="Experten-Check" text="Wir prüfen, rufen Sie an und ergänzen fehlende Details kostenlos." />
+            <Step num={4} time="72 h" title="Angebote / Auktion" text="Verifizierte Händler bieten – Sie wählen das beste Angebot." />
           </ol>
         </div>
       </section>
 
-      {/* ======================== TRUST / TESTIMONIAL-STRIP ======================== */}
-      <section className="bg-surface-strong py-14">
+      {/* ======================== TESTIMONIAL ======================== */}
+      <section className="bg-white py-14">
         <div className="section-container grid items-center gap-10 md:grid-cols-2">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-accent-700">
-              Verifizierte Händler
-            </span>
-            <h3 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
+            <span className="eyebrow">Verifizierte Händler</span>
+            <h3 className="mt-2 font-display text-2xl font-extrabold tracking-tight-2 text-ink sm:text-3xl">
               Geprüfte Küchenstudios deutschlandweit
             </h3>
             <p className="mt-3 text-ink-muted">
               Alle unsere Partner durchlaufen ein Prüfverfahren (Gewerbeschein,
-              Referenzen, Bonität). So profitieren Sie von professionellem Service
-              und fairen Preisen durch echten Wettbewerb.
+              Referenzen, Bonität). So profitieren Sie von professionellem
+              Service und fairen Preisen durch echten Wettbewerb.
             </p>
             <div className="mt-6 grid grid-cols-2 gap-6">
               <div>
-                <div className="font-display text-3xl font-bold text-brand-900">100 %</div>
-                <div className="text-sm text-ink-muted">Geprüfte Partner</div>
+                <div className="font-display text-3xl font-extrabold text-brand-900">
+                  100 %
+                </div>
+                <div className="text-sm text-ink-muted">geprüfte Partner</div>
               </div>
               <div>
-                <div className="font-display text-3xl font-bold text-brand-900">Mo–Fr</div>
-                <div className="text-sm text-ink-muted">Persönlicher Support</div>
+                <div className="font-display text-3xl font-extrabold text-brand-900">
+                  Mo–Fr
+                </div>
+                <div className="text-sm text-ink-muted">persönlicher Support</div>
               </div>
             </div>
           </div>
-          <div className="rounded-card border border-slate-200 bg-white p-7 shadow-card">
+          <div className="rounded-card border border-slate-200 bg-white p-7 shadow-card-elevated">
             <div className="flex items-center gap-1 text-amber-500">
               {[...Array(5)].map((_, i) => (
                 <span key={i} aria-hidden>★</span>
@@ -389,8 +529,9 @@ export default function HomePage() {
             </div>
             <p className="mt-4 text-base italic text-ink">
               „Hatte ein Angebot über 21.500 € von meinem Küchenstudio. Über
-              KüchenWert haben drei Händler geboten – am Ende habe ich die gleiche
-              Küche für 17.890 € bekommen. 3.610 € gespart in 72 Stunden."
+              KüchenWert haben drei Händler geboten – am Ende habe ich die
+              gleiche Küche für 17.890 € bekommen. 3.610 € gespart in 72
+              Stunden."
             </p>
             <div className="mt-5 flex items-center gap-3">
               <span className="grid h-10 w-10 place-items-center rounded-full bg-brand-100 font-semibold text-brand-700">
@@ -398,7 +539,9 @@ export default function HomePage() {
               </span>
               <div className="text-sm">
                 <div className="font-semibold text-ink">Martin K.</div>
-                <div className="text-xs text-ink-muted">München · Auktion #1247</div>
+                <div className="text-xs text-ink-muted">
+                  München · Auktion #1247
+                </div>
               </div>
             </div>
           </div>
@@ -406,15 +549,13 @@ export default function HomePage() {
       </section>
 
       {/* ======================== FAQ ======================== */}
-      <section className="border-t border-slate-200 bg-white section-padding">
+      <section className="border-t border-slate-200 bg-surface-soft section-padding">
         <div className="section-container max-w-3xl">
           <div className="text-center">
-            <span className="text-xs font-semibold uppercase tracking-wider text-accent-700">
-              FAQ
-            </span>
+            <span className="eyebrow">FAQ</span>
             <h2 className="mt-2 h-section">Häufig gestellte Fragen</h2>
           </div>
-          <div className="mt-10 divide-y divide-slate-200">
+          <div className="mt-10 divide-y divide-slate-200 rounded-card border border-slate-200 bg-white px-6">
             {FAQ.map((item) => (
               <details key={item.q} className="group py-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-ink">
@@ -423,48 +564,57 @@ export default function HomePage() {
                     +
                   </span>
                 </summary>
-                <p className="mt-3 text-sm leading-relaxed text-ink-muted">{item.a}</p>
+                <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+                  {item.a}
+                </p>
               </details>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ======================== BOTTOM CTA – HELLER ======================== */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-50 via-white to-accent-50 py-16 lg:py-20">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(31,185,122,0.06),_transparent_60%)]" />
+      {/* ======================== BOTTOM-CTA ======================== */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-900 py-16 text-white lg:py-20">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(31,185,122,0.12),_transparent_60%)]" />
         <div className="section-container relative text-center">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-brand-700 shadow-sm">
-            <Sparkles className="h-3.5 w-3.5" /> Bereit für den fairen Küchenpreis?
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold text-accent-200 backdrop-blur">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inset-0 animate-ping rounded-full bg-accent-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-400" />
+            </span>
+            Bereit für den fairen Küchenpreis?
           </span>
-          <h2 className="mt-5 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+          <h2 className="mt-5 font-display text-3xl font-extrabold tracking-tight-2 sm:text-4xl">
             Starten Sie jetzt – kostenlos und in 2 Minuten
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-ink-muted">
-            Wählen Sie Ihren Pfad und vergleichen Sie schon heute Ihr Angebot mit
-            verifizierten Küchenstudios.
+          <p className="mx-auto mt-3 max-w-xl text-slate-300">
+            Wählen Sie Ihren Pfad und vergleichen Sie schon heute Ihr Angebot
+            mit verifizierten Küchenstudios.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link href="/funnel/b" className="btn-primary">
+            <Link href="/funnel/b" className="btn-accent">
               Bestehendes Angebot vergleichen
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/funnel/a" className="btn-accent">
+            <Link
+              href="/funnel/a"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
+            >
               Angebot erhalten
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-ink-muted">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-slate-400">
             <span className="inline-flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-accent-600" />
-              Kostenlos & unverbindlich
+              <CheckCircle2 className="h-3.5 w-3.5 text-accent-400" />
+              Kostenlos &amp; unverbindlich
             </span>
             <span className="inline-flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-accent-600" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-accent-400" />
               Kein Login zum Starten
             </span>
             <span className="inline-flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-accent-600" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-accent-400" />
               Ergebnis in 72 h
             </span>
           </div>
@@ -476,24 +626,15 @@ export default function HomePage() {
 
 /* ---------------------- Sub-components ---------------------- */
 
-function Stat({
-  icon,
-  value,
-  label,
-}: {
-  icon: React.ReactNode;
-  value: string;
-  label: string;
-}) {
+function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex flex-col items-center">
-      <span className="grid h-10 w-10 place-items-center rounded-full bg-accent-50 text-accent-700">
-        {icon}
-      </span>
-      <div className="mt-3 font-display text-3xl font-bold text-brand-900 sm:text-4xl">
+      <div className="font-display text-3xl font-extrabold tracking-tight-2 text-brand-900 sm:text-4xl lg:text-5xl">
         {value}
       </div>
-      <div className="mt-1 text-xs text-ink-muted sm:text-sm">{label}</div>
+      <div className="mt-1 text-xs uppercase tracking-wider text-ink-muted sm:text-sm">
+        {label}
+      </div>
     </div>
   );
 }
@@ -530,7 +671,7 @@ function Step({
   text: string;
 }) {
   return (
-    <li className="relative rounded-card border border-slate-200 bg-white p-6 shadow-card">
+    <li className="relative rounded-card border border-slate-200 bg-white p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover">
       <div className="flex items-center justify-between">
         <span className="grid h-10 w-10 place-items-center rounded-full bg-brand-700 font-bold text-white shadow-card-active">
           {num}
@@ -539,7 +680,10 @@ function Step({
           {time}
         </span>
       </div>
-      <h3 className="mt-4 text-base font-semibold text-ink">{title}</h3>
+      <h3
+        className="mt-4 text-base font-semibold text-ink"
+        dangerouslySetInnerHTML={{ __html: title }}
+      />
       <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">{text}</p>
     </li>
   );
@@ -565,9 +709,9 @@ function PathExplainer({
   const toneClasses =
     tone === "brand"
       ? "bg-brand-100 text-brand-700"
-      : "bg-accent-50 text-accent-700";
+      : "bg-accent-100 text-accent-700";
   return (
-    <div className="card flex flex-col gap-5 transition hover:shadow-card-hover">
+    <div className="card flex flex-col gap-5 transition hover:-translate-y-0.5 hover:shadow-card-hover">
       <div className="flex items-start gap-4">
         <span
           className={`grid h-12 w-12 flex-none place-items-center rounded-lg ${toneClasses}`}
@@ -598,7 +742,7 @@ function PathExplainer({
             <span className="mt-0.5 grid h-5 w-5 flex-none place-items-center rounded-full bg-surface-strong text-xs font-semibold text-ink">
               {i + 1}
             </span>
-            <span>{s}</span>
+            <span dangerouslySetInnerHTML={{ __html: s }} />
           </li>
         ))}
       </ol>
@@ -610,4 +754,123 @@ function PathExplainer({
       </Link>
     </div>
   );
+}
+
+/* ---------------------- Auction Teaser ---------------------- */
+
+const DEMO_AUCTIONS: AuctionTeaser[] = [
+  {
+    id: "demo-1",
+    postal_code: "80331",
+    region: "München",
+    tier: "premium",
+    kitchen_form: "L-Form, modern",
+    budget_midpoint: 22000,
+    offer_price_eur: 22500,
+    ends_at: new Date(Date.now() + 1000 * 60 * 60 * 28).toISOString(),
+  },
+  {
+    id: "demo-2",
+    postal_code: "50667",
+    region: "Köln",
+    tier: "hot",
+    kitchen_form: "Kochinsel, premium",
+    budget_midpoint: 38000,
+    offer_price_eur: 38900,
+    ends_at: new Date(Date.now() + 1000 * 60 * 60 * 64).toISOString(),
+  },
+  {
+    id: "demo-3",
+    postal_code: "20095",
+    region: "Hamburg",
+    tier: "standard",
+    kitchen_form: "Küchenzeile",
+    budget_midpoint: 14000,
+    offer_price_eur: 14300,
+    ends_at: new Date(Date.now() + 1000 * 60 * 60 * 12).toISOString(),
+  },
+];
+
+function AuctionTeaserCard({
+  auction,
+  live,
+}: {
+  auction: AuctionTeaser;
+  live: boolean;
+}) {
+  const endsIn = auction.ends_at
+    ? msToHuman(new Date(auction.ends_at).getTime() - Date.now())
+    : null;
+  const plzPrefix = auction.postal_code?.slice(0, 3) ?? "—";
+  const tierLabel = (auction.tier ?? "standard").toUpperCase();
+
+  return (
+    <article className="group relative flex flex-col rounded-card border border-slate-200 bg-white p-5 shadow-card transition hover:-translate-y-1 hover:shadow-card-elevated">
+      <div className="flex items-center justify-between">
+        <span className="inline-flex items-center gap-1 rounded-full bg-accent-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-800">
+          {tierLabel}
+        </span>
+        <span className="inline-flex items-center gap-1 text-xs text-ink-muted">
+          <Clock className="h-3 w-3" />
+          {endsIn ?? "—"}
+        </span>
+      </div>
+
+      <h3 className="mt-3 font-display text-lg font-bold text-ink">
+        {auction.kitchen_form ?? "Küche"}
+      </h3>
+      <p className="mt-1 inline-flex items-center gap-1 text-xs text-ink-muted">
+        <MapPin className="h-3 w-3" />
+        {auction.region ?? "—"} · PLZ {plzPrefix}xx
+      </p>
+
+      <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
+        <div>
+          <dt className="text-[10px] uppercase tracking-wider text-ink-subtle">
+            Studio-Preis
+          </dt>
+          <dd className="mt-0.5 font-display text-base font-bold text-ink">
+            {auction.offer_price_eur
+              ? `${Number(auction.offer_price_eur).toLocaleString("de-DE")} €`
+              : "—"}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-[10px] uppercase tracking-wider text-ink-subtle">
+            Budget
+          </dt>
+          <dd className="mt-0.5 font-display text-base font-bold text-ink">
+            {auction.budget_midpoint
+              ? `~${Number(auction.budget_midpoint).toLocaleString("de-DE")} €`
+              : "—"}
+          </dd>
+        </div>
+      </dl>
+
+      <div className="mt-5 pt-4 border-t border-slate-100">
+        {live ? (
+          <Link
+            href={`/auktionen`}
+            className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800"
+          >
+            Auktion ansehen
+            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+          </Link>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 text-xs text-ink-subtle">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-ink-subtle" />
+            Beispiel-Auktion
+          </span>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function msToHuman(ms: number): string {
+  if (ms <= 0) return "endet jetzt";
+  const h = Math.floor(ms / (1000 * 60 * 60));
+  if (h >= 24) return `endet in ${Math.floor(h / 24)}d ${h % 24}h`;
+  const m = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+  return `endet in ${h}h ${m}m`;
 }

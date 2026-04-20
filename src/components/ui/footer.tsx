@@ -1,22 +1,39 @@
 import Link from "next/link";
+import { ShieldCheck, Lock, MapPin, BadgeCheck } from "lucide-react";
 
 export function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-white">
+      {/* ==================== TRUST-STRIP ==================== */}
+      <div className="border-b border-slate-200 bg-surface-soft">
+        <div className="section-container-wide flex flex-wrap items-center justify-center gap-x-8 gap-y-3 py-5 text-xs text-ink-muted">
+          <TrustItem icon={<ShieldCheck className="h-4 w-4 text-accent-600" />} label="DSGVO-konform" />
+          <TrustItem icon={<Lock className="h-4 w-4 text-accent-600" />} label="SSL-verschlüsselt" />
+          <TrustItem icon={<MapPin className="h-4 w-4 text-accent-600" />} label="Server in Deutschland" />
+          <TrustItem icon={<BadgeCheck className="h-4 w-4 text-accent-600" />} label="Verifizierte Händler" />
+          <TrustItem icon={<span className="text-[10px] font-bold text-accent-700">€</span>} label="Stripe-gesicherte Zahlungen" />
+        </div>
+      </div>
+
       <div className="section-container-wide py-12">
         <div className="grid gap-10 md:grid-cols-4">
           <div>
             <Link
               href="/"
-              className="flex items-center gap-2 font-display text-lg font-bold text-brand-900"
+              className="flex items-center gap-2 font-display text-lg font-extrabold tracking-tight-2 text-brand-900"
             >
-              <span className="grid h-8 w-8 place-items-center rounded-md bg-brand-700 text-white">K</span>
+              <span className="grid h-8 w-8 place-items-center rounded-md bg-gradient-to-br from-brand-700 to-brand-800 text-white">
+                K
+              </span>
               KüchenWert
             </Link>
             <p className="mt-3 text-sm text-ink-muted">
-              Transparenz für Ihren Küchenkauf. Vergleichen Sie bestehende Angebote oder
-              erhalten Sie neue von verifizierten Studios.
+              Transparenz für Ihren Küchenkauf. Vergleichen Sie bestehende Angebote
+              oder erhalten Sie neue von verifizierten Studios.
             </p>
+            <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-accent-50 px-3 py-1 text-xs font-medium text-accent-700">
+              <span aria-hidden>🇩🇪</span> Made in Germany
+            </div>
           </div>
 
           <FooterCol title="Service">
@@ -42,10 +59,19 @@ export function Footer() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-slate-200 pt-6 text-xs text-ink-subtle md:flex-row">
           <span>© {new Date().getFullYear()} KüchenWert. Alle Rechte vorbehalten.</span>
-          <span>Made in Germany. DSGVO-konform.</span>
+          <span>Bezahlung gesichert via Stripe · DSGVO-konform</span>
         </div>
       </div>
     </footer>
+  );
+}
+
+function TrustItem({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 font-medium">
+      {icon}
+      {label}
+    </span>
   );
 }
 
