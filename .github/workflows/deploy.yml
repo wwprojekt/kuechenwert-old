@@ -108,13 +108,15 @@ jobs:
             fi
           fi
 
-          # ---------- 3) Redeploy ----------
-          RESP=$(curl -s -w "\n%{http_code}" -X POST "$DOKPLOY_URL/api/application.redeploy" \
+          # ---------- 3) Deploy (full build with source pull) ----------
+          # Wichtig: application.deploy macht source pull + build,
+          # application.redeploy startet nur Container neu mit altem Image.
+          RESP=$(curl -s -w "\n%{http_code}" -X POST "$DOKPLOY_URL/api/application.deploy" \
             -H 'Content-Type: application/json' "${AUTH_HDR[@]}" \
             -d "{\"applicationId\":\"$APP_ID\"}")
           CODE=$(echo "$RESP" | tail -n1)
           if [ "$CODE" != "200" ]; then
-            echo "::error::Redeploy failed (HTTP $CODE): $(echo "$RESP" | sed '$d')"
+            echo "::error::Deploy failed (HTTP $CODE): $(echo "$RESP" | sed '$d')"
             exit 1
           fi
-          echo "Redeploy triggered"
+          echo "Deploy triggered (full build with source pull)"
