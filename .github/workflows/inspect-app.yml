@@ -1,0 +1,30 @@
+name: Inspect Dokploy App (one-shot)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch app info
+        env:
+          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+          APP_ID: ${{ secrets.DOKPLOY_APP_ID }}
+        run: |
+          set -e
+          BODY=$(curl -s -X GET "$DOKPLOY_URL/api/application.one?applicationId=$APP_ID" \
+            -H "x-api-key: $DOKPLOY_API_KEY")
+          echo "=== APP INFO (sensitive fields stripped) ==="
+          echo "$BODY" | jq '{
+            appName,
+            applicationStatus,
+            buildType,
+            sourceType,
+            customGitBranch: .customGitBranch,
+            isStaticSpa,
+            isPreviewDeploymentsEnabled,
+            domains: [.domains[]? | {host, https, port, path, certificateType, domainType}],
+            redirects: [.redirects[]? | {regex, replacement, permanent}]
+          }'
