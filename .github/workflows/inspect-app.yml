@@ -7,24 +7,31 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch app info
+      - name: Resolve Dokploy server + try app
         env:
           DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
           DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
           APP_ID: ${{ secrets.DOKPLOY_APP_ID }}
         run: |
           set -e
-          BODY=$(curl -s -X GET "$DOKPLOY_URL/api/application.one?applicationId=$APP_ID" \
-            -H "x-api-key: $DOKPLOY_API_KEY")
-          echo "=== APP INFO (sensitive fields stripped) ==="
-          echo "$BODY" | jq '{
-            appName,
-            applicationStatus,
-            buildType,
-            sourceType,
-            customGitBranch: .customGitBranch,
-            isStaticSpa,
-            isPreviewDeploymentsEnabled,
-            domains: [.domains[]? | {host, https, port, path, certificateType, domainType}],
-            redirects: [.redirects[]? | {regex, replacement, permanent}]
-          }'
+          HOST=$(echo "$DOKPLOY_URL" | sed -E 's|https?://||; s|/.*||')
+          echo "Dokploy host: $HOST"
+          IP=$(getent hosts "$HOST" | awk '{print $1}' | head -n1)
+          echo "Server IP: $IP"
+
+          for DOMAIN in "küchenwert.de" "www.küchenwert.de" "xn--kchenwert-y5a.de" "www.xn--kchenwert-y5a.de"; do
+            echo ""
+            echo "=== Try https://$IP with Host: $DOMAIN ==="
+            curl -ks -o /tmp/body.html -w "HTTP %{http_code} | size=%{size_download}\n" \
+              --resolve "$DOMAIN:443:$IP" \
+              "https://$DOMAIN/" || true
+            head -c 500 /tmp/body.html | tr -d '\r' || true
+            echo ""
+            echo "---"
+          done
+
+          echo ""
+          echo "=== Build/deploy info ==="
+          curl -s -X GET "$DOKPLOY_URL/api/application.one?applicationId=$APP_ID" \
+            -H "x-api-key: $DOKPLOY_API_KEY" \
+            | jq '{appName, applicationStatus, deployments: [.deployments[]? | {status, startedAt, finishedAt, errorMessage}] | .[0:3]}'
