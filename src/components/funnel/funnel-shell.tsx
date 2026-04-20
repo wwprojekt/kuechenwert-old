@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
+import { ArrowLeft, ArrowRight, Lock, Phone, ShieldCheck, Clock, Loader2 } from "lucide-react";
+import { BadgeTuevStyle, BadgeEkomiStyle, BadgeDsgvoStyle, BadgeSslStyle } from "@/components/ui/trust-badges";
 
 interface FunnelShellProps {
   children: React.ReactNode;
@@ -32,26 +34,38 @@ interface FunnelShellProps {
   showExitIntent?: boolean;
 }
 
-function ProgressBar({
-  current,
-  total,
-}: {
-  current: number;
-  total: number;
-}) {
-  const percentage = Math.round(((current + 1) / total) * 100);
+const SUPPORT_PHONE_DISPLAY = "+49 30 - 555 80 100";
+const SUPPORT_PHONE_TEL = "+493055580100";
 
+/** Estimated seconds remaining (~10s pro restlichem Schritt) */
+function estimateSecondsLeft(current: number, total: number): number {
+  return Math.max(15, (total - current) * 12);
+}
+
+function formatSeconds(s: number): string {
+  if (s < 60) return `~${s} Sek`;
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return r === 0 ? `~${m} Min` : `~${m}:${String(r).padStart(2, "0")} Min`;
+}
+
+function ProgressBar({ current, total }: { current: number; total: number }) {
+  const percentage = Math.min(100, Math.round(((current + 1) / total) * 100));
+  const secsLeft = estimateSecondsLeft(current, total);
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between text-xs text-zinc-500">
-        <span>
-          Schritt {current + 1} von {total}
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-semibold text-ink">
+          Schritt <span className="text-brand-700">{current + 1}</span> von {total}
         </span>
-        <span>{percentage}%</span>
+        <span className="inline-flex items-center gap-1.5 text-ink-muted">
+          <Clock className="h-3 w-3" />
+          {formatSeconds(secsLeft)} verbleibend
+        </span>
       </div>
-      <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-zinc-200">
+      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-200">
         <div
-          className="h-full rounded-full bg-brand-600 transition-all duration-500 ease-out"
+          className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all duration-500 ease-out"
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -69,31 +83,24 @@ function ExitIntentDialog({
   onLeave: () => void;
 }) {
   if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
-        <h3 className="text-lg font-bold text-zinc-900">
-          Wollen Sie wirklich abbrechen?
-        </h3>
-        <p className="mt-2 text-sm text-zinc-600">
-          Ihre Angaben werden nicht gespeichert und wir werden Ihnen keine
-          Angebote erstellen können.
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-card-elevated">
+        <h3 className="text-lg font-bold text-black">Wirklich abbrechen?</h3>
+        <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+          Ihre Angaben werden nicht gespeichert und wir können Ihnen keine
+          kostenlosen Angebote erstellen.
         </p>
-        <div className="mt-6 flex gap-3">
-          <button
-            type="button"
-            onClick={onStay}
-            className="btn-primary flex-1"
-          >
-            Zurück zur Eingabe
+        <div className="mt-6 flex flex-col gap-2.5">
+          <button type="button" onClick={onStay} className="btn-primary w-full">
+            Weiter ausfüllen
           </button>
           <button
             type="button"
             onClick={onLeave}
-            className="btn-secondary flex-1"
+            className="text-sm text-ink-muted underline-offset-4 hover:text-ink hover:underline"
           >
-            Ja, verlassen
+            Trotzdem verlassen
           </button>
         </div>
       </div>
@@ -130,92 +137,93 @@ export function FunnelShell({
 
   useEffect(() => {
     if (!showExitIntent || currentStep === 0) return;
-
     function handleBeforeUnload(e: BeforeUnloadEvent) {
       e.preventDefault();
     }
-
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [showExitIntent, currentStep]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50">
-      {/* Funnel Header */}
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="section-container flex h-14 items-center justify-between">
+    <div className="flex min-h-screen flex-col bg-surface-soft">
+      {/* ============ HEADER ============ */}
+      <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/95 backdrop-blur">
+        <div className="section-container flex h-14 items-center justify-between sm:h-16">
           <Link
             href="/"
             onClick={handleLogoClick}
-            className="text-lg font-bold"
+            className="inline-flex items-center gap-1 font-display text-lg font-bold tracking-tight-2 text-black"
           >
-            <span className="text-accent-400">Küchen</span>
-            <span className="text-brand-800">Wert</span>
+            <span>Küchen</span>
+            <span>Wert</span>
+            <span
+              className="ml-0.5 inline-block h-1.5 w-1.5 translate-y-1 rounded-full bg-brand-500"
+              aria-hidden
+            />
           </Link>
-          <div className="flex items-center gap-4">
-            <span className="hidden text-xs text-zinc-400 sm:block">
-              100% kostenlos & unverbindlich
+
+          <div className="flex items-center gap-3 sm:gap-5">
+            {/* Live-Counter (nur Desktop) */}
+            <span className="hidden items-center gap-1.5 text-xs font-medium text-ink-muted lg:inline-flex">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inset-0 animate-ping rounded-full bg-success-500 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success-500" />
+              </span>
+              <span>
+                <span className="font-bold text-black">23</span> Anfragen heute
+              </span>
             </span>
-            <div className="flex items-center gap-1.5">
-              <svg
-                className="h-4 w-4 text-green-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-xs text-zinc-500">SSL-verschlüsselt</span>
-            </div>
+
+            {/* Trust-Pill (nur md+) */}
+            <span className="hidden items-center gap-1.5 rounded-full bg-success-500/10 px-2.5 py-1 text-xs font-semibold text-success-700 md:inline-flex">
+              <Lock className="h-3 w-3" />
+              SSL · DSGVO
+            </span>
+
+            {/* Phone */}
+            <a
+              href={`tel:${SUPPORT_PHONE_TEL}`}
+              className="hidden items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold text-brand-700 hover:bg-brand-50 sm:inline-flex"
+            >
+              <Phone className="h-3.5 w-3.5" />
+              {SUPPORT_PHONE_DISPLAY}
+            </a>
           </div>
         </div>
       </header>
 
-      {/* Content */}
-      <main className="flex flex-1 flex-col items-center px-4 py-8 sm:py-12">
+      {/* ============ MAIN ============ */}
+      <main className="flex flex-1 flex-col items-center px-4 py-6 sm:py-10 lg:py-14">
         <div className="w-full max-w-2xl">
           {/* Progress */}
           <ProgressBar current={currentStep} total={totalSteps} />
 
-          {/* Step Content Card */}
+          {/* Step Card */}
           <div
             key={currentStep}
-            className="mt-6 animate-step-in rounded-xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8"
+            className="mt-5 animate-step-in rounded-2xl border border-neutral-200 bg-white p-6 shadow-card sm:p-8 lg:p-10"
           >
-            <h2 className="text-xl font-bold text-zinc-900 sm:text-2xl">
+            <h2 className="font-display text-[1.5rem] font-bold leading-tight tracking-tight-2 text-black sm:text-[1.75rem]">
               {stepLabel}
             </h2>
-            <p className="mt-1.5 text-sm text-zinc-500">{stepDescription}</p>
+            <p className="mt-2 text-[15px] leading-relaxed text-ink-muted">
+              {stepDescription}
+            </p>
 
-            <div className="mt-6">{children}</div>
+            <div className="mt-7">{children}</div>
 
-            {/* Navigation */}
-            <div className="mt-8 flex items-center justify-between gap-4">
+            {/* Desktop-Navigation (Mobile bekommt Sticky-Footer) */}
+            <div className="mt-9 hidden items-center justify-between gap-4 sm:flex">
               <button
                 type="button"
                 onClick={onBack}
                 className={clsx(
-                  "inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 transition hover:text-zinc-800",
+                  "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-ink-muted transition hover:bg-surface-strong hover:text-ink",
                   currentStep === 0 && "invisible",
                 )}
                 disabled={currentStep === 0}
               >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-                  />
-                </svg>
+                <ArrowLeft className="h-4 w-4" />
                 Zurück
               </button>
 
@@ -224,33 +232,18 @@ export function FunnelShell({
                   type="button"
                   onClick={onNext}
                   disabled={!canProceed || isSubmitting}
-                  className="btn-accent px-8 py-3.5 text-base"
+                  className="btn-primary-lg"
                 >
                   {isSubmitting ? (
-                    <span className="flex items-center gap-2">
-                      <svg
-                        className="h-4 w-4 animate-spin"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                        />
-                      </svg>
-                      Wird gesendet…
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Wird gesendet …
                     </span>
                   ) : (
-                    submitLabel
+                    <>
+                      {submitLabel}
+                      <ArrowRight className="h-5 w-5 btn-icon-arrow" />
+                    </>
                   )}
                 </button>
               ) : (
@@ -258,90 +251,88 @@ export function FunnelShell({
                   type="button"
                   onClick={onNext}
                   disabled={!canProceed}
-                  className="btn-primary px-8 py-3"
+                  className="btn-primary"
                 >
                   {nextLabel}
-                  <svg
-                    className="ml-1.5 h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                    />
-                  </svg>
+                  <ArrowRight className="h-4 w-4 btn-icon-arrow" />
                 </button>
               )}
             </div>
           </div>
 
-          {/* Trust Elements */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-zinc-400">
-            <span className="flex items-center gap-1">
-              <svg
-                className="h-3.5 w-3.5 text-green-500"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
+          {/* ============ TRUST-BADGES (Bottom) ============ */}
+          <div className="mt-8 hidden flex-wrap items-center justify-center gap-x-6 gap-y-3 text-ink-subtle md:flex">
+            <BadgeTuevStyle />
+            <BadgeEkomiStyle />
+            <BadgeDsgvoStyle />
+            <BadgeSslStyle />
+          </div>
+
+          {/* Trust-Pills (Mobile) */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-ink-muted md:hidden">
+            <span className="inline-flex items-center gap-1">
+              <ShieldCheck className="h-3.5 w-3.5 text-success-600" />
               Kostenlos
             </span>
-            <span className="flex items-center gap-1">
-              <svg
-                className="h-3.5 w-3.5 text-green-500"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Unverbindlich
+            <span className="inline-flex items-center gap-1">
+              <ShieldCheck className="h-3.5 w-3.5 text-success-600" />
+              DSGVO
             </span>
-            <span className="flex items-center gap-1">
-              <svg
-                className="h-3.5 w-3.5 text-green-500"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Geprüfte Fachhändler
-            </span>
-            <span className="flex items-center gap-1">
-              <svg
-                className="h-3.5 w-3.5 text-green-500"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              DSGVO-konform
+            <span className="inline-flex items-center gap-1">
+              <ShieldCheck className="h-3.5 w-3.5 text-success-600" />
+              SSL
             </span>
           </div>
         </div>
       </main>
 
-      {/* Exit Intent Dialog */}
+      {/* ============ STICKY MOBILE FOOTER ============ */}
+      <div className="sticky bottom-0 z-30 border-t border-neutral-200 bg-white/95 px-4 py-3 backdrop-blur sm:hidden">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            className={clsx(
+              "inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-ink-muted transition hover:bg-surface-strong",
+              currentStep === 0 && "invisible",
+            )}
+            disabled={currentStep === 0}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Zurück
+          </button>
+
+          {isFinalStep ? (
+            <button
+              type="button"
+              onClick={onNext}
+              disabled={!canProceed || isSubmitting}
+              className="btn-primary-lg flex-1 justify-center text-sm"
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  {submitLabel}
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onNext}
+              disabled={!canProceed}
+              className="btn-primary flex-1 justify-center"
+            >
+              {nextLabel}
+              <ArrowRight className="h-4 w-4 btn-icon-arrow" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Exit Intent */}
       <ExitIntentDialog
         open={exitDialogOpen}
         onStay={() => setExitDialogOpen(false)}

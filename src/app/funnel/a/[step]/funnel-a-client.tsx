@@ -262,13 +262,14 @@ export function FunnelAClient({
           options={FUNNEL_A_KITCHEN_FORMS.map((f) => ({
             id: f.id,
             label: f.label,
+            description: f.description,
             bgClass: f.bgClass,
+            imageSrc: f.imageSrc,
           }))}
           selected={data.kitchenForm ? [data.kitchenForm] : []}
-          onSelectionChange={(ids) => {
-            update({ kitchenForm: ids[0] ?? "" });
-            if (ids[0]) setTimeout(goNext, 400);
-          }}
+          onSelectionChange={(ids) => update({ kitchenForm: ids[0] ?? "" })}
+          autoAdvanceMs={300}
+          onAutoAdvance={goNext}
           columns={3}
         />
       )}
@@ -292,13 +293,14 @@ export function FunnelAClient({
           options={FUNNEL_A_STYLES.map((s) => ({
             id: s.id,
             label: s.label,
+            description: s.description,
             bgClass: s.bgClass,
+            imageSrc: s.imageSrc,
           }))}
           selected={data.style ? [data.style] : []}
-          onSelectionChange={(ids) => {
-            update({ style: ids[0] ?? "" });
-            if (ids[0]) setTimeout(goNext, 400);
-          }}
+          onSelectionChange={(ids) => update({ style: ids[0] ?? "" })}
+          autoAdvanceMs={300}
+          onAutoAdvance={goNext}
           columns={3}
         />
       )}

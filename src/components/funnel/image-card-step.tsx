@@ -1,14 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback } from "react";
 import { clsx } from "clsx";
+import { Check } from "lucide-react";
 
 export interface ImageOption {
   id: string;
   label: string;
-  /** Tailwind gradient class as visual placeholder */
+  description?: string;
+  /** Tailwind background class als Fallback */
   bgClass: string;
-  /** Optional image URL */
+  /** Optional image URL (Unsplash/CDN) */
   imageSrc?: string;
 }
 
@@ -19,6 +22,9 @@ interface ImageCardStepProps {
   /** Single select or multi select */
   multiple?: boolean;
   columns?: 2 | 3;
+  /** Auto-Advance bei Single-Select nach Klick (ms, 0 = aus) */
+  autoAdvanceMs?: number;
+  onAutoAdvance?: () => void;
 }
 
 export function ImageCardStep({
@@ -27,6 +33,8 @@ export function ImageCardStep({
   onSelectionChange,
   multiple = false,
   columns = 2,
+  autoAdvanceMs = 0,
+  onAutoAdvance,
 }: ImageCardStepProps) {
   const toggle = useCallback(
     (id: string) => {
@@ -38,18 +46,21 @@ export function ImageCardStep({
         }
       } else {
         onSelectionChange([id]);
+        if (onAutoAdvance && autoAdvanceMs > 0) {
+          setTimeout(onAutoAdvance, autoAdvanceMs);
+        }
       }
     },
-    [selected, onSelectionChange, multiple],
+    [selected, onSelectionChange, multiple, autoAdvanceMs, onAutoAdvance],
   );
 
   const gridCols: Record<number, string> = {
-    2: "grid-cols-1 sm:grid-cols-2",
-    3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+    2: "grid-cols-2",
+    3: "grid-cols-2 sm:grid-cols-3",
   };
 
   return (
-    <div className={clsx("grid gap-4", gridCols[columns])}>
+    <div className={clsx("grid gap-3 sm:gap-4", gridCols[columns])}>
       {options.map((opt) => {
         const isActive = selected.includes(opt.id);
 
@@ -58,77 +69,57 @@ export function ImageCardStep({
             key={opt.id}
             type="button"
             onClick={() => toggle(opt.id)}
+            aria-pressed={isActive}
             className={clsx(
-              "group relative overflow-hidden rounded-xl border-3 transition-all",
+              "group relative overflow-hidden rounded-2xl border-2 bg-white text-left transition-all",
               isActive
-                ? "border-brand-600 shadow-lg shadow-brand-600/15"
-                : "border-transparent shadow-sm hover:shadow-md",
+                ? "border-brand-500 shadow-card-active ring-4 ring-brand-500/15"
+                : "border-neutral-200 shadow-sm hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-card-hover",
             )}
           >
-            {/* Image or gradient placeholder */}
-            <div className="aspect-[4/3] overflow-hidden">
-              {opt.imageSrc ? (
-                <img
+            {/* Image-Header */}
+            <div className={clsx("relative aspect-[5/4] overflow-hidden", opt.bgClass)}>
+              {opt.imageSrc && (
+                <Image
                   src={opt.imageSrc}
                   alt={opt.label}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 640px) 50vw, 300px"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-              ) : (
-                <div
-                  className={clsx(
-                    "flex h-full w-full items-center justify-center transition-transform duration-500 group-hover:scale-105",
-                    opt.bgClass,
-                  )}
-                >
-                  <span className="text-4xl text-white/30">
-                    ✦
-                  </span>
-                </div>
               )}
+
+              {/* Selection-Overlay (oben rechts) */}
+              <span
+                className={clsx(
+                  "absolute right-2.5 top-2.5 grid h-7 w-7 place-items-center rounded-full border-2 transition",
+                  isActive
+                    ? "border-white bg-brand-500 shadow-md"
+                    : "border-white/80 bg-white/80 backdrop-blur",
+                )}
+              >
+                {isActive && <Check className="h-4 w-4 text-white" strokeWidth={3} />}
+              </span>
             </div>
 
-            {/* Label bar */}
+            {/* Label-Bar */}
             <div
               className={clsx(
-                "flex items-center justify-between px-4 py-3 transition",
+                "px-3 py-3 transition sm:px-4",
                 isActive ? "bg-brand-50" : "bg-white",
               )}
             >
-              <span
+              <div
                 className={clsx(
-                  "text-sm font-semibold",
-                  isActive ? "text-brand-800" : "text-zinc-800",
+                  "font-display text-sm font-bold sm:text-base",
+                  isActive ? "text-brand-900" : "text-black",
                 )}
               >
                 {opt.label}
-              </span>
-
-              {/* Selection indicator */}
-              <div
-                className={clsx(
-                  "flex h-6 w-6 items-center justify-center rounded-full border-2 transition",
-                  isActive
-                    ? "border-brand-600 bg-brand-600"
-                    : "border-zinc-300",
-                )}
-              >
-                {isActive && (
-                  <svg
-                    className="h-3.5 w-3.5 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={3}
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M4.5 12.75l6 6 9-13.5"
-                    />
-                  </svg>
-                )}
               </div>
+              {opt.description && (
+                <div className="mt-0.5 text-xs text-ink-muted">{opt.description}</div>
+              )}
             </div>
           </button>
         );

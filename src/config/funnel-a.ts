@@ -142,15 +142,17 @@ export const FUNNEL_A_HOUSING = [
 ] as const;
 
 // ---------------------------------------------------------------
-// 3) Kuechenform
+// 3) Kuechenform - mit echten Küchen-Bildern
 // ---------------------------------------------------------------
+import { FUNNEL_KITCHEN_FORMS, FUNNEL_KITCHEN_STYLES } from "@/lib/images";
+
 export const FUNNEL_A_KITCHEN_FORMS = [
-  { id: "zeile", label: "Küchenzeile", bgClass: "bg-gradient-to-br from-zinc-700 to-zinc-900" },
-  { id: "l-form", label: "L-Form", bgClass: "bg-gradient-to-br from-brand-700 to-brand-900" },
-  { id: "u-form", label: "U-Form", bgClass: "bg-gradient-to-br from-brand-800 to-brand-950" },
-  { id: "zweizeilig", label: "Zweizeilig", bgClass: "bg-gradient-to-br from-stone-600 to-stone-800" },
-  { id: "kochinsel", label: "Kochinsel", bgClass: "bg-gradient-to-br from-amber-700 to-amber-900" },
-  { id: "unsicher", label: "Steht noch nicht fest", bgClass: "bg-gradient-to-br from-zinc-400 to-zinc-600" },
+  { id: "zeile", label: "Küchenzeile", description: "Gerade Front", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_FORMS.zeile },
+  { id: "l-form", label: "L-Form", description: "Über Eck", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_FORMS["l-form"] },
+  { id: "u-form", label: "U-Form", description: "Drei Seiten", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_FORMS["u-form"] },
+  { id: "zweizeilig", label: "Zweizeilig", description: "Parallel", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_FORMS.zweizeilig },
+  { id: "kochinsel", label: "Kochinsel", description: "Mit Insel", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_FORMS.kochinsel },
+  { id: "unsicher", label: "Steht noch nicht fest", description: "Beratung gewünscht", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_FORMS.unsicher },
 ] as const;
 
 // ---------------------------------------------------------------
@@ -165,15 +167,15 @@ export const FUNNEL_A_SIZES = [
 ] as const;
 
 // ---------------------------------------------------------------
-// 5) Stil
+// 5) Stil - mit echten Küchen-Stil-Bildern
 // ---------------------------------------------------------------
 export const FUNNEL_A_STYLES = [
-  { id: "modern", label: "Modern", bgClass: "bg-gradient-to-br from-zinc-800 to-zinc-950" },
-  { id: "landhaus", label: "Landhaus", bgClass: "bg-gradient-to-br from-amber-200 to-amber-500" },
-  { id: "klassisch", label: "Klassisch", bgClass: "bg-gradient-to-br from-stone-200 to-stone-500" },
-  { id: "minimalistisch", label: "Minimalistisch", bgClass: "bg-gradient-to-br from-white to-zinc-300" },
-  { id: "industrial", label: "Industrial", bgClass: "bg-gradient-to-br from-zinc-600 to-zinc-900" },
-  { id: "individuell", label: "Bin offen / unsicher", bgClass: "bg-gradient-to-br from-brand-200 to-brand-500" },
+  { id: "modern", label: "Modern", description: "Klare Linien, Hochglanz", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_STYLES.modern },
+  { id: "landhaus", label: "Landhaus", description: "Warm, gemütlich, Holz", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_STYLES.landhaus },
+  { id: "klassisch", label: "Klassisch", description: "Zeitlos, elegant", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_STYLES.klassisch },
+  { id: "minimalistisch", label: "Minimalistisch", description: "Reduziert, grifflos", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_STYLES.minimalistisch },
+  { id: "industrial", label: "Industrial", description: "Beton, Metall, dunkel", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_STYLES.industrial },
+  { id: "individuell", label: "Bin offen / unsicher", description: "Beratung gewünscht", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_STYLES.individuell },
 ] as const;
 
 // ---------------------------------------------------------------

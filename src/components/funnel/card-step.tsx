@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { clsx } from "clsx";
+import { Check } from "lucide-react";
 
 export interface CardOption {
   id: string;
@@ -15,6 +16,8 @@ interface CardStepProps {
   selected: string;
   onSelect: (id: string) => void;
   columns?: 2 | 3 | 4 | 5;
+  /** Auto-Advance Delay in ms; default 250 (snappy) */
+  autoAdvanceMs?: number;
   onAutoAdvance?: () => void;
 }
 
@@ -23,17 +26,19 @@ export function CardStep({
   selected,
   onSelect,
   columns = 3,
+  autoAdvanceMs = 250,
   onAutoAdvance,
 }: CardStepProps) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function handleClick(id: string) {
     onSelect(id);
-    if (onAutoAdvance) {
+    if (onAutoAdvance && autoAdvanceMs > 0) {
       if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(onAutoAdvance, 400);
+      timerRef.current = setTimeout(onAutoAdvance, autoAdvanceMs);
     }
   }
+
   const gridCols: Record<number, string> = {
     2: "grid-cols-1 sm:grid-cols-2",
     3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
@@ -51,46 +56,33 @@ export function CardStep({
             key={opt.id}
             type="button"
             onClick={() => handleClick(opt.id)}
+            aria-pressed={isActive}
             className={clsx(
-              "relative flex flex-col items-center gap-2.5 rounded-xl border-2 px-4 py-5 text-center transition-all",
+              "group relative flex min-h-[110px] flex-col items-start gap-1.5 rounded-2xl border-2 bg-white px-5 py-4 text-left transition-all",
               isActive
-                ? "border-brand-600 bg-brand-50 shadow-md shadow-brand-600/10"
-                : "border-zinc-200 bg-white hover:border-brand-300 hover:shadow-sm",
+                ? "border-brand-500 bg-brand-50/40 shadow-card-active ring-4 ring-brand-500/15"
+                : "border-neutral-200 hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-card-hover",
             )}
           >
-            {/* Selection indicator */}
-            <div
+            {/* Selection indicator (oben rechts) */}
+            <span
               className={clsx(
-                "absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full border-2 transition",
+                "absolute right-3 top-3 grid h-6 w-6 place-items-center rounded-full border-2 transition",
                 isActive
-                  ? "border-brand-600 bg-brand-600"
-                  : "border-zinc-300",
+                  ? "border-brand-500 bg-brand-500"
+                  : "border-neutral-300 bg-white",
               )}
             >
-              {isActive && (
-                <svg
-                  className="h-3 w-3 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={3}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4.5 12.75l6 6 9-13.5"
-                  />
-                </svg>
-              )}
-            </div>
+              {isActive && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
+            </span>
 
             {opt.icon && (
               <div
                 className={clsx(
-                  "flex h-10 w-10 items-center justify-center rounded-lg text-lg transition",
+                  "grid h-9 w-9 place-items-center rounded-lg text-lg transition",
                   isActive
                     ? "bg-brand-100 text-brand-700"
-                    : "bg-zinc-100 text-zinc-500",
+                    : "bg-neutral-100 text-ink-muted",
                 )}
               >
                 {opt.icon}
@@ -99,15 +91,15 @@ export function CardStep({
 
             <span
               className={clsx(
-                "text-sm font-semibold",
-                isActive ? "text-brand-800" : "text-zinc-800",
+                "pr-7 font-display text-[15px] font-bold leading-tight",
+                isActive ? "text-brand-900" : "text-black",
               )}
             >
               {opt.label}
             </span>
 
             {opt.description && (
-              <span className="text-xs leading-relaxed text-zinc-500">
+              <span className="pr-7 text-xs leading-relaxed text-ink-muted">
                 {opt.description}
               </span>
             )}
