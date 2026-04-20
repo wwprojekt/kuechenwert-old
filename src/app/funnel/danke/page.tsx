@@ -7,6 +7,7 @@ interface Props {
 export default async function DankePage({ searchParams }: Props) {
   const { funnel } = await searchParams;
 
+  const isFunnelA = funnel === "a";
   const isAngebote = funnel === "angebote";
   const isPlanung = funnel === "planung";
 
@@ -34,7 +35,7 @@ export default async function DankePage({ searchParams }: Props) {
         </h1>
 
         <p className="mt-3 text-base leading-relaxed text-zinc-600">
-          {isAngebote
+          {isFunnelA || isAngebote
             ? "Wir haben Ihre Anfrage erhalten und suchen jetzt bis zu 3 passende Küchenstudios in Ihrer Region."
             : isPlanung
               ? "Ihre detaillierte Küchenplanung ist eingegangen. Unser Experten-Team erstellt jetzt Ihr individuelles Anforderungsprofil."
@@ -68,7 +69,7 @@ export default async function DankePage({ searchParams }: Props) {
                 3
               </span>
               <span>
-                Sie erhalten {isAngebote ? "bis zu 3 " : ""}kostenlose und unverbindliche Angebote von geprüften Fachhändlern.
+                Sie erhalten {isFunnelA || isAngebote ? "bis zu 3 " : ""}kostenlose und unverbindliche Angebote von geprüften Fachhändlern.
               </span>
             </li>
           </ol>

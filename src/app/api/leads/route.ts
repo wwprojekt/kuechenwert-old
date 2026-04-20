@@ -20,19 +20,28 @@ const BUDGET_MIDPOINTS: Record<string, number | null> = {
   "5k-10k": 7500,
   "10k-15k": 12500,
   "15k-25k": 20000,
+  "25k-40k": 32500,
   "ueber-25k": 30000,
+  "ueber-40k": 50000,
   "over-25k": 30000,
   unsicher: null,
 };
 
 const TIMEFRAME_MONTHS: Record<string, number> = {
+  asap: 1,
   "1-3": 2,
   "4-6": 5,
   "7-12": 9,
   "12+": 15,
-  spaeter: 12,
+  spaeter: 18,
   later: 12,
 };
+
+/** Erlaubte Werte fuer leads.funnel_type. */
+const ALLOWED_FUNNEL_TYPES = new Set(["a", "b"]);
+
+/** Erlaubte Werte fuer leads.housing_type. */
+const ALLOWED_HOUSING_TYPES = new Set(["rent", "own", "unknown"]);
 
 export async function POST(request: Request) {
   try {
@@ -66,16 +75,48 @@ export async function POST(request: Request) {
 
     const region = getRegionByPlz(body.plz ?? "");
 
+    // funnel_type: nur 'a' oder 'b' fuer DB-Spalte zulassen,
+    // ansonsten Standard 'a' (Lead-Generation).
+    const dbFunnelType = ALLOWED_FUNNEL_TYPES.has(funnelType) ? funnelType : "a";
+
+    // housing_type: rent / own / unknown (Pflicht in Funnel A).
+    const housingTypeRaw = body.housing_type ?? null;
+    const housingType =
+      housingTypeRaw && ALLOWED_HOUSING_TYPES.has(housingTypeRaw)
+        ? housingTypeRaw
+        : null;
+
+    // Auto-Qualify Funnel-A-Leads, sobald
+    //  - tier >= qualified (kein Spam),
+    //  - Pflicht-Kontaktdaten vorhanden,
+    //  - housing_type erfasst.
+    // Funnel-B bleibt 'new', weil dort der Experte zuerst zurueckruft
+    // und das Auction-Sheet manuell vervollstaendigt wird.
+    const QUALIFIED_TIERS = new Set(["hot", "premium", "qualified"]);
+    const hasMinContact =
+      !!body.firstName && !!body.lastName && !!body.email && !!body.phone;
+    const autoQualify =
+      dbFunnelType === "a" &&
+      QUALIFIED_TIERS.has(scoringResult.tier) &&
+      !!housingType &&
+      hasMinContact;
+    const initialStatus = autoQualify ? "qualified" : "new";
+
     const insertData: Record<string, unknown> = {
-      status: "new",
+      status: initialStatus,
       score: scoringResult.score,
       tier: scoringResult.tier,
+      funnel_type: dbFunnelType,
+      housing_type: housingType,
       postal_code: body.plz ?? "",
       region: region?.id ?? null,
+      city: body.city ?? null,
+      address_line: body.addressLine ?? body.address_line ?? null,
       kitchen_form: body.kitchenForm ?? null,
       kitchen_style: body.style ?? body.kitchenStyle ?? null,
       purchase_reason: body.reason ?? body.purchaseReason ?? null,
-      special_wishes: body.specialWishes ?? body.equipment ?? body.quizPriorities ?? [],
+      special_wishes:
+        body.specialWishes ?? body.equipment ?? body.quizPriorities ?? [],
       timeframe_months: timeframeMonths,
       budget_midpoint: budgetMidpoint,
       has_existing_offer: body.hasExistingOffer ?? false,

@@ -1,369 +1,371 @@
 import Link from "next/link";
-import { StatCounter } from "@/components/ui/stat-counter";
-import { Accordion } from "@/components/ui/accordion";
-import { ImageCard } from "@/components/ui/image-card";
-import { HeroPlzEntry } from "@/components/ui/hero-plz-entry";
+import {
+  ArrowRight,
+  CheckCircle2,
+  ShieldCheck,
+  Gavel,
+  Search,
+  Sparkles,
+  ClipboardCheck,
+  Headphones,
+  Wallet,
+} from "lucide-react";
 
-const THREE_PATHS = [
+const FAQ = [
   {
-    href: "/angebote-vergleichen",
-    funnelHref: "/funnel/angebote/kuechenform",
-    tag: "Schnell",
-    title: "Angebote vergleichen",
-    desc: "5 Fragen, 2 Minuten. Erhalten Sie bis zu 3 kostenlose Angebote von geprüften Studios in Ihrer Nähe.",
-    cta: "Angebote vergleichen",
-    gradient: "from-brand-600 to-brand-800",
+    q: "Ist der Service wirklich kostenlos?",
+    a: "Ja, für Sie als Verbraucher ist KüchenWert komplett kostenlos und unverbindlich. Wir finanzieren uns über Provisionen der Küchenstudios.",
   },
   {
-    href: "/kuechenplanung",
-    funnelHref: "/funnel/planung/kuechenform",
-    tag: "Detailliert",
-    title: "Küchenplanung starten",
-    desc: "11 Schritte, 5 Minuten. Von Küchenform über Stil und Ausstattung bis zum Grundriss – maximale Planungstiefe.",
-    cta: "Planung starten",
-    gradient: "from-brand-700 to-brand-950",
+    q: "Wie funktioniert der Vergleich eines bestehenden Angebots?",
+    a: "Sie geben uns die Eckdaten Ihres Angebots (Hersteller, Fronten, Arbeitsplatte, Geräte usw.) und laden falls vorhanden Angebot, Grundriss oder Foto hoch. Ein Experte ruft Sie an und ergänzt fehlende Details. Anschließend stellen wir Ihre Anfrage neutralisiert in eine 72-Stunden-Auktion ein – verifizierte Händler unterbieten den Preis Ihres Studios.",
   },
   {
-    href: "/style-quiz",
-    funnelHref: "/funnel/quiz/stil",
-    tag: "Inspirierend",
-    title: "Style-Quiz",
-    desc: "Bilder wählen, Stil entdecken. Unser visuelles Quiz findet Ihren persönlichen Küchenstil – spielerisch und schnell.",
-    cta: "Quiz starten",
-    gradient: "from-accent-500 to-accent-600",
-  },
-];
-
-const SOCIAL_PROOF = [
-  {
-    text: "Endlich konnte ich Angebote wirklich vergleichen. 4.000 € gespart!",
-    name: "Sabine M.",
-    city: "München",
+    q: "Wie verbindlich ist die Auktion?",
+    a: "Beide Seiten sind verbindlich gebunden: Der Händler muss zum gebotenen Preis liefern, und Sie verpflichten sich, das beste Angebot anzunehmen. Bei grundlosem Abbruch wird eine Bearbeitungsgebühr fällig.",
   },
   {
-    text: "Das Style-Quiz hat mir gezeigt, dass Landhaus genau mein Ding ist. Die Angebote kamen prompt.",
-    name: "Thomas K.",
-    city: "Hamburg",
+    q: "Warum kann ein anderes Studio meine Küche günstiger anbieten?",
+    a: "Küchenstudios kalkulieren mit unterschiedlichen Margen, Konditionen und Auslastung. Durch echten Wettbewerb auf einer neutralen Spec-Liste werden Preisunterschiede sichtbar – häufig zwischen 5 % und 25 %.",
   },
   {
-    text: "Die detaillierte Planung war Gold wert. Das Studio wusste genau, was ich wollte.",
-    name: "Andrea L.",
-    city: "Berlin",
-  },
-];
-
-const KITCHEN_STYLES_PREVIEW = [
-  {
-    href: "/kuechenstile/modern",
-    title: "Modern",
-    description: "Klare Linien, grifflos, minimalistisch",
-    bgClass: "bg-gradient-to-br from-zinc-800 to-zinc-950",
-  },
-  {
-    href: "/kuechenstile/landhaus",
-    title: "Landhaus",
-    description: "Natürliche Materialien, warme Töne",
-    bgClass: "bg-gradient-to-br from-amber-700 to-amber-900",
-  },
-  {
-    href: "/kuechenstile/industrial",
-    title: "Industrial",
-    description: "Beton, Metall und rohes Holz",
-    bgClass: "bg-gradient-to-br from-stone-600 to-stone-800",
-  },
-  {
-    href: "/kuechenstile/skandinavisch",
-    title: "Skandinavisch",
-    description: "Hell, funktional, nordisch",
-    bgClass: "bg-gradient-to-br from-sky-200 to-sky-400",
-  },
-];
-
-const STATS = [
-  { value: 12000, suffix: "+", label: "Vermittelte Anfragen" },
-  { value: 800, suffix: "+", label: "Partner-Studios" },
-  { value: 23, suffix: "%", label: "Ø Ersparnis" },
-  { value: 48, suffix: "h", label: "Bis zum ersten Angebot" },
-];
-
-const FAQ_ITEMS = [
-  {
-    question: "Ist der Service wirklich kostenlos?",
-    answer:
-      "Ja, für Sie als Kücheninteressent ist unser Service zu 100% kostenlos und unverbindlich. Die Kosten werden von den teilnehmenden Küchenstudios getragen.",
-  },
-  {
-    question: "Wie viele Angebote erhalte ich?",
-    answer:
-      "Beim schnellen Angebotsvergleich erhalten Sie bis zu 3 individuelle Angebote. Bei der detaillierten Küchenplanung finden wir den optimal passenden Fachhändler.",
-  },
-  {
-    question: "Muss ich mich an ein Angebot binden?",
-    answer:
-      "Nein. Alle Angebote sind komplett unverbindlich. Sie entscheiden selbst, ob und mit welchem Studio Sie weiterarbeiten möchten.",
-  },
-  {
-    question: "Wie werden die Küchenstudios geprüft?",
-    answer:
-      "Alle Studios in unserem Netzwerk durchlaufen einen mehrstufigen Qualifizierungsprozess. Wir prüfen Zertifizierungen, Kundenbewertungen und Erfahrung.",
-  },
-  {
-    question: "Was passiert mit meinen Daten?",
-    answer:
-      "Ihre Daten werden SSL-verschlüsselt übertragen und ausschließlich zur Bearbeitung Ihrer Anfrage verwendet. Wir halten uns strikt an die DSGVO.",
+    q: "Was passiert mit meinen Daten?",
+    a: "Ihre Kontaktdaten (Name, Adresse, Telefon, E-Mail) sehen Händler erst nach erfolgter Lead-Freischaltung bzw. Auktions-Abschluss. SSL-Verschlüsselung, Server in Deutschland, DSGVO-konform.",
   },
 ];
 
 export default function HomePage() {
   return (
     <>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-brand-950 py-20 lg:py-28">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-800/30 via-brand-950 to-brand-950" />
-        <div className="section-container relative text-center">
-          <div className="mx-auto inline-block rounded-full bg-accent-500/10 px-4 py-1.5 text-xs font-semibold text-accent-400">
-            Transparenz schafft Wert
-          </div>
-          <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Drei Wege zu Ihrer{" "}
-            <span className="text-accent-400">Traumküche</span>
-          </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-lg text-brand-200">
-            Ob schneller Angebotsvergleich, detaillierte Planung oder visuelles
-            Style-Quiz – finden Sie Ihren Weg zur perfekten Küche.
-          </p>
+      {/* ======================== HERO mit 2-Card-Wahl ======================== */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-brand-950 via-brand-900 to-brand-800 pb-20 pt-16 lg:pb-28 lg:pt-24">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.08),_transparent_60%)]" />
+        <div className="section-container relative">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-accent-500/15 px-4 py-1.5 text-xs font-semibold text-accent-300">
+              <Sparkles className="h-3.5 w-3.5" /> Transparenz für Ihren Küchenkauf
+            </span>
+            <h1 className="mt-6 font-display text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              In 2 Minuten zum{" "}
+              <span className="text-accent-400">besten Küchenpreis</span>
+            </h1>
+            <p className="mx-auto mt-5 max-w-2xl text-base text-brand-100 sm:text-lg">
+              Vergleichen Sie ein bestehendes Angebot Ihres Küchenstudios oder
+              erhalten Sie neue Angebote von verifizierten Händlern in Ihrer Region.
+            </p>
 
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-brand-300">
-            {["Kostenlos", "Unverbindlich", "Geprüfte Händler", "DSGVO-konform"].map(
-              (item) => (
-                <span key={item} className="flex items-center gap-1">
-                  <svg
-                    className="h-3.5 w-3.5 text-accent-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  {item}
-                </span>
-              ),
-            )}
-          </div>
-
-          <HeroPlzEntry />
-        </div>
-      </section>
-
-      {/* 3 Paths Section */}
-      <section className="py-16 lg:py-20">
-        <div className="section-container">
-          <h2 className="text-center text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
-            Wählen Sie Ihren Weg
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-center text-zinc-600">
-            Jeder Weg führt zu kostenlosen Angeboten von geprüften
-            Küchenstudios in Ihrer Nähe.
-          </p>
-
-          <div className="mt-12 grid gap-6 lg:grid-cols-3">
-            {THREE_PATHS.map((path) => (
-              <div
-                key={path.title}
-                className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:shadow-lg"
-              >
-                {/* Colored header */}
-                <div
-                  className={`bg-gradient-to-r ${path.gradient} px-6 py-8 text-white`}
-                >
-                  <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">
-                    {path.tag}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-brand-200">
+              {["100 % kostenlos", "Unverbindlich", "Verifizierte Händler", "DSGVO-konform"].map(
+                (item) => (
+                  <span key={item} className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-accent-400" />
+                    {item}
                   </span>
-                  <h3 className="mt-3 text-xl font-bold">{path.title}</h3>
-                </div>
-
-                {/* Content */}
-                <div className="flex flex-1 flex-col px-6 py-5">
-                  <p className="flex-1 text-sm leading-relaxed text-zinc-600">
-                    {path.desc}
-                  </p>
-                  <div className="mt-5">
-                    <Link
-                      href={path.funnelHref}
-                      className="btn-primary w-full text-center"
-                    >
-                      {path.cta}
-                    </Link>
-                    <Link
-                      href={path.href}
-                      className="mt-2 block text-center text-xs text-zinc-400 underline hover:text-zinc-600"
-                    >
-                      Mehr erfahren
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <StatCounter stats={STATS} />
-
-      {/* Kitchen Styles Preview */}
-      <section className="py-16 lg:py-20">
-        <div className="section-container">
-          <h2 className="text-center text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
-            Küchenstile entdecken
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-center text-zinc-600">
-            Lassen Sie sich inspirieren und finden Sie den Stil, der zu Ihnen
-            passt.
-          </p>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {KITCHEN_STYLES_PREVIEW.map((style) => (
-              <ImageCard
-                key={style.title}
-                href={style.href}
-                title={style.title}
-                description={style.description}
-                bgClass={style.bgClass}
-              />
-            ))}
-          </div>
-          <div className="mt-8 text-center">
-            <Link
-              href="/kuechenstile"
-              className="text-sm font-medium text-brand-600 underline underline-offset-4 hover:text-brand-800"
-            >
-              Alle Küchenstile ansehen
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Social Proof */}
-      <section className="border-y border-zinc-200 bg-zinc-50 py-16 lg:py-20">
-        <div className="section-container">
-          <h2 className="text-center text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
-            Das sagen unsere Nutzer
-          </h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {SOCIAL_PROOF.map((review) => (
-              <div key={review.name} className="card">
-                <div className="flex gap-0.5 text-accent-500">
-                  {[...Array(5)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className="h-4 w-4"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-                  &ldquo;{review.text}&rdquo;
-                </p>
-                <p className="mt-3 text-xs font-medium text-zinc-400">
-                  {review.name}, {review.city}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="py-16 lg:py-20">
-        <div className="section-container">
-          <h2 className="text-center text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
-            So funktioniert KüchenWert
-          </h2>
-          <div className="mx-auto mt-12 max-w-3xl">
-            <div className="grid gap-8 md:grid-cols-3">
-              {[
-                {
-                  num: "1",
-                  title: "Weg wählen",
-                  desc: "Wählen Sie zwischen schnellem Vergleich, detaillierter Planung oder Style-Quiz.",
-                },
-                {
-                  num: "2",
-                  title: "Fragen beantworten",
-                  desc: "Beantworten Sie wenige Fragen zu Ihren Wünschen – in 2 bis 5 Minuten.",
-                },
-                {
-                  num: "3",
-                  title: "Angebote erhalten",
-                  desc: "Geprüfte Studios erstellen kostenlose Angebote, die Sie in Ruhe vergleichen.",
-                },
-              ].map((step) => (
-                <div key={step.num} className="text-center">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-xl font-bold text-white shadow-lg shadow-brand-600/25">
-                    {step.num}
-                  </div>
-                  <h3 className="mt-5 text-lg font-semibold text-zinc-900">
-                    {step.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-zinc-500">
-                    {step.desc}
-                  </p>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* FAQ */}
-      <section className="border-t border-zinc-200 bg-zinc-50 py-16">
-        <div className="section-container max-w-3xl">
-          <h2 className="text-center text-2xl font-bold text-zinc-900 sm:text-3xl">
-            Häufig gestellte Fragen
-          </h2>
-          <div className="mt-8">
-            <Accordion items={FAQ_ITEMS} />
+          {/* 2-Card-Hero-Wahl */}
+          <div className="mx-auto mt-12 grid max-w-5xl gap-5 md:grid-cols-2">
+            <Link href="/funnel/b" className="hero-choice-card group text-left">
+              <div className="flex items-center justify-between">
+                <span className="grid h-12 w-12 place-items-center rounded-lg bg-brand-100 text-brand-700">
+                  <ClipboardCheck className="h-6 w-6" />
+                </span>
+                <span className="chip-success">Spart bis zu 25 %</span>
+              </div>
+              <div>
+                <h2 className="h-card">Bestehendes Angebot vergleichen</h2>
+                <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+                  Sie haben bereits ein Angebot von einem Küchenstudio? Wir starten
+                  eine 72-h-Auktion mit verifizierten Händlern – die unterbieten den
+                  Preis bei gleicher Ausstattung.
+                </p>
+              </div>
+              <div className="mt-auto flex items-center gap-2 text-sm font-semibold text-brand-700 group-hover:text-brand-800">
+                Auktion starten <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+              </div>
+            </Link>
+
+            <Link href="/funnel/a" className="hero-choice-card group text-left">
+              <div className="flex items-center justify-between">
+                <span className="grid h-12 w-12 place-items-center rounded-lg bg-accent-50 text-accent-700">
+                  <Search className="h-6 w-6" />
+                </span>
+                <span className="chip">In 2 Min. fertig</span>
+              </div>
+              <div>
+                <h2 className="h-card">Angebot erhalten</h2>
+                <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+                  Sie planen eine neue Küche? Beantworten Sie wenige Fragen –
+                  wir vermitteln Sie an bis zu 3 verifizierte Küchenstudios in
+                  Ihrer Region, die individuelle Angebote erstellen.
+                </p>
+              </div>
+              <div className="mt-auto flex items-center gap-2 text-sm font-semibold text-brand-700 group-hover:text-brand-800">
+                Anfrage starten <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+              </div>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Bottom CTA */}
+      {/* ======================== STATS ======================== */}
+      <section className="border-y border-slate-200 bg-white py-10">
+        <div className="section-container">
+          <div className="grid grid-cols-2 gap-6 text-center md:grid-cols-4">
+            <Stat value="72 h" label="Auktionsdauer" />
+            <Stat value="< 25 %" label="Ø Ersparnis im Vergleich" />
+            <Stat value="0 €" label="Kosten für Verbraucher" />
+            <Stat value="100 %" label="Verifizierte Händler" />
+          </div>
+        </div>
+      </section>
+
+      {/* ======================== ZWEI WEGE EXPLAINER ======================== */}
+      <section className="section-padding">
+        <div className="section-container">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="h-section">Zwei Wege zum besten Preis</h2>
+            <p className="mt-3 text-lead">
+              Egal ob Sie schon ein konkretes Angebot haben oder bei null starten –
+              wir bringen Sie zum fairen Marktpreis.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
+            <PathExplainer
+              icon={<ClipboardCheck className="h-6 w-6" />}
+              tone="brand"
+              tag="Reverse-Auktion"
+              title="Bestehendes Angebot vergleichen"
+              steps={[
+                "Eckdaten Ihrer Wunschküche erfassen (Hersteller, Fronten, Arbeitsplatte, Geräte, Sanitär, Lieferung, Zahlung)",
+                "Optional: Angebot, Grundriss und Bild hochladen",
+                "Experte ruft Sie an und ergänzt Details",
+                "72-h-Auktion: verifizierte Händler unterbieten Ihr Angebot",
+                "Sie nehmen das beste Gebot verbindlich an",
+              ]}
+              cta={{ href: "/funnel/b", label: "Auktion starten" }}
+            />
+            <PathExplainer
+              icon={<Search className="h-6 w-6" />}
+              tone="accent"
+              tag="Lead-Vermittlung"
+              title="Angebot erhalten"
+              steps={[
+                "Küchenform und Stil wählen",
+                "Anlass, Wünsche und Zeitrahmen angeben",
+                "Budget & Wohnsituation (Miete / Eigentum) angeben",
+                "PLZ und Kontaktdaten",
+                "Bis zu 3 verifizierte Studios erstellen kostenlose Angebote",
+              ]}
+              cta={{ href: "/funnel/a", label: "Anfrage starten" }}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ======================== VORTEILE 6-GRID ======================== */}
+      <section className="bg-surface-strong section-padding">
+        <div className="section-container">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="h-section">Warum KüchenWert?</h2>
+            <p className="mt-3 text-lead">
+              Wir kombinieren Marktdruck mit echtem Service – damit Sie
+              nicht raten müssen, ob Ihr Preis fair ist.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <Benefit
+              icon={<Gavel className="h-5 w-5" />}
+              title="Echte Reverse-Auktion"
+              text="Verifizierte Händler unterbieten sich auf eine neutrale Spec-Liste – kein Vergleich von Äpfeln mit Birnen."
+            />
+            <Benefit
+              icon={<ShieldCheck className="h-5 w-5" />}
+              title="Verbindlich für beide Seiten"
+              text="Der Sieger liefert zum Auktionspreis, Sie nehmen das beste Gebot an. Kein faules Spiel."
+            />
+            <Benefit
+              icon={<Headphones className="h-5 w-5" />}
+              title="Persönlicher Experte"
+              text="Vor jeder Auktion ruft Sie ein Spec-Experte an und ergänzt fehlende Details."
+            />
+            <Benefit
+              icon={<CheckCircle2 className="h-5 w-5" />}
+              title="0 € für Verbraucher"
+              text="Keine versteckten Kosten, keine Monatsgebühr. Wir verdienen ausschließlich an erfolgreichen Vermittlungen."
+            />
+            <Benefit
+              icon={<Wallet className="h-5 w-5" />}
+              title="Transparente Provision"
+              text="Wir kommunizieren offen, was Händler an uns zahlen. Keine versteckte Marge auf Ihrer Küche."
+            />
+            <Benefit
+              icon={<ShieldCheck className="h-5 w-5" />}
+              title="DSGVO-konform"
+              text="Daten in Deutschland gehostet. Kontaktdaten erst nach verbindlichem Lead-/Auktions-Abschluss sichtbar für Händler."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ======================== SO LÄUFT ES ======================== */}
+      <section className="section-padding">
+        <div className="section-container">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="h-section">In 4 Schritten zum besten Preis</h2>
+          </div>
+          <ol className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-4">
+            <Step
+              num={1}
+              title="Pfad wählen"
+              text="Bestehendes Angebot vergleichen oder neues erhalten."
+            />
+            <Step
+              num={2}
+              title="Daten erfassen"
+              text="Alle relevanten Eckdaten in 2-5 Minuten eingeben."
+            />
+            <Step
+              num={3}
+              title="Experten-Check"
+              text="Wir prüfen, rufen Sie an und ergänzen Details."
+            />
+            <Step
+              num={4}
+              title="Angebote / Auktion"
+              text="Händler bieten – Sie wählen das beste Angebot."
+            />
+          </ol>
+        </div>
+      </section>
+
+      {/* ======================== FAQ ======================== */}
+      <section className="border-t border-slate-200 bg-white section-padding">
+        <div className="section-container max-w-3xl">
+          <div className="text-center">
+            <h2 className="h-section">Häufig gestellte Fragen</h2>
+          </div>
+          <div className="mt-10 divide-y divide-slate-200">
+            {FAQ.map((item) => (
+              <details key={item.q} className="group py-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-ink">
+                  {item.q}
+                  <span className="text-ink-subtle transition group-open:rotate-45">+</span>
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-ink-muted">{item.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ======================== BOTTOM CTA ======================== */}
       <section className="bg-brand-950 py-16 lg:py-20">
         <div className="section-container text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            Bereit für Ihre Traumküche?
+          <h2 className="font-display text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            Bereit für den fairen Küchenpreis?
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-brand-300">
-            Starten Sie jetzt – kostenlos und unverbindlich.
+          <p className="mx-auto mt-3 max-w-xl text-brand-200">
+            Wählen Sie Ihren Pfad – kostenlos und in 2 Minuten gestartet.
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/funnel/angebote/kuechenform"
-              className="btn-accent px-8 py-3.5"
-            >
-              Angebote vergleichen
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/funnel/b" className="btn-accent">
+              Bestehendes Angebot vergleichen
             </Link>
-            <Link
-              href="/funnel/planung/kuechenform"
-              className="inline-flex items-center justify-center rounded-lg border border-white/20 px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Küchenplanung starten
-            </Link>
-            <Link
-              href="/funnel/quiz/stil"
-              className="inline-flex items-center justify-center rounded-lg border border-white/20 px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Style-Quiz
+            <Link href="/funnel/a" className="btn-secondary border-white/20 bg-transparent text-white hover:bg-white/10">
+              Angebot erhalten
             </Link>
           </div>
         </div>
       </section>
     </>
+  );
+}
+
+/* ---------------------- Sub-components ---------------------- */
+
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div>
+      <div className="font-display text-3xl font-bold text-brand-900 sm:text-4xl">{value}</div>
+      <div className="mt-1 text-xs text-ink-muted sm:text-sm">{label}</div>
+    </div>
+  );
+}
+
+function Benefit({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+  return (
+    <div className="card">
+      <span className="grid h-10 w-10 place-items-center rounded-md bg-accent-50 text-accent-700">
+        {icon}
+      </span>
+      <h3 className="mt-4 text-base font-semibold text-ink">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-ink-muted">{text}</p>
+    </div>
+  );
+}
+
+function Step({ num, title, text }: { num: number; title: string; text: string }) {
+  return (
+    <li className="text-center">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-brand-700 font-bold text-white shadow-card-active">
+        {num}
+      </div>
+      <h3 className="mt-4 text-base font-semibold text-ink">{title}</h3>
+      <p className="mt-1.5 text-sm text-ink-muted">{text}</p>
+    </li>
+  );
+}
+
+function PathExplainer({
+  icon,
+  tone,
+  tag,
+  title,
+  steps,
+  cta,
+}: {
+  icon: React.ReactNode;
+  tone: "brand" | "accent";
+  tag: string;
+  title: string;
+  steps: string[];
+  cta: { href: string; label: string };
+}) {
+  const toneClasses = tone === "brand"
+    ? "bg-brand-100 text-brand-700"
+    : "bg-accent-50 text-accent-700";
+  return (
+    <div className="card flex flex-col gap-5">
+      <div className="flex items-center gap-3">
+        <span className={`grid h-12 w-12 place-items-center rounded-lg ${toneClasses}`}>
+          {icon}
+        </span>
+        <div>
+          <span className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">
+            {tag}
+          </span>
+          <h3 className="text-lg font-semibold text-ink">{title}</h3>
+        </div>
+      </div>
+      <ol className="space-y-2.5 text-sm text-ink-muted">
+        {steps.map((s, i) => (
+          <li key={i} className="flex gap-2.5">
+            <span className="mt-0.5 grid h-5 w-5 flex-none place-items-center rounded-full bg-surface-strong text-xs font-semibold text-ink">
+              {i + 1}
+            </span>
+            <span>{s}</span>
+          </li>
+        ))}
+      </ol>
+      <Link href={cta.href} className={tone === "brand" ? "btn-primary" : "btn-accent"}>
+        {cta.label} <ArrowRight className="h-4 w-4" />
+      </Link>
+    </div>
   );
 }

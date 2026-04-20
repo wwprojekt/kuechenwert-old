@@ -11,3 +11,7 @@ npm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+
+cookies.txt
+*.cookies
+.smoke-output.log

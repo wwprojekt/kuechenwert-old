@@ -6,17 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "smoke": "node --env-file=.env.local scripts/smoke-e2e.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.468.0",
     "next": "^15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "stripe": "^17.7.0",
-    "lucide-react": "^0.468.0",
-    "clsx": "^2.1.1"
+    "stripe": "^17.7.0"
   },
   "devDependencies": {
     "@types/node": "^22.12.0",

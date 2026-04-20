@@ -4,59 +4,122 @@
 
 :root {
   color-scheme: light;
+  --kw-radius-card: 0.875rem;
 }
 
 body {
-  @apply min-h-screen bg-white text-zinc-900 antialiased;
+  @apply min-h-screen bg-surface-soft text-ink antialiased;
 }
 
 @layer components {
+  /* Buttons */
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-700 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 disabled:opacity-50;
   }
   .btn-accent {
-    @apply inline-flex items-center justify-center rounded-lg bg-accent-500 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-accent-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-accent-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 disabled:opacity-50;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-lg border border-zinc-300 bg-white px-6 py-3 text-sm font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-400 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-ink shadow-sm transition hover:bg-surface-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 disabled:opacity-50;
   }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-ink-muted transition hover:bg-surface-strong hover:text-ink;
+  }
+
+  /* Inputs */
   .input-field {
-    @apply w-full rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20;
+    @apply w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-subtle focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20;
   }
+  .label-field {
+    @apply mb-1.5 block text-sm font-medium text-ink;
+  }
+  .helper-text {
+    @apply mt-1 text-xs text-ink-muted;
+  }
+
+  /* Cards */
   .card {
-    @apply rounded-xl border border-zinc-200 bg-white p-6 shadow-sm;
+    @apply rounded-card border border-slate-200 bg-white p-6 shadow-card;
   }
+  .card-clickable {
+    @apply cursor-pointer rounded-card border-2 border-slate-200 bg-white p-6 shadow-card transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-card-hover;
+  }
+  .card-clickable[data-selected="true"],
+  .card-clickable.is-selected {
+    @apply border-brand-700 shadow-card-active;
+  }
+
+  /* Hero choice cards (Startseite 2-Card-Hero)
+     Hinweis: 'group' ist ein Tailwind-Variant-Marker und darf nicht in @apply.
+     -> 'group' als zusaetzliche Klasse direkt am JSX-Element setzen. */
+  .hero-choice-card {
+    @apply relative flex h-full cursor-pointer flex-col gap-4 rounded-card border-2 border-transparent bg-white p-8 shadow-card transition hover:-translate-y-1 hover:border-brand-300 hover:shadow-card-hover sm:p-10;
+  }
+
+  /* Layout */
   .section-container {
     @apply mx-auto max-w-6xl px-4 sm:px-6 lg:px-8;
   }
+  .section-container-wide {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .section-padding {
+    @apply py-16 sm:py-20 lg:py-24;
+  }
+
+  /* Trust badges row */
+  .trust-row {
+    @apply flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-ink-muted;
+  }
+  .trust-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-accent-50 px-3 py-1 text-xs font-medium text-accent-700;
+  }
+
+  /* Step / progress (Funnel) */
+  .progress-track {
+    @apply h-1.5 w-full overflow-hidden rounded-full bg-slate-200;
+  }
+  .progress-fill {
+    @apply h-full rounded-full bg-accent-500 transition-all duration-500;
+  }
+
+  /* Tags / chips */
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full bg-surface-strong px-2.5 py-0.5 text-xs font-medium text-ink-muted;
+  }
+  .chip-success {
+    @apply inline-flex items-center gap-1 rounded-full bg-accent-50 px-2.5 py-0.5 text-xs font-medium text-accent-700;
+  }
+  .chip-warning {
+    @apply inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700;
+  }
+  .chip-danger {
+    @apply inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700;
+  }
+
+  /* Headings */
+  .h-display {
+    @apply font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl;
+  }
+  .h-section {
+    @apply font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl;
+  }
+  .h-card {
+    @apply font-display text-xl font-semibold text-ink;
+  }
+  .text-lead {
+    @apply text-base text-ink-muted sm:text-lg;
+  }
 }
 
+/* Animations */
 @keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes step-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out both;
-}
-
-.animate-step-in {
-  animation: step-in 0.35s ease-out both;
-}
+.animate-fade-in { animation: fade-in 0.3s ease-out both; }
+.animate-step-in { animation: step-in 0.35s ease-out both; }

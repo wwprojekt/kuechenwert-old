@@ -1,0 +1,61 @@
+name: Scheduled Cron Triggers
+
+# Loest die zwei Cron-Endpoints auf der Dokploy-Production an,
+# da Dokploy keinen eigenen Vercel-aequivalenten Cron-Mechanismus hat.
+#
+# Erforderliche Repository-Secrets:
+#   PROD_BASE_URL   z. B. https://kuechenwert.de   (ohne trailing slash)
+#   CRON_SECRET     identisch zur Server-Env
+#
+# GitHub-Actions-Cron-Granularitaet ist 5 Min (best effort, kann verschoben sein).
+on:
+  schedule:
+    # Alle 5 Minuten -> Auctions finalisieren
+    - cron: "*/5 * * * *"
+    # Taeglich 08:00 UTC -> Mahnwesen
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "Welcher Job soll laufen?"
+        required: true
+        default: "finalize-auctions"
+        type: choice
+        options:
+          - finalize-auctions
+          - dunning
+
+jobs:
+  finalize-auctions:
+    if: github.event.schedule == '*/5 * * * *' || github.event.inputs.job == 'finalize-auctions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger /api/cron/finalize-auctions
+        run: |
+          set -euo pipefail
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+            "${{ secrets.PROD_BASE_URL }}/api/cron/finalize-auctions" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d: -f2)
+          echo "Body: $BODY"
+          echo "Status: $STATUS"
+          test "$STATUS" -eq 200
+
+  dunning:
+    if: github.event.schedule == '0 8 * * *' || github.event.inputs.job == 'dunning'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Trigger /api/cron/dunning
+        run: |
+          set -euo pipefail
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+            "${{ secrets.PROD_BASE_URL }}/api/cron/dunning" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d: -f2)
+          echo "Body: $BODY"
+          echo "Status: $STATUS"
+          test "$STATUS" -eq 200

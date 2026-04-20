@@ -1,86 +1,69 @@
 import Link from "next/link";
 
-const FOOTER_SECTIONS = [
-  {
-    title: "Service",
-    links: [
-      { href: "/angebote-vergleichen", label: "Angebote vergleichen" },
-      { href: "/kuechenplanung", label: "Küchenplanung" },
-      { href: "/style-quiz", label: "Style-Quiz" },
-      { href: "/rechner", label: "Küchenrechner" },
-      { href: "/so-funktionierts", label: "So funktioniert's" },
-    ],
-  },
-  {
-    title: "Inspiration",
-    links: [
-      { href: "/kuechenstile", label: "Küchenstile" },
-      { href: "/kuechenformen", label: "Küchenformen" },
-      { href: "/ratgeber", label: "Ratgeber" },
-      { href: "/kosten", label: "Küchenkosten" },
-    ],
-  },
-  {
-    title: "Für Händler",
-    links: [
-      { href: "/partner", label: "Partner werden" },
-      { href: "/partner/dashboard", label: "Händler-Login" },
-    ],
-  },
-  {
-    title: "Rechtliches",
-    links: [
-      { href: "/impressum", label: "Impressum" },
-      { href: "/datenschutz", label: "Datenschutz" },
-      { href: "/agb", label: "AGB" },
-      { href: "/kontakt", label: "Kontakt" },
-    ],
-  },
-];
-
 export function Footer() {
   return (
-    <footer className="bg-brand-950 text-zinc-400">
-      <div className="section-container py-12">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
-          {/* Brand */}
+    <footer className="border-t border-slate-200 bg-white">
+      <div className="section-container-wide py-12">
+        <div className="grid gap-10 md:grid-cols-4">
           <div>
-            <p className="text-lg font-bold">
-              <span className="text-accent-400">Küchen</span>
-              <span className="text-white">Wert</span>
-            </p>
-            <p className="mt-3 text-sm leading-relaxed">
-              Transparenz schafft Wert. Vergleichen Sie kostenlos regionale
-              Küchenangebote und sparen Sie beim Küchenkauf.
+            <Link
+              href="/"
+              className="flex items-center gap-2 font-display text-lg font-bold text-brand-900"
+            >
+              <span className="grid h-8 w-8 place-items-center rounded-md bg-brand-700 text-white">K</span>
+              KüchenWert
+            </Link>
+            <p className="mt-3 text-sm text-ink-muted">
+              Transparenz für Ihren Küchenkauf. Vergleichen Sie bestehende Angebote oder
+              erhalten Sie neue von verifizierten Studios.
             </p>
           </div>
 
-          {/* Link sections */}
-          {FOOTER_SECTIONS.map((section) => (
-            <div key={section.title}>
-              <p className="text-sm font-semibold uppercase tracking-wider text-zinc-300">
-                {section.title}
-              </p>
-              <ul className="mt-4 space-y-2.5">
-                {section.links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm transition hover:text-white"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <FooterCol title="Service">
+            <FooterLink href="/funnel/b">Angebot vergleichen</FooterLink>
+            <FooterLink href="/funnel/a">Angebot erhalten</FooterLink>
+            <FooterLink href="/auktionen">Aktive Auktionen</FooterLink>
+            <FooterLink href="/so-funktionierts">So funktioniert&apos;s</FooterLink>
+          </FooterCol>
+
+          <FooterCol title="Für Händler">
+            <FooterLink href="/partner">Übersicht</FooterLink>
+            <FooterLink href="/partner/registrieren">Registrieren</FooterLink>
+            <FooterLink href="/partner/login">Login</FooterLink>
+          </FooterCol>
+
+          <FooterCol title="Rechtliches">
+            <FooterLink href="/impressum">Impressum</FooterLink>
+            <FooterLink href="/datenschutz">Datenschutz</FooterLink>
+            <FooterLink href="/agb">AGB</FooterLink>
+            <FooterLink href="/kontakt">Kontakt</FooterLink>
+          </FooterCol>
         </div>
-        <div className="mt-10 border-t border-zinc-800 pt-6 text-center text-xs text-zinc-500">
-          &copy; {new Date().getFullYear()} KüchenWert. Alle Rechte
-          vorbehalten.
+
+        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-slate-200 pt-6 text-xs text-ink-subtle md:flex-row">
+          <span>© {new Date().getFullYear()} KüchenWert. Alle Rechte vorbehalten.</span>
+          <span>Made in Germany. DSGVO-konform.</span>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterCol({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h4 className="mb-3 text-sm font-semibold text-ink">{title}</h4>
+      <ul className="space-y-2 text-sm">{children}</ul>
+    </div>
+  );
+}
+
+function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <li>
+      <Link href={href} className="text-ink-muted hover:text-ink">
+        {children}
+      </Link>
+    </li>
   );
 }
