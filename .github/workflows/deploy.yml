@@ -58,6 +58,10 @@ jobs:
           else
             echo "$HC_BODY" | jq -r '.env // ""' > current.env
             cp current.env merged.env
+            # Existing buildArgs/Secrets/createEnvFile aus aktueller App holen, da im saveEnvironment-Schema required
+            CUR_BUILD_ARGS=$(echo "$HC_BODY" | jq -r '.buildArgs // ""')
+            CUR_BUILD_SECRETS=$(echo "$HC_BODY" | jq -r '.buildSecrets // ""')
+            CUR_CREATE_ENV_FILE=$(echo "$HC_BODY" | jq -r '.createEnvFile // false')
 
             declare -A NEW_VARS=(
               ["NEXT_PUBLIC_SUPABASE_URL"]="$SUPABASE_URL_PUB"
@@ -86,7 +90,12 @@ jobs:
             if cmp -s current.env merged.env && [ "$FORCE_SYNC" != "true" ]; then
               echo "ENV unchanged, skipping saveEnvironment"
             else
-              PAYLOAD=$(jq -Rs --arg id "$APP_ID" '{applicationId:$id, env:.}' merged.env)
+              PAYLOAD=$(jq -Rs \
+                --arg id "$APP_ID" \
+                --arg ba "$CUR_BUILD_ARGS" \
+                --arg bs "$CUR_BUILD_SECRETS" \
+                --argjson cef "$CUR_CREATE_ENV_FILE" \
+                '{applicationId:$id, env:., buildArgs:$ba, buildSecrets:$bs, createEnvFile:$cef}' merged.env)
               RESP=$(curl -s -w "\n%{http_code}" -X POST "$DOKPLOY_URL/api/application.saveEnvironment" \
                 -H 'Content-Type: application/json' "${AUTH_HDR[@]}" \
                 -d "$PAYLOAD")
