@@ -1,8 +1,11 @@
 /**
  * Funnel A: "Angebot erhalten" (Lead-Generation)
  *
- * 12-Step-Funnel im CaravanWert/Aroundhome-Stil.
- * Pflichtfelder: Wohnsituation, Budget, PLZ, Kontakt.
+ * 12-Step-Funnel im küchenportal.de/Aroundhome-Stil.
+ *  - Single-Choice-Steps mit Auto-Advance
+ *  - Budget als Slider (3.000 – 50.000 €, Default 10.000 €)
+ *  - Kontakt gesplittet: Name/E-Mail ⇒ Telefon-Verifizierung
+ *  - Keine Pflicht-Adresse (erst nach Lead-Kauf erfasst)
  * Stammdaten (Fronten, Geraete, Worktops) werden aus DB geladen.
  */
 
@@ -15,9 +18,10 @@ export type FunnelAStepType =
   | "stammdaten-cards"
   | "stammdaten-multi-cards"
   | "size"
+  | "budget-slider"
   | "plz"
-  | "address"
-  | "contact";
+  | "contact"
+  | "phone";
 
 export interface FunnelAStepConfig {
   slug: string;
@@ -94,8 +98,9 @@ export const FUNNEL_A_STEPS: FunnelAStepConfig[] = [
   {
     slug: "budget",
     label: "Budget",
-    description: "Was möchten Sie investieren?",
-    type: "cards",
+    description:
+      "Welches Budget haben Sie ungefähr eingeplant? (unverbindlich)",
+    type: "budget-slider",
     required: true,
   },
   {
@@ -106,17 +111,18 @@ export const FUNNEL_A_STEPS: FunnelAStepConfig[] = [
     required: true,
   },
   {
-    slug: "adresse",
-    label: "Adresse",
-    description: "Wo soll die Küche geliefert und montiert werden?",
-    type: "address",
+    slug: "kontakt",
+    label: "Wer soll die Angebote erhalten?",
+    description: "Damit wir Ihre Angebote richtig adressieren können.",
+    type: "contact",
     required: true,
   },
   {
-    slug: "kontakt",
-    label: "Kontaktdaten",
-    description: "Wie können wir Sie für unverbindliche Angebote erreichen?",
-    type: "contact",
+    slug: "telefon",
+    label: "Zur Verifizierung Ihrer Angaben",
+    description:
+      "Damit wir Ihre Anfrage bestätigen und Rückfragen klären können.",
+    type: "phone",
     required: true,
   },
 ];
@@ -129,6 +135,7 @@ export const FUNNEL_A_OCCASIONS = [
   { id: "renovierung", label: "Renovierung", description: "Bestehende Küche wird ersetzt" },
   { id: "umzug", label: "Umzug", description: "Neue Wohnung / neues Haus" },
   { id: "modernisierung", label: "Modernisierung", description: "Einzelne Komponenten erneuern" },
+  { id: "unsicher", label: "Weiß noch nicht", description: "Bin in der Orientierungsphase" },
 ] as const;
 
 // ---------------------------------------------------------------
@@ -139,6 +146,7 @@ export const FUNNEL_A_HOUSING = [
   { id: "rent_house", label: "Miethaus", description: "Ich miete ein Haus", housing_type: "rent" },
   { id: "own_apartment", label: "Eigentumswohnung", description: "Mir gehört die Wohnung", housing_type: "own" },
   { id: "own_house", label: "Eigenheim", description: "Mir gehört das Haus", housing_type: "own" },
+  { id: "unsicher", label: "Möchte ich nicht sagen", description: "Keine Angabe", housing_type: "unknown" },
 ] as const;
 
 // ---------------------------------------------------------------
@@ -187,19 +195,18 @@ export const FUNNEL_A_TIMEFRAMES = [
   { id: "4-6", label: "4 – 6 Monate", months: 5 },
   { id: "7-12", label: "7 – 12 Monate", months: 9 },
   { id: "spaeter", label: "Später / Nur informieren", months: 18 },
+  { id: "unsicher", label: "Weiß noch nicht", months: 12 },
 ] as const;
 
 // ---------------------------------------------------------------
-// 10) Budget - PFLICHT
+// Budget-Slider-Config (ersetzt die alten BUDGET-Cards)
 // ---------------------------------------------------------------
-export const FUNNEL_A_BUDGETS = [
-  { id: "unter-5k", label: "Unter 5.000 €", midpoint: 3500 },
-  { id: "5k-10k", label: "5.000 – 10.000 €", midpoint: 7500 },
-  { id: "10k-15k", label: "10.000 – 15.000 €", midpoint: 12500 },
-  { id: "15k-25k", label: "15.000 – 25.000 €", midpoint: 20000 },
-  { id: "25k-40k", label: "25.000 – 40.000 €", midpoint: 32500 },
-  { id: "ueber-40k", label: "Über 40.000 €", midpoint: 50000 },
-] as const;
+export const FUNNEL_A_BUDGET_SLIDER = {
+  min: 3_000,
+  max: 50_000,
+  step: 500,
+  default: 10_000,
+} as const;
 
 // ---------------------------------------------------------------
 // State
@@ -219,21 +226,19 @@ export interface FunnelAData {
 
   // Step 9-10 (Pflicht)
   timeframe: string;
-  budget: string;
+  /** Budget in Euro (Slider-Wert). 0 = noch nicht gewählt. */
+  budget: number;
 
   // Step 11 (Pflicht)
   plz: string;
 
-  // Step 12 (Adresse - Pflicht): Strasse, Hausnummer, optional Stadt-Override
-  street: string;
-  houseNumber: string;
-  city: string;
-
-  // Step 13 (Kontakt - Pflicht)
+  // Step 12 (Kontakt – ohne Telefon)
   salutation: string;
   firstName: string;
   lastName: string;
   email: string;
+
+  // Step 13 (Telefon-Verifizierung – Pflicht)
   phone: string;
   consentCall: boolean;
   consentMarketing: boolean;
@@ -250,11 +255,8 @@ export function createEmptyFunnelAData(): FunnelAData {
     worktopMaterialId: "",
     applianceBrandIds: [],
     timeframe: "",
-    budget: "",
+    budget: 0,
     plz: "",
-    street: "",
-    houseNumber: "",
-    city: "",
     salutation: "",
     firstName: "",
     lastName: "",

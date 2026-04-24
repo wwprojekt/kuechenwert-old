@@ -17,9 +17,21 @@ interface ContactStepProps {
   onChange: (patch: Partial<ContactData>) => void;
   /** Additional fields rendered below the standard form */
   children?: React.ReactNode;
+  /**
+   * "full" zeigt Telefon + Consents (Standard / Legacy-Funnel).
+   * "without-phone" lässt Telefon + Consents weg – für Funnels mit
+   * separatem Telefon-Verifizierungs-Step (Funnel A).
+   */
+  variant?: "full" | "without-phone";
 }
 
-export function ContactStep({ data, onChange, children }: ContactStepProps) {
+export function ContactStep({
+  data,
+  onChange,
+  children,
+  variant = "full",
+}: ContactStepProps) {
+  const showPhoneAndConsents = variant === "full";
   return (
     <div className="space-y-5">
       {/* Salutation */}
@@ -103,57 +115,61 @@ export function ContactStep({ data, onChange, children }: ContactStepProps) {
         />
       </div>
 
-      {/* Phone */}
-      <div>
-        <label
-          htmlFor="contact-phone"
-          className="mb-1.5 block text-sm font-medium text-zinc-700"
-        >
-          Telefonnummer *
-        </label>
-        <input
-          id="contact-phone"
-          type="tel"
-          autoComplete="tel"
-          value={data.phone}
-          onChange={(e) => onChange({ phone: e.target.value })}
-          className="input-field"
-          placeholder="Für die telefonische Qualifizierung"
-          required
-        />
-      </div>
+      {/* Phone – nur im Full-Mode (Funnels ohne separaten Phone-Step) */}
+      {showPhoneAndConsents && (
+        <div>
+          <label
+            htmlFor="contact-phone"
+            className="mb-1.5 block text-sm font-medium text-zinc-700"
+          >
+            Telefonnummer *
+          </label>
+          <input
+            id="contact-phone"
+            type="tel"
+            autoComplete="tel"
+            value={data.phone}
+            onChange={(e) => onChange({ phone: e.target.value })}
+            className="input-field"
+            placeholder="Für die telefonische Qualifizierung"
+            required
+          />
+        </div>
+      )}
 
       {/* Additional fields (e.g. upload, textarea) */}
       {children}
 
-      {/* Consent checkboxes */}
-      <div className="space-y-3 rounded-lg bg-zinc-50 p-4">
-        <label className="flex items-start gap-3 text-sm">
-          <input
-            type="checkbox"
-            checked={data.consentCall}
-            onChange={(e) => onChange({ consentCall: e.target.checked })}
-            className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
-            required
-          />
-          <span className="text-zinc-700">
-            Ich stimme zu, dass KüchenWert mich telefonisch kontaktiert, um
-            meine Anfrage zu qualifizieren und passende Angebote zu vermitteln. *
-          </span>
-        </label>
-        <label className="flex items-start gap-3 text-sm">
-          <input
-            type="checkbox"
-            checked={data.consentMarketing}
-            onChange={(e) => onChange({ consentMarketing: e.target.checked })}
-            className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
-          />
-          <span className="text-zinc-500">
-            Ich möchte Tipps und Angebote rund um den Küchenkauf per E-Mail
-            erhalten (jederzeit abbestellbar).
-          </span>
-        </label>
-      </div>
+      {/* Consent checkboxes – nur im Full-Mode */}
+      {showPhoneAndConsents && (
+        <div className="space-y-3 rounded-lg bg-zinc-50 p-4">
+          <label className="flex items-start gap-3 text-sm">
+            <input
+              type="checkbox"
+              checked={data.consentCall}
+              onChange={(e) => onChange({ consentCall: e.target.checked })}
+              className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
+              required
+            />
+            <span className="text-zinc-700">
+              Ich stimme zu, dass KüchenWert mich telefonisch kontaktiert, um
+              meine Anfrage zu qualifizieren und passende Angebote zu vermitteln. *
+            </span>
+          </label>
+          <label className="flex items-start gap-3 text-sm">
+            <input
+              type="checkbox"
+              checked={data.consentMarketing}
+              onChange={(e) => onChange({ consentMarketing: e.target.checked })}
+              className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
+            />
+            <span className="text-zinc-500">
+              Ich möchte Tipps und Angebote rund um den Küchenkauf per E-Mail
+              erhalten (jederzeit abbestellbar).
+            </span>
+          </label>
+        </div>
+      )}
 
       {/* Privacy notice */}
       <p className="text-xs leading-relaxed text-zinc-400">
@@ -172,14 +188,20 @@ export function ContactStep({ data, onChange, children }: ContactStepProps) {
   );
 }
 
-/** Validates that all required contact fields are filled */
-export function isContactComplete(data: ContactData): boolean {
-  return !!(
-    data.firstName.trim() &&
-    data.lastName.trim() &&
-    data.email.trim() &&
-    data.email.includes("@") &&
-    data.phone.trim() &&
-    data.consentCall
-  );
+/**
+ * Validates that all required contact fields are filled.
+ * Mit `variant: "without-phone"` werden Telefon/Consent nicht geprüft
+ * (werden im separaten Phone-Step validiert).
+ */
+export function isContactComplete(
+  data: ContactData,
+  variant: "full" | "without-phone" = "full",
+): boolean {
+  const baseOk =
+    !!data.firstName.trim() &&
+    !!data.lastName.trim() &&
+    !!data.email.trim() &&
+    data.email.includes("@");
+  if (variant === "without-phone") return baseOk;
+  return baseOk && !!data.phone.trim() && !!data.consentCall;
 }

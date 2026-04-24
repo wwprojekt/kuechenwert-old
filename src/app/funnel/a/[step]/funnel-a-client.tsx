@@ -12,9 +12,13 @@ import {
   isContactComplete,
 } from "@/components/funnel/contact-step";
 import {
-  AddressStep,
-  isAddressComplete,
-} from "@/components/funnel/address-step";
+  BudgetSliderStep,
+  isBudgetValid,
+} from "@/components/funnel/budget-slider-step";
+import {
+  PhoneStep,
+  isPhoneStepComplete,
+} from "@/components/funnel/phone-step";
 import {
   FUNNEL_A_ID,
   FUNNEL_A_STEPS,
@@ -24,7 +28,7 @@ import {
   FUNNEL_A_SIZES,
   FUNNEL_A_STYLES,
   FUNNEL_A_TIMEFRAMES,
-  FUNNEL_A_BUDGETS,
+  FUNNEL_A_BUDGET_SLIDER,
   createEmptyFunnelAData,
   type FunnelAData,
   type FunnelAStammdaten,
@@ -133,12 +137,14 @@ export function FunnelAClient({
           .filter(Boolean),
 
         timeframe: data.timeframe,
-        budget: data.budget,
+        // Budget als Number (Slider-Wert) – API liest `budgetEur` direkt.
+        // Falls Nutzer den Slider nicht berührt hat, gilt der Default.
+        budget: "slider",
+        budgetEur: data.budget || FUNNEL_A_BUDGET_SLIDER.default,
         plz: data.plz,
 
-        // Adresse - wird auf API-Seite in leads.address_line + leads.city gemappt
-        addressLine: [data.street, data.houseNumber].filter(Boolean).join(" "),
-        city: data.city,
+        // Adresse wird erst nach Lead-Kauf vom Händler eingeholt
+        // (address_line / city werden dann bei Bedarf nachgetragen).
 
         salutation: data.salutation,
         firstName: data.firstName,
@@ -190,21 +196,28 @@ export function FunnelAClient({
       case "zeitrahmen":
         return !!data.timeframe;
       case "budget":
-        return !!data.budget;
+        return isBudgetValid(
+          data.budget || FUNNEL_A_BUDGET_SLIDER.default,
+          FUNNEL_A_BUDGET_SLIDER.min,
+          FUNNEL_A_BUDGET_SLIDER.max,
+        );
       case "plz":
         return /^\d{5}$/.test(data.plz);
-      case "adresse":
-        return isAddressComplete({
-          street: data.street,
-          houseNumber: data.houseNumber,
-          city: data.city,
-        });
       case "kontakt":
-        return isContactComplete({
-          salutation: data.salutation,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
+        return isContactComplete(
+          {
+            salutation: data.salutation,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+            phone: data.phone,
+            consentCall: data.consentCall,
+            consentMarketing: data.consentMarketing,
+          },
+          "without-phone",
+        );
+      case "telefon":
+        return isPhoneStepComplete({
           phone: data.phone,
           consentCall: data.consentCall,
           consentMarketing: data.consentMarketing,
@@ -214,7 +227,7 @@ export function FunnelAClient({
     }
   }
 
-  const isFinal = step.slug === "kontakt";
+  const isFinal = step.slug === "telefon";
 
   return (
     <FunnelShell
@@ -363,15 +376,13 @@ export function FunnelAClient({
       )}
 
       {step.slug === "budget" && (
-        <CardStep
-          options={FUNNEL_A_BUDGETS.map((b) => ({
-            id: b.id,
-            label: b.label,
-          }))}
-          selected={data.budget}
-          onSelect={(id) => update({ budget: id })}
-          onAutoAdvance={goNext}
-          columns={3}
+        <BudgetSliderStep
+          value={data.budget}
+          onChange={(v) => update({ budget: v })}
+          min={FUNNEL_A_BUDGET_SLIDER.min}
+          max={FUNNEL_A_BUDGET_SLIDER.max}
+          step={FUNNEL_A_BUDGET_SLIDER.step}
+          defaultValue={FUNNEL_A_BUDGET_SLIDER.default}
         />
       )}
 
@@ -379,26 +390,26 @@ export function FunnelAClient({
         <PlzStep value={data.plz} onChange={(plz) => update({ plz })} />
       )}
 
-      {step.slug === "adresse" && (
-        <AddressStep
-          plz={data.plz}
+      {step.slug === "kontakt" && (
+        <ContactStep
+          variant="without-phone"
           data={{
-            street: data.street,
-            houseNumber: data.houseNumber,
-            city: data.city,
+            salutation: data.salutation,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+            phone: data.phone,
+            consentCall: data.consentCall,
+            consentMarketing: data.consentMarketing,
           }}
           onChange={(patch) => update(patch as Partial<FunnelAData>)}
         />
       )}
 
-      {step.slug === "kontakt" && (
+      {step.slug === "telefon" && (
         <>
-          <ContactStep
+          <PhoneStep
             data={{
-              salutation: data.salutation,
-              firstName: data.firstName,
-              lastName: data.lastName,
-              email: data.email,
               phone: data.phone,
               consentCall: data.consentCall,
               consentMarketing: data.consentMarketing,

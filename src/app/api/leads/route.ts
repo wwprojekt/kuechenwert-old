@@ -46,7 +46,12 @@ export async function POST(request: Request) {
     const budgetKey = body.budget ?? "";
     const timeframeKey = body.timeframe ?? "";
 
+    // Vom Funnel-A-Slider: `budgetEur` = exakter Wert in €.
+    // Fallback: bekannte String-Keys (legacy/Funnel B).
     const budgetMidpoint =
+      (typeof body.budgetEur === "number" && Number.isFinite(body.budgetEur)
+        ? Math.round(body.budgetEur)
+        : null) ??
       BUDGET_MIDPOINTS[budgetKey] ??
       BUDGET_RANGES.find((b) => b.id === budgetKey)?.midpoint ??
       null;

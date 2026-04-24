@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
-import { ArrowLeft, ArrowRight, Lock, Phone, ShieldCheck, Clock, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Lock, Phone, ShieldCheck, Loader2 } from "lucide-react";
 import { BadgeTuevStyle, BadgeEkomiStyle, BadgeDsgvoStyle, BadgeSslStyle } from "@/components/ui/trust-badges";
 
 interface FunnelShellProps {
@@ -37,37 +37,20 @@ interface FunnelShellProps {
 const SUPPORT_PHONE_DISPLAY = "+49 30 - 555 80 100";
 const SUPPORT_PHONE_TEL = "+493055580100";
 
-/** Estimated seconds remaining (~10s pro restlichem Schritt) */
-function estimateSecondsLeft(current: number, total: number): number {
-  return Math.max(15, (total - current) * 12);
-}
-
-function formatSeconds(s: number): string {
-  if (s < 60) return `~${s} Sek`;
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return r === 0 ? `~${m} Min` : `~${m}:${String(r).padStart(2, "0")} Min`;
-}
-
 function ProgressBar({ current, total }: { current: number; total: number }) {
   const percentage = Math.min(100, Math.round(((current + 1) / total) * 100));
-  const secsLeft = estimateSecondsLeft(current, total);
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between text-xs">
-        <span className="font-semibold text-ink">
-          Schritt <span className="text-brand-700">{current + 1}</span> von {total}
-        </span>
-        <span className="inline-flex items-center gap-1.5 text-ink-muted">
-          <Clock className="h-3 w-3" />
-          {formatSeconds(secsLeft)} verbleibend
-        </span>
-      </div>
-      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-200">
+    <div className="w-full" aria-label={`Schritt ${current + 1} von ${total}`}>
+      {/* Schlanker, dezenter Fortschrittsbalken – wie küchenportal.de */}
+      <div className="h-[3px] w-full overflow-hidden rounded-full bg-neutral-200">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all duration-500 ease-out"
+          className="h-full rounded-full bg-brand-500 transition-all duration-500 ease-out"
           style={{ width: `${percentage}%` }}
         />
+      </div>
+      {/* Unauffälliger Step-Counter direkt darunter */}
+      <div className="mt-1.5 text-right text-[11px] font-medium text-ink-subtle">
+        {current + 1} / {total}
       </div>
     </div>
   );
