@@ -3,8 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
-import { ArrowLeft, ArrowRight, Lock, Phone, ShieldCheck, Loader2 } from "lucide-react";
-import { BadgeTuevStyle, BadgeEkomiStyle, BadgeDsgvoStyle, BadgeSslStyle } from "@/components/ui/trust-badges";
+import { ArrowLeft, ArrowRight, Phone, Loader2 } from "lucide-react";
 
 interface FunnelShellProps {
   children: React.ReactNode;
@@ -37,20 +36,26 @@ interface FunnelShellProps {
 const SUPPORT_PHONE_DISPLAY = "+49 30 - 555 80 100";
 const SUPPORT_PHONE_TEL = "+493055580100";
 
+/**
+ * Dezenter Progress-Balken im Küchenportal-Stil.
+ * Keine Zahlen, kein "X von Y" — nur ein feiner Balken.
+ */
 function ProgressBar({ current, total }: { current: number; total: number }) {
   const percentage = Math.min(100, Math.round(((current + 1) / total) * 100));
   return (
-    <div className="w-full" aria-label={`Schritt ${current + 1} von ${total}`}>
-      {/* Schlanker, dezenter Fortschrittsbalken – wie küchenportal.de */}
+    <div
+      className="w-full"
+      role="progressbar"
+      aria-valuenow={percentage}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`Schritt ${current + 1} von ${total}`}
+    >
       <div className="h-[3px] w-full overflow-hidden rounded-full bg-neutral-200">
         <div
           className="h-full rounded-full bg-brand-500 transition-all duration-500 ease-out"
           style={{ width: `${percentage}%` }}
         />
-      </div>
-      {/* Unauffälliger Step-Counter direkt darunter */}
-      <div className="mt-1.5 text-right text-[11px] font-medium text-ink-subtle">
-        {current + 1} / {total}
       </div>
     </div>
   );
@@ -129,7 +134,7 @@ export function FunnelShell({
 
   return (
     <div className="flex min-h-screen flex-col bg-surface-soft">
-      {/* ============ HEADER ============ */}
+      {/* ============ HEADER — minimal, KP-Style ============ */}
       <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/95 backdrop-blur">
         <div className="section-container flex h-14 items-center justify-between sm:h-16">
           <Link
@@ -145,33 +150,15 @@ export function FunnelShell({
             />
           </Link>
 
-          <div className="flex items-center gap-3 sm:gap-5">
-            {/* Live-Counter (nur Desktop) */}
-            <span className="hidden items-center gap-1.5 text-xs font-medium text-ink-muted lg:inline-flex">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inset-0 animate-ping rounded-full bg-success-500 opacity-75" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success-500" />
-              </span>
-              <span>
-                <span className="font-bold text-black">23</span> Anfragen heute
-              </span>
-            </span>
-
-            {/* Trust-Pill (nur md+) */}
-            <span className="hidden items-center gap-1.5 rounded-full bg-success-500/10 px-2.5 py-1 text-xs font-semibold text-success-700 md:inline-flex">
-              <Lock className="h-3 w-3" />
-              SSL · DSGVO
-            </span>
-
-            {/* Phone */}
-            <a
-              href={`tel:${SUPPORT_PHONE_TEL}`}
-              className="hidden items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold text-brand-700 hover:bg-brand-50 sm:inline-flex"
-            >
-              <Phone className="h-3.5 w-3.5" />
-              {SUPPORT_PHONE_DISPLAY}
-            </a>
-          </div>
+          {/* Nur noch der Support-Call — wie Küchenportal */}
+          <a
+            href={`tel:${SUPPORT_PHONE_TEL}`}
+            className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-bold text-brand-700 hover:bg-brand-50 sm:text-sm"
+          >
+            <Phone className="h-4 w-4" />
+            <span className="hidden sm:inline">Haben Sie Fragen? </span>
+            <span>{SUPPORT_PHONE_DISPLAY}</span>
+          </a>
         </div>
       </header>
 
@@ -184,16 +171,19 @@ export function FunnelShell({
           {/* Step Card */}
           <div
             key={currentStep}
-            className="mt-5 animate-step-in rounded-2xl border border-neutral-200 bg-white p-6 shadow-card sm:p-8 lg:p-10"
+            className="mt-6 animate-step-in rounded-2xl border border-neutral-200 bg-white p-6 shadow-card sm:p-10 lg:p-12"
           >
-            <h2 className="font-display text-[1.5rem] font-bold leading-tight tracking-tight-2 text-black sm:text-[1.75rem]">
+            {/* Titel zentriert, groß, KP-Style */}
+            <h1 className="text-center font-display text-2xl font-bold leading-tight tracking-tight-2 text-black sm:text-[2rem] lg:text-[2.25rem]">
               {stepLabel}
-            </h2>
-            <p className="mt-2 text-[15px] leading-relaxed text-ink-muted">
-              {stepDescription}
-            </p>
+            </h1>
+            {stepDescription && stepDescription !== stepLabel && (
+              <p className="mx-auto mt-3 max-w-lg text-center text-[15px] leading-relaxed text-ink-muted sm:text-base">
+                {stepDescription}
+              </p>
+            )}
 
-            <div className="mt-7">{children}</div>
+            <div className="mt-8 sm:mt-10">{children}</div>
 
             {/* Desktop-Navigation (Mobile bekommt Sticky-Footer) */}
             <div className="mt-9 hidden items-center justify-between gap-4 sm:flex">
@@ -243,29 +233,11 @@ export function FunnelShell({
             </div>
           </div>
 
-          {/* ============ TRUST-BADGES (Bottom) ============ */}
-          <div className="mt-8 hidden flex-wrap items-center justify-center gap-x-6 gap-y-3 text-ink-subtle md:flex">
-            <BadgeTuevStyle />
-            <BadgeEkomiStyle />
-            <BadgeDsgvoStyle />
-            <BadgeSslStyle />
-          </div>
-
-          {/* Trust-Pills (Mobile) */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-ink-muted md:hidden">
-            <span className="inline-flex items-center gap-1">
-              <ShieldCheck className="h-3.5 w-3.5 text-success-600" />
-              Kostenlos
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <ShieldCheck className="h-3.5 w-3.5 text-success-600" />
-              DSGVO
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <ShieldCheck className="h-3.5 w-3.5 text-success-600" />
-              SSL
-            </span>
-          </div>
+          {/*
+            Trust-Badges + Live-Counter + SSL-Pills bewusst entfernt — im Funnel
+            lenken sie ab und triggern eher Misstrauen. Trust-Signals gehoeren
+            auf die Landing-Page, nicht in den aktiven Flow.
+          */}
         </div>
       </main>
 

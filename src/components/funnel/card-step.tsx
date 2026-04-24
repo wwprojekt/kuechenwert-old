@@ -2,7 +2,6 @@
 
 import { useRef } from "react";
 import { clsx } from "clsx";
-import { Check } from "lucide-react";
 
 export interface CardOption {
   id: string;
@@ -40,14 +39,14 @@ export function CardStep({
   }
 
   const gridCols: Record<number, string> = {
-    2: "grid-cols-1 sm:grid-cols-2",
-    3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-    4: "grid-cols-2 lg:grid-cols-4",
+    2: "grid-cols-2",
+    3: "grid-cols-2 sm:grid-cols-3",
+    4: "grid-cols-2 sm:grid-cols-4",
     5: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5",
   };
 
   return (
-    <div className={clsx("grid gap-3", gridCols[columns])}>
+    <div className={clsx("grid gap-3 sm:gap-4", gridCols[columns])}>
       {options.map((opt) => {
         const isActive = selected === opt.id;
 
@@ -58,51 +57,40 @@ export function CardStep({
             onClick={() => handleClick(opt.id)}
             aria-pressed={isActive}
             className={clsx(
-              "group relative flex min-h-[110px] flex-col items-start gap-1.5 rounded-2xl border-2 bg-white px-5 py-4 text-left transition-all",
+              "group flex flex-col items-center justify-center gap-3 rounded-2xl border-2 px-4 py-6 text-center transition-all",
               isActive
-                ? "border-brand-500 bg-brand-50/40 shadow-card-active ring-4 ring-brand-500/15"
-                : "border-neutral-200 hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-card-hover",
+                ? "border-brand-500 bg-brand-50 shadow-card-active ring-4 ring-brand-500/15"
+                : "border-neutral-200 bg-white hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-card-hover",
             )}
           >
-            {/* Selection indicator (oben rechts) */}
-            <span
-              className={clsx(
-                "absolute right-3 top-3 grid h-6 w-6 place-items-center rounded-full border-2 transition",
-                isActive
-                  ? "border-brand-500 bg-brand-500"
-                  : "border-neutral-300 bg-white",
-              )}
-            >
-              {isActive && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
-            </span>
-
             {opt.icon && (
               <div
                 className={clsx(
-                  "grid h-9 w-9 place-items-center rounded-lg text-lg transition",
+                  "grid h-14 w-14 place-items-center rounded-full transition",
                   isActive
-                    ? "bg-brand-100 text-brand-700"
-                    : "bg-neutral-100 text-ink-muted",
+                    ? "bg-brand-500 text-white"
+                    : "bg-brand-50 text-brand-600 group-hover:bg-brand-100",
                 )}
               >
-                {opt.icon}
+                <span className="[&>svg]:h-7 [&>svg]:w-7">{opt.icon}</span>
               </div>
             )}
 
-            <span
-              className={clsx(
-                "pr-7 font-display text-[15px] font-bold leading-tight",
-                isActive ? "text-brand-900" : "text-black",
-              )}
-            >
-              {opt.label}
-            </span>
-
-            {opt.description && (
-              <span className="pr-7 text-xs leading-relaxed text-ink-muted">
-                {opt.description}
+            <div className="flex flex-col gap-1">
+              <span
+                className={clsx(
+                  "font-display text-[15px] font-bold leading-tight sm:text-base",
+                  isActive ? "text-brand-900" : "text-black",
+                )}
+              >
+                {opt.label}
               </span>
-            )}
+              {opt.description && (
+                <span className="text-xs leading-relaxed text-ink-muted">
+                  {opt.description}
+                </span>
+              )}
+            </div>
           </button>
         );
       })}

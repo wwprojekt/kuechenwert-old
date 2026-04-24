@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useCallback } from "react";
 import { clsx } from "clsx";
-import { Check } from "lucide-react";
 
 export interface ImageOption {
   id: string;
@@ -13,6 +12,8 @@ export interface ImageOption {
   bgClass: string;
   /** Optional image URL (Unsplash/CDN) */
   imageSrc?: string;
+  /** Optional SVG-Pictogramm (rendert statt Image, in Brand-Color) */
+  pictogram?: React.ReactNode;
 }
 
 interface ImageCardStepProps {
@@ -63,6 +64,7 @@ export function ImageCardStep({
     <div className={clsx("grid gap-3 sm:gap-4", gridCols[columns])}>
       {options.map((opt) => {
         const isActive = selected.includes(opt.id);
+        const hasPictogram = !!opt.pictogram;
 
         return (
           <button
@@ -77,35 +79,41 @@ export function ImageCardStep({
                 : "border-neutral-200 shadow-sm hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-card-hover",
             )}
           >
-            {/* Image-Header */}
-            <div className={clsx("relative aspect-[5/4] overflow-hidden", opt.bgClass)}>
-              {opt.imageSrc && (
-                <Image
-                  src={opt.imageSrc}
-                  alt={opt.label}
-                  fill
-                  sizes="(max-width: 640px) 50vw, 300px"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              )}
-
-              {/* Selection-Overlay (oben rechts) */}
-              <span
+            {/* Visual-Header: Pictogram in neutraler Flaeche ODER Foto */}
+            {hasPictogram ? (
+              <div
                 className={clsx(
-                  "absolute right-2.5 top-2.5 grid h-7 w-7 place-items-center rounded-full border-2 transition",
-                  isActive
-                    ? "border-white bg-brand-500 shadow-md"
-                    : "border-white/80 bg-white/80 backdrop-blur",
+                  "relative flex aspect-[5/4] items-center justify-center p-6 transition-colors",
+                  isActive ? "bg-brand-50" : "bg-neutral-50",
                 )}
               >
-                {isActive && <Check className="h-4 w-4 text-white" strokeWidth={3} />}
-              </span>
-            </div>
+                <div
+                  className={clsx(
+                    "h-full w-full transition-colors",
+                    isActive ? "text-brand-600" : "text-brand-500",
+                  )}
+                >
+                  {opt.pictogram}
+                </div>
+              </div>
+            ) : (
+              <div className={clsx("relative aspect-[5/4] overflow-hidden", opt.bgClass)}>
+                {opt.imageSrc && (
+                  <Image
+                    src={opt.imageSrc}
+                    alt={opt.label}
+                    fill
+                    sizes="(max-width: 640px) 50vw, 400px"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                )}
+              </div>
+            )}
 
-            {/* Label-Bar */}
+            {/* Label-Bar (zentriert, KP-Style) */}
             <div
               className={clsx(
-                "px-3 py-3 transition sm:px-4",
+                "px-3 py-3 text-center transition sm:px-4 sm:py-4",
                 isActive ? "bg-brand-50" : "bg-white",
               )}
             >

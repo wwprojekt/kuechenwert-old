@@ -49,6 +49,11 @@ import {
   OVEN_ICONS,
   COOKSTYLE_ICONS,
 } from "@/components/funnel/funnel-a-icons";
+import {
+  KITCHEN_FORM_PICTOGRAMS,
+  KITCHEN_STYLE_PICTOGRAMS,
+  WORKTOP_PICTOGRAMS,
+} from "@/components/funnel/funnel-a-pictograms";
 
 const STORAGE_KEY = "kw_funnel_a";
 
@@ -307,13 +312,13 @@ export function FunnelAClient({
             label: f.label,
             description: f.description,
             bgClass: f.bgClass,
-            imageSrc: f.imageSrc,
+            pictogram: KITCHEN_FORM_PICTOGRAMS[f.id],
           }))}
           selected={data.kitchenForm ? [data.kitchenForm] : []}
           onSelectionChange={(ids) => update({ kitchenForm: ids[0] ?? "" })}
           autoAdvanceMs={300}
           onAutoAdvance={goNext}
-          columns={3}
+          columns={2}
         />
       )}
 
@@ -339,13 +344,13 @@ export function FunnelAClient({
             label: s.label,
             description: s.description,
             bgClass: s.bgClass,
-            imageSrc: s.imageSrc,
+            pictogram: KITCHEN_STYLE_PICTOGRAMS[s.id],
           }))}
           selected={data.style ? [data.style] : []}
           onSelectionChange={(ids) => update({ style: ids[0] ?? "" })}
           autoAdvanceMs={300}
           onAutoAdvance={goNext}
-          columns={3}
+          columns={2}
         />
       )}
 
@@ -371,7 +376,7 @@ export function FunnelAClient({
             label: w.label,
             description: w.description,
             bgClass: w.bgClass,
-            imageSrc: w.imageSrc,
+            pictogram: WORKTOP_PICTOGRAMS[w.id],
           }))}
           selected={data.worktopCategory ? [data.worktopCategory] : []}
           onSelectionChange={(ids) =>
@@ -379,7 +384,7 @@ export function FunnelAClient({
           }
           autoAdvanceMs={300}
           onAutoAdvance={goNext}
-          columns={3}
+          columns={2}
         />
       )}
 
