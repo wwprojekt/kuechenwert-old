@@ -60,14 +60,16 @@ export function FunnelBShell({
       <main className="flex flex-1 justify-center px-4 py-6 sm:py-10">
         <div className="grid w-full max-w-5xl gap-6 lg:grid-cols-[1fr_280px]">
           <div className="flex flex-col">
-            {/* Progress */}
-            <div>
-              <div className="flex items-center justify-between text-xs text-ink-muted">
-                <span>Schritt {currentStep + 1} von {totalSteps}</span>
-                <span className="font-medium text-ink">{percentage} %</span>
+            {/* Progress – dezent im kuechenportal.de-Stil */}
+            <div aria-label={`Schritt ${currentStep + 1} von ${totalSteps}`}>
+              <div className="h-[3px] w-full overflow-hidden rounded-full bg-slate-200">
+                <div
+                  className="h-full bg-brand-500 transition-[width] duration-300 ease-out"
+                  style={{ width: `${percentage}%` }}
+                />
               </div>
-              <div className="progress-track mt-1.5">
-                <div className="progress-fill" style={{ width: `${percentage}%` }} />
+              <div className="mt-1.5 flex justify-end text-[11px] font-medium text-ink-subtle">
+                {currentStep + 1} / {totalSteps}
               </div>
             </div>
 

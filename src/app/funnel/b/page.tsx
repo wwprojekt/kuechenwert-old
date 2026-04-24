@@ -1,12 +1,36 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, FileUp, ShieldCheck, Lightbulb, Phone } from "lucide-react";
+import { clsx } from "clsx";
+import {
+  Plus,
+  Trash2,
+  FileUp,
+  ShieldCheck,
+  Lightbulb,
+  Phone,
+  Check,
+  Mail,
+  CloudUpload,
+  AlertCircle,
+} from "lucide-react";
 import { FunnelBShell } from "@/components/funnel/funnel-b-shell";
+import { Combobox, type ComboboxOption } from "@/components/funnel/combobox";
+import {
+  TIMEFRAME_ICONS_B,
+  HANDLE_TYPE_ICONS,
+  WORKTOP_ICONS,
+  SINK_MATERIAL_ICONS,
+  WASTE_SEP_ICONS,
+  DELIVERY_ICONS,
+  FINANCING_ICONS,
+  APPLIANCE_CATEGORY_ICON,
+} from "@/components/funnel/funnel-b-icons";
 import {
   KITCHEN_BRANDS,
   FRONT_MATERIALS,
+  FRONT_CATEGORY_LABEL,
   HANDLE_TYPES,
   WORKTOP_MATERIALS,
   WORKTOP_DESIGNS,
@@ -20,48 +44,52 @@ import {
   FINANCING_OPTIONS,
 } from "@/config/funnel-b-stammdaten";
 
+/* ====================================================================== */
+/* STATE                                                                    */
+/* ====================================================================== */
+
+type OfferDeliveryMethod = "" | "now" | "later";
+
 type FunnelBData = {
-  // Step 0 - Situation (alles optional - Angebot wird hochgeladen)
   timeframe: string;
 
-  // Step 1 - Korpus & Fronten
   brand: string;
   brandCustom: string;
-  frontName: string; // Freitext, z. B. "Riva", "Sylt"
+  frontName: string;
   frontMaterialName: string;
   handleType: string;
 
-  // Step 2 - Arbeitsplatte
   worktopMaterial: string;
   worktopDesign: string;
   worktopDesignCustom: string;
 
-  // Step 3 - Geräte (multi)
-  appliances: { id: string; categorySlug: string; brandSlug: string; model: string }[];
+  appliances: {
+    id: string;
+    categorySlug: string;
+    brandSlug: string;
+    model: string;
+  }[];
 
-  // Step 4 - Sanitär & Müll
   sinkBrand: string;
   sinkMaterial: string;
   sinkDesignation: string;
-  wasteSeparationSystem: "yes" | "no" | "";
+  wasteSeparationSystem: "yes" | "no" | "unknown" | "";
 
-  // Step 5 - Extras
   extras: string[];
   extrasNotes: string;
 
-  // Step 6 - Lieferung + Zahlung
   deliveryMode: string;
-  paymentDownPaymentPercent: string; // store as string to allow empty input
+  paymentDownPaymentPercent: string;
   paymentFinancing: string;
   paymentFinancingApr: string;
   paymentFinancingMonths: string;
 
-  // Step 7 - Studio-Angebot + Upload (PFLICHT: existingOfferPriceEur)
   existingOfferStudio: string;
   existingOfferPriceEur: string;
+  /** Wie wird das Studio-Angebot uebermittelt? "now" = Upload jetzt, "later" = Per E-Mail nachreichen */
+  offerDeliveryMethod: OfferDeliveryMethod;
   uploads: { id: string; category: "angebot" | "grundriss" | "kueche_bild"; file: File }[];
 
-  // Step 8 - Kontakt (alles PFLICHT)
   postalCode: string;
   city: string;
   firstName: string;
@@ -97,6 +125,7 @@ const initialData: FunnelBData = {
   paymentFinancingMonths: "",
   existingOfferStudio: "",
   existingOfferPriceEur: "",
+  offerDeliveryMethod: "",
   uploads: [],
   postalCode: "",
   city: "",
@@ -123,12 +152,50 @@ const STEPS = [
 
 const TOTAL = STEPS.length;
 
+const STORAGE_KEY = "kw_funnel_b";
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
+
+/** Persist nur JSON-serialisierbare Felder, keine File-Objekte. */
+function serializeForStorage(data: FunnelBData): string {
+  const { uploads: _u, ...rest } = data;
+  void _u;
+  return JSON.stringify(rest);
+}
+
+function loadSaved(): Partial<FunnelBData> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+/* ====================================================================== */
+/* PAGE                                                                     */
+/* ====================================================================== */
+
 export default function FunnelBPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [data, setData] = useState<FunnelBData>(initialData);
+  const [data, setData] = useState<FunnelBData>(() => ({
+    ...initialData,
+    ...loadSaved(),
+    uploads: [], // nie aus storage rehydrieren
+  }));
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // auto-persist bei jeder Aenderung (File-Objekte ausgeschlossen)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      sessionStorage.setItem(STORAGE_KEY, serializeForStorage(data));
+    } catch {
+      /* quota / privacy mode */
+    }
+  }, [data]);
 
   const update = useCallback((patch: Partial<FunnelBData>) => {
     setData((prev) => ({ ...prev, ...patch }));
@@ -138,9 +205,14 @@ export default function FunnelBPage() {
     switch (step) {
       case 7: {
         const priceOk = Number(data.existingOfferPriceEur) > 0;
-        const hasAngebot = data.uploads.some((u) => u.category === "angebot");
-        const hasGrundriss = data.uploads.some((u) => u.category === "grundriss");
-        return priceOk && hasAngebot && hasGrundriss;
+        if (!priceOk) return false;
+        if (data.offerDeliveryMethod === "later") return true;
+        if (data.offerDeliveryMethod === "now") {
+          const hasAngebot = data.uploads.some((u) => u.category === "angebot");
+          const hasGrundriss = data.uploads.some((u) => u.category === "grundriss");
+          return hasAngebot && hasGrundriss;
+        }
+        return false;
       }
       case 8:
         return (
@@ -179,6 +251,7 @@ export default function FunnelBPage() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Fehler beim Speichern");
+      sessionStorage.removeItem(STORAGE_KEY);
       router.push(`/funnel/b/danke?id=${json.id}`);
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "Unbekannter Fehler");
@@ -188,6 +261,11 @@ export default function FunnelBPage() {
 
   const handleBack = useCallback(() => {
     setStep((s) => Math.max(0, s - 1));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  const goNext = useCallback(() => {
+    setStep((s) => Math.min(TOTAL - 1, s + 1));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
@@ -217,7 +295,10 @@ export default function FunnelBPage() {
           <span className="font-semibold text-ink">Brauchen Sie Hilfe?</span>
         </div>
         <p className="mt-2 text-ink-muted">
-          Rufen Sie uns an: <a href="tel:+4900000000" className="font-medium text-brand-700 hover:underline">+49 (0) 000 00 00 00</a>
+          Rufen Sie uns an:{" "}
+          <a href="tel:+4900000000" className="font-medium text-brand-700 hover:underline">
+            +49 (0) 000 00 00 00
+          </a>
         </p>
       </div>
     </>
@@ -237,7 +318,7 @@ export default function FunnelBPage() {
       isSubmitting={submitting}
       sidebar={sidebar}
     >
-      {step === 0 && <Step0 data={data} update={update} />}
+      {step === 0 && <Step0 data={data} update={update} goNext={goNext} />}
       {step === 1 && <Step1 data={data} update={update} />}
       {step === 2 && <Step2 data={data} update={update} />}
       {step === 3 && <Step3 data={data} update={update} />}
@@ -264,12 +345,12 @@ const TIPS = [
   "Spülen-Material und -Marke beeinflussen den Preis stark. Mülltrennsysteme sind oft separat kalkuliert.",
   "Beleuchtung und Steckdosen-Lösungen sind häufige „versteckte\" Posten – hier verlangen Studios oft hohe Aufschläge.",
   "Anzahlung und Finanzierungsbedingungen sind verhandelbar. Geben Sie an, was Ihr Studio Ihnen angeboten hat.",
-  "Falls Sie ein schriftliches Angebot oder einen Grundriss haben: hochladen erhöht die Genauigkeit der Auktion deutlich.",
+  "Sie haben Angebot & Grundriss nicht zur Hand? Kein Problem – wir senden Ihnen nach der Anfrage einen sicheren Upload-Link per E-Mail.",
   "Wir rufen Sie binnen 24h an – das ist Pflichtschritt vor jeder Auktion. SMS oder E-Mail-Termine sind möglich.",
 ];
 
 /* ====================================================================== */
-/* STEP COMPONENTS                                                         */
+/* STEP COMPONENTS                                                          */
 /* ====================================================================== */
 
 type StepProps = {
@@ -277,14 +358,23 @@ type StepProps = {
   update: (patch: Partial<FunnelBData>) => void;
 };
 
-function Step0({ data, update }: StepProps) {
+function Step0({ data, update, goNext }: StepProps & { goNext: () => void }) {
   return (
     <div className="space-y-6">
-      <Field label="Wann soll die Küche geliefert/montiert werden?" hint="Optional – hilft bei Verfügbarkeitsprüfung.">
+      <Field
+        label="Wann soll die Küche geliefert/montiert werden?"
+        hint="Optional – hilft bei Verfügbarkeitsprüfung."
+      >
         <CardGroup
-          options={TIMEFRAMES.map((t) => ({ value: t.slug, label: t.name }))}
+          columns={2}
+          options={TIMEFRAMES.map((t) => ({
+            value: t.slug,
+            label: t.name,
+            icon: TIMEFRAME_ICONS_B[t.slug],
+          }))}
           value={data.timeframe}
           onChange={(v) => update({ timeframe: v })}
+          onAutoAdvance={goNext}
         />
       </Field>
     </div>
@@ -292,21 +382,31 @@ function Step0({ data, update }: StepProps) {
 }
 
 function Step1({ data, update }: StepProps) {
+  const brandOptions: ComboboxOption[] = KITCHEN_BRANDS.map((b) => ({
+    value: b.slug,
+    label: b.name,
+    badge: b.segment,
+  }));
+
+  const frontMaterialOptions: ComboboxOption[] = FRONT_MATERIALS.map((f) => ({
+    value: f.name,
+    label: f.name,
+    description: f.description,
+    group: FRONT_CATEGORY_LABEL[f.category],
+  }));
+
   return (
     <div className="space-y-6">
-      <Field label="Hersteller / Marke der Küche" hint="Optional. Alle gängigen deutschen Hersteller in der Liste.">
-        <select
-          className="input-field"
+      <Field
+        label="Hersteller / Marke der Küche"
+        hint={'Optional. Suchbar – tippen Sie z. B. „Nobilia".'}
+      >
+        <Combobox
+          options={brandOptions}
           value={data.brand}
-          onChange={(e) => update({ brand: e.target.value })}
-        >
-          <option value="">– Bitte wählen –</option>
-          {KITCHEN_BRANDS.map((b) => (
-            <option key={b.slug} value={b.slug}>
-              {b.name}
-            </option>
-          ))}
-        </select>
+          onChange={(v) => update({ brand: v })}
+          placeholder="– Bitte wählen –"
+        />
         {data.brand === "sonstiger" && (
           <input
             type="text"
@@ -318,7 +418,10 @@ function Step1({ data, update }: StepProps) {
         )}
       </Field>
 
-      <Field label="Name der Front" hint={'Optional. Bezeichnung der Front laut Angebot, z. B. „Riva", „Sylt", „Flash".'}>
+      <Field
+        label="Name der Front"
+        hint={'Optional. Bezeichnung der Front laut Angebot, z. B. „Riva", „Sylt", „Flash".'}
+      >
         <input
           type="text"
           className="input-field"
@@ -328,19 +431,16 @@ function Step1({ data, update }: StepProps) {
         />
       </Field>
 
-      <Field label="Frontmaterial" hint={'Optional. Z. B. „UV-Lack hochglanz".'}>
-        <select
-          className="input-field"
+      <Field
+        label="Frontmaterial"
+        hint="Optional. Nach Kategorien gruppiert (Kunststoff, Lack, Echtholz …)."
+      >
+        <Combobox
+          options={frontMaterialOptions}
           value={data.frontMaterialName}
-          onChange={(e) => update({ frontMaterialName: e.target.value })}
-        >
-          <option value="">– Bitte wählen –</option>
-          {FRONT_MATERIALS.map((f) => (
-            <option key={f.name} value={f.name}>
-              {f.name}{f.description ? ` – ${f.description}` : ""}
-            </option>
-          ))}
-        </select>
+          onChange={(v) => update({ frontMaterialName: v })}
+          placeholder="– Bitte wählen –"
+        />
       </Field>
 
       <Field label="Grifftyp" hint="Optional.">
@@ -350,6 +450,7 @@ function Step1({ data, update }: StepProps) {
             value: h.slug,
             label: h.name,
             description: h.description,
+            icon: HANDLE_TYPE_ICONS[h.slug],
           }))}
           value={data.handleType}
           onChange={(v) => update({ handleType: v })}
@@ -365,6 +466,12 @@ function Step2({ data, update }: StepProps) {
     return WORKTOP_DESIGNS.filter((d) => d.materialSlug === data.worktopMaterial);
   }, [data.worktopMaterial]);
 
+  const designOptions: ComboboxOption[] = designs.map((d) => ({
+    value: d.name,
+    label: d.name,
+    badge: d.manufacturer,
+  }));
+
   return (
     <div className="space-y-6">
       <Field label="Material der Arbeitsplatte" hint="Optional.">
@@ -374,30 +481,30 @@ function Step2({ data, update }: StepProps) {
             value: m.slug,
             label: m.name,
             description: m.description,
+            icon: WORKTOP_ICONS[m.slug],
           }))}
           value={data.worktopMaterial}
-          onChange={(v) => update({ worktopMaterial: v, worktopDesign: "", worktopDesignCustom: "" })}
+          onChange={(v) =>
+            update({ worktopMaterial: v, worktopDesign: "", worktopDesignCustom: "" })
+          }
         />
       </Field>
 
       {data.worktopMaterial && designs.length > 0 && (
         <Field label="Bekannte Bezeichnungen" hint="Optional – wählen oder unten Freitext.">
-          <select
-            className="input-field"
+          <Combobox
+            options={designOptions}
             value={data.worktopDesign}
-            onChange={(e) => update({ worktopDesign: e.target.value })}
-          >
-            <option value="">– Keine Auswahl –</option>
-            {designs.map((d) => (
-              <option key={d.name} value={d.name}>
-                {d.name}{d.manufacturer ? ` (${d.manufacturer})` : ""}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => update({ worktopDesign: v })}
+            placeholder="– Keine Auswahl –"
+          />
         </Field>
       )}
 
-      <Field label="Eigene Bezeichnung / Notiz" hint={'Optional. Z. B. „Eiche massiv geölt" oder spezifischer Code vom Studio.'}>
+      <Field
+        label="Eigene Bezeichnung / Notiz"
+        hint={'Optional. Z. B. „Eiche massiv geölt" oder spezifischer Code vom Studio.'}
+      >
         <input
           type="text"
           className="input-field"
@@ -427,24 +534,36 @@ function Step3({ data, update }: StepProps) {
   const remove = (id: string) => {
     update({ appliances: data.appliances.filter((a) => a.id !== id) });
   };
-  const upd = (id: string, patch: Partial<typeof data.appliances[number]>) => {
+  const upd = (id: string, patch: Partial<(typeof data.appliances)[number]>) => {
     update({
       appliances: data.appliances.map((a) => (a.id === id ? { ...a, ...patch } : a)),
     });
   };
 
+  const categoryOptions: ComboboxOption[] = APPLIANCE_CATEGORIES.map((c) => ({
+    value: c.slug,
+    label: c.name,
+  }));
+  const brandOptions: ComboboxOption[] = APPLIANCE_BRANDS.map((b) => ({
+    value: b.slug,
+    label: b.name,
+    badge: b.segment,
+  }));
+
   return (
     <div className="space-y-6">
       <p className="text-sm text-ink-muted">
-        Geräte sind komplett optional. Klicken Sie auf <span className="font-medium">„Gerät hinzufügen"</span>,
-        um eine Position einzutragen.
+        Geräte sind komplett optional. Klicken Sie auf{" "}
+        <span className="font-medium">„Gerät hinzufügen"</span>, um eine Position einzutragen.
       </p>
 
       <div className="space-y-3">
         {data.appliances.map((a, i) => (
           <div key={a.id} className="rounded-lg border border-slate-200 bg-surface-soft p-4">
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase text-ink-subtle">Gerät {i + 1}</span>
+              <span className="flex items-center gap-2 text-xs font-semibold uppercase text-ink-subtle">
+                {APPLIANCE_CATEGORY_ICON} Gerät {i + 1}
+              </span>
               <button
                 type="button"
                 onClick={() => remove(a.id)}
@@ -456,29 +575,21 @@ function Step3({ data, update }: StepProps) {
             <div className="grid gap-3 md:grid-cols-3">
               <div>
                 <label className="label-field">Typ</label>
-                <select
-                  className="input-field"
+                <Combobox
+                  options={categoryOptions}
                   value={a.categorySlug}
-                  onChange={(e) => upd(a.id, { categorySlug: e.target.value })}
-                >
-                  <option value="">– Wählen –</option>
-                  {APPLIANCE_CATEGORIES.map((c) => (
-                    <option key={c.slug} value={c.slug}>{c.name}</option>
-                  ))}
-                </select>
+                  onChange={(v) => upd(a.id, { categorySlug: v })}
+                  placeholder="– Wählen –"
+                />
               </div>
               <div>
                 <label className="label-field">Marke</label>
-                <select
-                  className="input-field"
+                <Combobox
+                  options={brandOptions}
                   value={a.brandSlug}
-                  onChange={(e) => upd(a.id, { brandSlug: e.target.value })}
-                >
-                  <option value="">– Wählen –</option>
-                  {APPLIANCE_BRANDS.map((b) => (
-                    <option key={b.slug} value={b.slug}>{b.name}</option>
-                  ))}
-                </select>
+                  onChange={(v) => upd(a.id, { brandSlug: v })}
+                  placeholder="– Wählen –"
+                />
               </div>
               <div>
                 <label className="label-field">Modell / Bezeichnung</label>
@@ -503,54 +614,58 @@ function Step3({ data, update }: StepProps) {
 }
 
 function Step4({ data, update }: StepProps) {
+  const sinkBrandOptions: ComboboxOption[] = SINK_BRANDS.map((b) => ({
+    value: b.slug,
+    label: b.name,
+  }));
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Spülen-Marke" hint="Optional.">
-          <select
-            className="input-field"
+          <Combobox
+            options={sinkBrandOptions}
             value={data.sinkBrand}
-            onChange={(e) => update({ sinkBrand: e.target.value })}
-          >
-            <option value="">– Wählen –</option>
-            {SINK_BRANDS.map((b) => (
-              <option key={b.slug} value={b.slug}>{b.name}</option>
-            ))}
-          </select>
+            onChange={(v) => update({ sinkBrand: v })}
+            placeholder="– Wählen –"
+          />
         </Field>
 
-        <Field label="Spülen-Material" hint="Optional.">
-          <select
+        <Field label="Bezeichnung / Modell" hint={'Optional. z. B. „Blanco Subline 500-U".'}>
+          <input
+            type="text"
             className="input-field"
-            value={data.sinkMaterial}
-            onChange={(e) => update({ sinkMaterial: e.target.value })}
-          >
-            <option value="">– Wählen –</option>
-            {SINK_MATERIALS.map((m) => (
-              <option key={m.slug} value={m.slug}>{m.name}</option>
-            ))}
-          </select>
+            value={data.sinkDesignation}
+            onChange={(e) => update({ sinkDesignation: e.target.value })}
+          />
         </Field>
       </div>
 
-      <Field label="Bezeichnung / Modell" hint={'Optional. z. B. „Blanco Subline 500-U".'}>
-        <input
-          type="text"
-          className="input-field"
-          value={data.sinkDesignation}
-          onChange={(e) => update({ sinkDesignation: e.target.value })}
+      <Field label="Spülen-Material" hint="Optional.">
+        <CardGroup
+          columns={2}
+          options={SINK_MATERIALS.map((m) => ({
+            value: m.slug,
+            label: m.name,
+            icon: SINK_MATERIAL_ICONS[m.slug],
+          }))}
+          value={data.sinkMaterial}
+          onChange={(v) => update({ sinkMaterial: v })}
         />
       </Field>
 
       <Field label="Mülltrennsystem" hint="Optional.">
         <CardGroup
-          columns={2}
+          columns={3}
           options={[
-            { value: "yes", label: "Ja, vorgesehen" },
-            { value: "no", label: "Nein, kein System" },
+            { value: "yes", label: "Ja, vorgesehen", icon: WASTE_SEP_ICONS.yes },
+            { value: "no", label: "Nein, kein System", icon: WASTE_SEP_ICONS.no },
+            { value: "unknown", label: "Weiß ich nicht", icon: WASTE_SEP_ICONS.unknown },
           ]}
           value={data.wasteSeparationSystem}
-          onChange={(v) => update({ wasteSeparationSystem: v as FunnelBData["wasteSeparationSystem"] })}
+          onChange={(v) =>
+            update({ wasteSeparationSystem: v as FunnelBData["wasteSeparationSystem"] })
+          }
         />
       </Field>
     </div>
@@ -567,7 +682,10 @@ function Step5({ data, update }: StepProps) {
   };
   return (
     <div className="space-y-6">
-      <Field label="Welche Extras sind im Angebot enthalten?" hint="Mehrfachauswahl möglich – alles optional.">
+      <Field
+        label="Welche Extras sind im Angebot enthalten?"
+        hint="Mehrfachauswahl möglich – alles optional."
+      >
         <div className="grid gap-2 sm:grid-cols-2">
           {EXTRAS_OPTIONS.map((e) => {
             const selected = data.extras.includes(e.slug);
@@ -586,21 +704,27 @@ function Step5({ data, update }: StepProps) {
                 <div className="flex items-start gap-3">
                   <div
                     className={`mt-0.5 h-5 w-5 flex-none rounded border-2 ${
-                      selected
-                        ? "border-brand-700 bg-brand-700"
-                        : "border-slate-300 bg-white"
+                      selected ? "border-brand-700 bg-brand-700" : "border-slate-300 bg-white"
                     }`}
                     aria-hidden="true"
                   >
                     {selected && (
                       <svg className="h-full w-full text-white" viewBox="0 0 12 12" fill="none">
-                        <path d="M2.5 6.5L5 9L9.5 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path
+                          d="M2.5 6.5L5 9L9.5 4"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
                       </svg>
                     )}
                   </div>
                   <div>
                     <div className="text-sm font-medium text-ink">{e.name}</div>
-                    {e.description && <div className="mt-0.5 text-xs text-ink-muted">{e.description}</div>}
+                    {e.description && (
+                      <div className="mt-0.5 text-xs text-ink-muted">{e.description}</div>
+                    )}
                   </div>
                 </div>
               </label>
@@ -628,7 +752,18 @@ function Step6({ data, update }: StepProps) {
       <Field label="Wie soll geliefert werden?" hint="Optional.">
         <CardGroup
           columns={2}
-          options={DELIVERY_MODES.map((d) => ({ value: d.slug, label: d.name }))}
+          options={[
+            ...DELIVERY_MODES.map((d) => ({
+              value: d.slug,
+              label: d.name,
+              icon: DELIVERY_ICONS[d.slug],
+            })),
+            {
+              value: "unknown",
+              label: "Weiß ich nicht",
+              icon: DELIVERY_ICONS.unknown,
+            },
+          ]}
           value={data.deliveryMode}
           onChange={(v) => update({ deliveryMode: v })}
         />
@@ -649,16 +784,16 @@ function Step6({ data, update }: StepProps) {
         </Field>
 
         <Field label="Zahlungsmodalitäten" hint="Optional.">
-          <select
-            className="input-field"
+          <CardGroup
+            columns={1}
+            options={FINANCING_OPTIONS.map((f) => ({
+              value: f.slug,
+              label: f.name,
+              icon: FINANCING_ICONS[f.slug],
+            }))}
             value={data.paymentFinancing}
-            onChange={(e) => update({ paymentFinancing: e.target.value })}
-          >
-            <option value="">– Wählen –</option>
-            {FINANCING_OPTIONS.map((f) => (
-              <option key={f.slug} value={f.slug}>{f.name}</option>
-            ))}
-          </select>
+            onChange={(v) => update({ paymentFinancing: v })}
+          />
         </Field>
       </div>
 
@@ -697,7 +832,11 @@ function Step7({ data, update }: StepProps) {
     update({
       uploads: [
         ...data.uploads,
-        { id: `f-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, category, file },
+        {
+          id: `f-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          category,
+          file,
+        },
       ],
     });
   };
@@ -728,7 +867,10 @@ function Step7({ data, update }: StepProps) {
         </div>
       </Field>
 
-      <Field label="Name des Küchenstudios" hint="Optional. Hilft uns bei Quervergleichen, wird Händlern nicht gezeigt.">
+      <Field
+        label="Name des Küchenstudios"
+        hint="Optional. Hilft uns bei Quervergleichen, wird Händlern nicht gezeigt."
+      >
         <input
           type="text"
           className="input-field"
@@ -738,53 +880,98 @@ function Step7({ data, update }: StepProps) {
         />
       </Field>
 
-      <div className="space-y-3">
-        <UploadDrop
-          label="Schriftliches Angebot hochladen *"
-          description="Pflicht. PDF oder Bild. Max. 10 MB."
-          accept="application/pdf,image/*"
-          onFile={(f) => addFile("angebot", f)}
-          done={data.uploads.some((u) => u.category === "angebot")}
+      <Field
+        label="Wie möchten Sie uns Angebot und Grundriss zukommen lassen? *"
+        hint="Pflicht. Ohne diese Dokumente können die Händler kein verbindliches Gegenangebot abgeben."
+      >
+        <CardGroup
+          columns={2}
+          options={[
+            {
+              value: "now",
+              label: "Jetzt hochladen",
+              description: "Ich habe Angebot & Grundriss zur Hand",
+              icon: <CloudUpload className="h-5 w-5" />,
+            },
+            {
+              value: "later",
+              label: "Per E-Mail nachreichen",
+              description: "Ich erhalte einen sicheren Upload-Link",
+              icon: <Mail className="h-5 w-5" />,
+            },
+          ]}
+          value={data.offerDeliveryMethod}
+          onChange={(v) =>
+            update({ offerDeliveryMethod: v as OfferDeliveryMethod })
+          }
         />
-        <UploadDrop
-          label="Grundriss hochladen *"
-          description="Pflicht. PDF oder Bild. Max. 10 MB."
-          accept="application/pdf,image/*"
-          onFile={(f) => addFile("grundriss", f)}
-          done={data.uploads.some((u) => u.category === "grundriss")}
-        />
-        <UploadDrop
-          label="Bild der geplanten Küche"
-          description="Optional. JPG / PNG. Max. 10 MB."
-          accept="image/*"
-          onFile={(f) => addFile("kueche_bild", f)}
-          done={data.uploads.some((u) => u.category === "kueche_bild")}
-        />
-      </div>
+      </Field>
 
-      {data.uploads.length > 0 && (
-        <div className="rounded-lg border border-slate-200 bg-surface-soft p-4">
-          <div className="mb-2 text-xs font-semibold uppercase text-ink-subtle">
-            Hochgeladen ({data.uploads.length})
+      {data.offerDeliveryMethod === "now" && (
+        <div className="space-y-3">
+          <UploadDrop
+            label="Schriftliches Angebot hochladen *"
+            description="Pflicht. PDF oder Bild. Max. 10 MB."
+            accept="application/pdf,image/*"
+            onFile={(f) => addFile("angebot", f)}
+            done={data.uploads.some((u) => u.category === "angebot")}
+          />
+          <UploadDrop
+            label="Grundriss hochladen *"
+            description="Pflicht. PDF oder Bild. Max. 10 MB."
+            accept="application/pdf,image/*"
+            onFile={(f) => addFile("grundriss", f)}
+            done={data.uploads.some((u) => u.category === "grundriss")}
+          />
+          <UploadDrop
+            label="Bild der geplanten Küche"
+            description="Optional. JPG / PNG. Max. 10 MB."
+            accept="image/*"
+            onFile={(f) => addFile("kueche_bild", f)}
+            done={data.uploads.some((u) => u.category === "kueche_bild")}
+          />
+
+          {data.uploads.length > 0 && (
+            <div className="rounded-lg border border-slate-200 bg-surface-soft p-4">
+              <div className="mb-2 text-xs font-semibold uppercase text-ink-subtle">
+                Hochgeladen ({data.uploads.length})
+              </div>
+              <ul className="space-y-1 text-sm">
+                {data.uploads.map((u) => (
+                  <li key={u.id} className="flex items-center justify-between gap-3">
+                    <span className="truncate">
+                      <span className="chip mr-2">{u.category}</span>
+                      {u.file.name}{" "}
+                      <span className="text-xs text-ink-subtle">
+                        ({formatBytes(u.file.size)})
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => remove(u.id)}
+                      className="text-xs text-red-600 hover:underline"
+                    >
+                      Entfernen
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {data.offerDeliveryMethod === "later" && (
+        <div className="flex items-start gap-3 rounded-lg border border-accent-200 bg-accent-50 p-4 text-sm">
+          <Mail className="mt-0.5 h-5 w-5 flex-none text-accent-700" />
+          <div className="text-ink-muted">
+            <div className="font-medium text-ink">Upload-Link per E-Mail</div>
+            <p className="mt-1">
+              Direkt nach Abschluss dieses Formulars erhalten Sie eine E-Mail mit
+              einem sicheren Upload-Link für Angebot und Grundriss. Ihre Auktion
+              startet, sobald die Dokumente eingegangen sind.
+            </p>
           </div>
-          <ul className="space-y-1 text-sm">
-            {data.uploads.map((u) => (
-              <li key={u.id} className="flex items-center justify-between gap-3">
-                <span className="truncate">
-                  <span className="chip mr-2">{u.category}</span>
-                  {u.file.name}{" "}
-                  <span className="text-xs text-ink-subtle">({formatBytes(u.file.size)})</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => remove(u.id)}
-                  className="text-xs text-red-600 hover:underline"
-                >
-                  Entfernen
-                </button>
-              </li>
-            ))}
-          </ul>
         </div>
       )}
     </div>
@@ -804,7 +991,9 @@ function Step8({ data, update }: StepProps) {
             className="input-field"
             placeholder="12345"
             value={data.postalCode}
-            onChange={(e) => update({ postalCode: e.target.value.replace(/\D/g, "").slice(0, 5) })}
+            onChange={(e) =>
+              update({ postalCode: e.target.value.replace(/\D/g, "").slice(0, 5) })
+            }
           />
         </Field>
         <Field label="Stadt" hint="Optional, ergänzen wir aus PLZ.">
@@ -877,8 +1066,9 @@ function Step8({ data, update }: StepProps) {
             onChange={(e) => update({ consentCall: e.target.checked })}
           />
           <span className="text-ink-muted">
-            <strong className="text-ink">Pflicht:</strong> Ich willige ein, dass mich KüchenWert telefonisch
-            zur Klärung meines Angebots kontaktiert. Ich kann diese Einwilligung jederzeit widerrufen.
+            <strong className="text-ink">Pflicht:</strong> Ich willige ein, dass mich KüchenWert
+            telefonisch zur Klärung meines Angebots kontaktiert. Ich kann diese Einwilligung
+            jederzeit widerrufen.
           </span>
         </label>
         <label className="flex items-start gap-3">
@@ -889,14 +1079,20 @@ function Step8({ data, update }: StepProps) {
             onChange={(e) => update({ consentMarketing: e.target.checked })}
           />
           <span className="text-ink-muted">
-            Optional: Ich möchte Tipps und Marktinformationen rund um meinen Küchenkauf per E-Mail erhalten.
+            Optional: Ich möchte Tipps und Marktinformationen rund um meinen Küchenkauf per
+            E-Mail erhalten.
           </span>
         </label>
         <p className="text-xs text-ink-subtle">
           Mit Absenden bestätigen Sie unsere{" "}
-          <a href="/datenschutz" className="underline">Datenschutzerklärung</a> und{" "}
-          <a href="/agb" className="underline">AGB</a>. Verbindliche Auktion: bei grundlosem Abbruch
-          während laufender Auktion wird eine Bearbeitungsgebühr von 299 € fällig.
+          <a href="/datenschutz" className="underline">
+            Datenschutzerklärung
+          </a>{" "}
+          und{" "}
+          <a href="/agb" className="underline">
+            AGB
+          </a>
+          .
         </p>
       </div>
     </div>
@@ -904,7 +1100,7 @@ function Step8({ data, update }: StepProps) {
 }
 
 /* ====================================================================== */
-/* SHARED FIELD HELPERS                                                    */
+/* SHARED FIELD HELPERS                                                     */
 /* ====================================================================== */
 
 function Field({
@@ -925,18 +1121,47 @@ function Field({
   );
 }
 
+interface CardGroupOption {
+  value: string;
+  label: string;
+  description?: string;
+  icon?: React.ReactNode;
+}
+
+interface CardGroupProps {
+  options: CardGroupOption[];
+  value: string;
+  onChange: (v: string) => void;
+  columns?: 1 | 2 | 3;
+  /** Auto-Advance Delay in ms; default 250. Nur aktiv wenn onAutoAdvance gesetzt. */
+  autoAdvanceMs?: number;
+  onAutoAdvance?: () => void;
+}
+
 function CardGroup({
   options,
   value,
   onChange,
   columns = 1,
-}: {
-  options: { value: string; label: string; description?: string }[];
-  value: string;
-  onChange: (v: string) => void;
-  columns?: 1 | 2 | 3;
-}) {
-  const colClass = columns === 3 ? "sm:grid-cols-3" : columns === 2 ? "sm:grid-cols-2" : "";
+  autoAdvanceMs = 250,
+  onAutoAdvance,
+}: CardGroupProps) {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const colClass =
+    columns === 3
+      ? "sm:grid-cols-3"
+      : columns === 2
+        ? "sm:grid-cols-2"
+        : "";
+
+  function handleClick(v: string) {
+    onChange(v);
+    if (onAutoAdvance && autoAdvanceMs > 0) {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(onAutoAdvance, autoAdvanceMs);
+    }
+  }
+
   return (
     <div className={`grid gap-2 ${colClass}`}>
       {options.map((o) => {
@@ -945,14 +1170,36 @@ function CardGroup({
           <button
             type="button"
             key={`${o.value}-${o.label}`}
-            onClick={() => onChange(o.value)}
-            className={`card-clickable !p-4 text-left ${selected ? "is-selected" : ""}`}
+            onClick={() => handleClick(o.value)}
+            className={clsx(
+              "card-clickable !p-4 text-left",
+              selected && "is-selected",
+            )}
             data-selected={selected}
           >
-            <div className="text-sm font-medium text-ink">{o.label}</div>
-            {o.description && (
-              <div className="mt-0.5 text-xs text-ink-muted">{o.description}</div>
-            )}
+            <div className="flex items-start gap-3">
+              {o.icon && (
+                <div
+                  className={clsx(
+                    "mt-0.5 grid h-8 w-8 flex-none place-items-center rounded-lg transition",
+                    selected
+                      ? "bg-brand-100 text-brand-700"
+                      : "bg-neutral-100 text-ink-muted",
+                  )}
+                >
+                  {o.icon}
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium text-ink">{o.label}</div>
+                {o.description && (
+                  <div className="mt-0.5 text-xs text-ink-muted">{o.description}</div>
+                )}
+              </div>
+              {selected && (
+                <Check className="mt-0.5 h-4 w-4 flex-none text-brand-700" />
+              )}
+            </div>
           </button>
         );
       })}
@@ -973,30 +1220,71 @@ function UploadDrop({
   onFile: (f: File) => void;
   done?: boolean;
 }) {
+  const [dragOver, setDragOver] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function acceptFile(f: File) {
+    setError(null);
+    if (f.size > MAX_UPLOAD_BYTES) {
+      setError(`Datei ist zu groß (${(f.size / 1024 / 1024).toFixed(1)} MB). Maximal 10 MB erlaubt.`);
+      return;
+    }
+    onFile(f);
+  }
+
   return (
-    <label
-      className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed p-4 transition ${
-        done
-          ? "border-accent-400 bg-accent-50"
-          : "border-slate-300 bg-surface-soft hover:border-brand-300 hover:bg-white"
-      }`}
-    >
-      <FileUp className={`h-5 w-5 flex-none ${done ? "text-accent-700" : "text-brand-700"}`} />
-      <div className="flex-1">
-        <div className="text-sm font-medium text-ink">{label}</div>
-        {description && <div className="text-xs text-ink-muted">{description}</div>}
-      </div>
-      <span className="btn-ghost text-xs">{done ? "Weitere Datei" : "Datei wählen"}</span>
-      <input
-        type="file"
-        className="sr-only"
-        accept={accept}
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onFile(f);
-          e.currentTarget.value = "";
+    <div>
+      <label
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
         }}
-      />
-    </label>
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          const f = e.dataTransfer.files?.[0];
+          if (f) acceptFile(f);
+        }}
+        className={clsx(
+          "flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed p-4 transition",
+          done
+            ? "border-accent-400 bg-accent-50"
+            : dragOver
+              ? "border-brand-500 bg-brand-50"
+              : "border-slate-300 bg-surface-soft hover:border-brand-300 hover:bg-white",
+        )}
+      >
+        <FileUp
+          className={clsx(
+            "h-5 w-5 flex-none",
+            done ? "text-accent-700" : "text-brand-700",
+          )}
+        />
+        <div className="flex-1">
+          <div className="text-sm font-medium text-ink">{label}</div>
+          {description && <div className="text-xs text-ink-muted">{description}</div>}
+        </div>
+        <span className="btn-ghost text-xs">
+          {done ? "Weitere Datei" : dragOver ? "Loslassen" : "Datei wählen"}
+        </span>
+        <input
+          type="file"
+          className="sr-only"
+          accept={accept}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) acceptFile(f);
+            e.currentTarget.value = "";
+          }}
+        />
+      </label>
+      {error && (
+        <div className="mt-1.5 flex items-center gap-1.5 text-xs text-red-700">
+          <AlertCircle className="h-3.5 w-3.5" />
+          {error}
+        </div>
+      )}
+    </div>
   );
 }
