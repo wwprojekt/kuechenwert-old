@@ -27,8 +27,11 @@ export const COMPANY = {
 
   // Kontakt
   phone: process.env.COMPANY_PHONE ?? "0511 5153247",
-  email: process.env.COMPANY_EMAIL ?? "info@küchenwert.de",
-  email_ascii: process.env.COMPANY_EMAIL_ASCII ?? "info@kuechenwert.de",
+  // E-Mail läuft bewusst über `kuechenwert24.de` (ASCII): die Domain
+  // `kuechenwert.de` ohne Umlaut gehört uns nicht, und reine Umlaut-Domains
+  // bereiten im Mailverkehr (SPF/DKIM/DMARC, Spamfilter) regelmäßig Probleme.
+  email: process.env.COMPANY_EMAIL ?? "info@kuechenwert24.de",
+  email_ascii: process.env.COMPANY_EMAIL_ASCII ?? "info@kuechenwert24.de",
 
   // Steuer
   vat_id: process.env.COMPANY_VAT_ID ?? "Beantragt",

@@ -1,20 +1,25 @@
 /**
  * Site-URL-Helper.
  *
- * Hintergrund: Unsere Domain ist `küchenwert.de` (mit Umlaut). DNS kann
- * historisch nur ASCII, deshalb existiert die Domain technisch zusätzlich
- * als Punycode `xn--kchenwert-y5a.de` — exakt dieselbe Zone, beide Namen
- * lösen auf den gleichen Server auf.
+ * Domain-Aufstellung:
+ *  - `küchenwert.de` (mit Umlaut) = primäre Website-Domain.
+ *    Punycode (ASCII-Äquivalent, gleiche Zone): `xn--kchenwert-q9a.de`.
+ *  - `kuechenwert24.de` = sekundäre ASCII-Domain für E-Mail-Versand und
+ *    als 301-Redirect auf die Hauptdomain. Wird separat verwaltet, siehe
+ *    `src/config/company.ts` bzw. `EMAIL_FROM` in der .env.
+ *  - `kuechenwert.de` (ohne Umlaut, ohne 24) gehört uns NICHT — nie verwenden.
  *
- * Wir wollen:
- *  - In E-Mails, UI, Rechnungen etc. die schöne Form `küchenwert.de`
- *    (Kunden sehen das in jedem aktuellen Browser sauber)
- *  - In Server-zu-Server `fetch()`, `Host:`-Headern und externen Webhooks
- *    die ASCII-Form, weil ältere Node-fetch-Implementierungen sowie viele
- *    HTTP-Libs (RFC 7230) auf reinen ASCII-Hostnames bestehen
+ * Site-URL-Wahl:
+ *  - In E-Mails, UI, Rechnungen, SEO-Canonical → die Pretty-Form
+ *    `küchenwert.de` (Kunden sehen das in jedem aktuellen Browser sauber).
+ *  - In Server-zu-Server `fetch()`, `Host:`-Headern und eigenen Webhooks
+ *    die Punycode-Form `xn--kchenwert-q9a.de`, weil ältere Node-fetch-
+ *    Implementierungen sowie viele HTTP-Libs (RFC 7230) auf reinen
+ *    ASCII-Hostnames bestehen.
  *
- * Quelle der Wahrheit: NEXT_PUBLIC_SITE_URL → soll als „pretty" Form
- * gespeichert werden (z.B. https://küchenwert.de).
+ * Quelle der Wahrheit: NEXT_PUBLIC_SITE_URL → als Pretty-Form speichern
+ * (z.B. https://küchenwert.de). Die ASCII-Variante wird zur Laufzeit
+ * aus der URL gerechnet.
  */
 
 const FALLBACK_PRETTY = "https://küchenwert.de";
@@ -37,7 +42,7 @@ export function getSiteUrlPretty(): string {
  *
  * Beispiel:
  *   getSiteUrlAscii("https://küchenwert.de/api/x")
- *   → "https://xn--kchenwert-y5a.de/api/x"
+ *   → "https://xn--kchenwert-q9a.de/api/x"
  */
 export function getSiteUrlAscii(input?: string): string {
   const raw = (input ?? getSiteUrlPretty()).trim();

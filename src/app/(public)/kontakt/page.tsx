@@ -46,10 +46,10 @@ export default function KontaktPage() {
                 <div>
                   <p className="text-sm font-semibold text-zinc-900">E-Mail</p>
                   <a
-                    href="mailto:info@kuechenwert.de"
+                    href="mailto:info@kuechenwert24.de"
                     className="mt-1 text-sm text-brand-600 hover:underline"
                   >
-                    info@kuechenwert.de
+                    info@kuechenwert24.de
                   </a>
                 </div>
                 <div>
@@ -104,7 +104,7 @@ export default function KontaktPage() {
                   },
                   {
                     q: "Mein Datenschutz-Auskunftsrecht",
-                    a: "Gemäß DSGVO haben Sie das Recht auf Auskunft, Berichtigung und Löschung. Schreiben Sie an datenschutz@kuechenwert.de.",
+                    a: "Gemäß DSGVO haben Sie das Recht auf Auskunft, Berichtigung und Löschung. Schreiben Sie an datenschutz@kuechenwert24.de.",
                   },
                 ].map((item) => (
                   <div

@@ -27,7 +27,7 @@ export interface SendMailResult {
   delivered: "resend" | "console";
 }
 
-const FROM_DEFAULT = process.env.EMAIL_FROM || "KüchenWert <noreply@kuechenwert.de>";
+const FROM_DEFAULT = process.env.EMAIL_FROM || "KüchenWert <noreply@kuechenwert24.de>";
 
 export async function sendMail(params: SendMailParams): Promise<SendMailResult> {
   const apiKey = process.env.RESEND_API_KEY?.trim();

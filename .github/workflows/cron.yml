@@ -4,7 +4,9 @@ name: Scheduled Cron Triggers
 # da Dokploy keinen eigenen Vercel-aequivalenten Cron-Mechanismus hat.
 #
 # Erforderliche Repository-Secrets:
-#   PROD_BASE_URL   z. B. https://kuechenwert.de   (ohne trailing slash)
+#   PROD_BASE_URL   Punycode-Form, z. B. https://xn--kchenwert-q9a.de
+#                   (ohne trailing slash; ASCII zwingend, da curl/GitHub-Runner
+#                    IDN-Hostnamen nicht zuverlässig auflösen).
 #   CRON_SECRET     identisch zur Server-Env
 #
 # GitHub-Actions-Cron-Granularitaet ist 5 Min (best effort, kann verschoben sein).

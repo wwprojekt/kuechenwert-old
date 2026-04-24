@@ -117,7 +117,7 @@ const FAQ_SECTIONS = [
       {
         question: "Kann ich meine Daten löschen lassen?",
         answer:
-          "Ja, jederzeit. Schreiben Sie an datenschutz@kuechenwert.de und wir löschen Ihre Daten innerhalb von 30 Tagen vollständig.",
+          "Ja, jederzeit. Schreiben Sie an datenschutz@kuechenwert24.de und wir löschen Ihre Daten innerhalb von 30 Tagen vollständig.",
       },
     ],
   },

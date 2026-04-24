@@ -37,7 +37,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 
 # Resend (Rechnungen + Mahnungen)
 RESEND_API_KEY=
-RESEND_FROM_EMAIL=billing@kuechenwert.de
+RESEND_FROM_EMAIL=billing@kuechenwert24.de
 
 # Cron-Manual-Trigger + Vercel-Cron
 CRON_SECRET=
@@ -249,11 +249,13 @@ Ergebnis: 21 OK · 0 FAIL
 7. Smoke-Test gegen die Live-URL fahren:
 
    ```bash
-   NEXT_PUBLIC_SITE_URL=https://kuechenwert.de \
+   # Für Smoke-Tests die Punycode-Form verwenden (curl/Node-fetch kommen
+   # mit Umlauten in Host-Headern nicht zuverlässig klar).
+   NEXT_PUBLIC_SITE_URL=https://küchenwert.de \
    CRON_SECRET=... \
    SUPABASE_SERVICE_ROLE_KEY=... \
    NEXT_PUBLIC_SUPABASE_URL=... \
-   node scripts/smoke-e2e.mjs --base https://kuechenwert.de
+   node scripts/smoke-e2e.mjs --base https://xn--kchenwert-q9a.de
    ```
 
 ---

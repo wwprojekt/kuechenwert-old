@@ -12,7 +12,10 @@ Verbindliche Regel fuer ALLE Agents in diesem Workspace. Gilt ohne Ausnahme.
 - **Workspace-Root**: `C:\Users\PCUser\Projects\kuechenwert`
 - **Git-Remote**: `https://github.com/wwprojekt/kuechenwert.git` (origin, `main`)
 - **Dokploy-App-ID**: Wert aus GH-Secret `DOKPLOY_APP_ID` (strikt app-scoped)
-- **Produktions-Domain**: `https://küchenwert.de` (Punycode: `xn--kchenwert-q9a.de`). Ignoriere `kuechenwert.de` ohne Umlaut — das ist ein fremder Domain-Park (nicht unser Server).
+- **Produktions-Domains**:
+  - `https://küchenwert.de` (primär, Punycode: `xn--kchenwert-q9a.de`) — öffentliche Website, SEO-Canonical, alle User-Einstiegspunkte.
+  - `https://kuechenwert24.de` (sekundär, ASCII) — E-Mail-Versand (`@kuechenwert24.de`), Cron-Trigger von Drittsystemen, 301-Redirect auf die Hauptdomain.
+  - `kuechenwert.de` ohne Umlaut gehört uns **NICHT** (fremder Domain-Park). Nie im Code oder in E-Mail-Adressen verwenden.
 
 ## Harte Regeln
 
@@ -20,7 +23,7 @@ Verbindliche Regel fuer ALLE Agents in diesem Workspace. Gilt ohne Ausnahme.
    - `wwprojekt/caravanwert` und alle anderen Repos des GH-Accounts
    - Andere lokale Projekte (`C:\Users\PCUser\Projects\*` ausser `kuechenwert`)
    - Andere Dokploy-Apps als die via `DOKPLOY_APP_ID` referenzierte
-   - Andere Domains ausser `küchenwert.de` und ihren Subdomains
+   - Andere Domains ausser `küchenwert.de`, `kuechenwert24.de` und ihren Subdomains
    - Andere Supabase-Projekte als das, das in `NEXT_PUBLIC_SUPABASE_URL` dieses Repos hinterlegt ist
 
 2. **`cd` / Working-Directory-Wechsel raus aus `C:\Users\PCUser\Projects\kuechenwert` ist verboten.** Auch nicht temporaer.

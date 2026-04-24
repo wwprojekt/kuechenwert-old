@@ -147,8 +147,8 @@ export default function DatenschutzPage() {
         </ul>
         <p>
           Anfragen senden Sie bitte an{" "}
-          <a className="text-brand-700 hover:underline" href="mailto:datenschutz@kuechenwert.de">
-            datenschutz@kuechenwert.de
+          <a className="text-brand-700 hover:underline" href="mailto:datenschutz@kuechenwert24.de">
+            datenschutz@kuechenwert24.de
           </a>
           . Wir reagieren binnen 30 Tagen.
         </p>

@@ -26,7 +26,7 @@ export default function ImpressumPage() {
         </p>
         <p>
           Betreibt die Plattform <strong className="text-ink">{COMPANY.brand_name}</strong>{" "}
-          unter den Domains <em>küchenwert.de</em> bzw. <em>kuechenwert.de</em>.
+          unter den Domains <em>küchenwert.de</em> bzw. <em>kuechenwert24.de</em>.
         </p>
 
         <h2 className="text-xl font-bold text-ink">Handelsregister</h2>
