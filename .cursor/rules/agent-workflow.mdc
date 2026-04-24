@@ -1,0 +1,37 @@
+---
+description: Git- und Supabase-Deployment-Workflow für Agents in diesem Projekt
+alwaysApply: true
+---
+
+# Agent-Deployment-Workflow
+
+Verbindliche Konvention für KüchenWert. Der Agent handelt **autonom und proaktiv** — ohne Rückfragen bei Standard-Arbeit.
+
+## Git
+
+- **Direkt auf `main` committen und pushen** — kein Feature-Branch, kein PR, keine Rückfrage.
+- Nach jeder inhaltlich abgeschlossenen Änderung: `git add` → `git commit -F <tmp>` → `git push origin main`.
+- Commit-Messages auf Deutsch, Conventional-Commits (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:` …), prägnant, mit Kurzbegründung.
+- **Nicht mehrere Mini-Commits** — logisch zusammengehörende Änderungen in einem Commit bündeln.
+- PowerShell hat kein `&&` und kein Heredoc → Befehle einzeln ausführen, Commit-Message über `git commit -F .tmp_commit_msg.txt` (Temp-File danach löschen).
+- Push auf `main` triggert via `.github/workflows/deploy.yml` automatisch Dokploy-Deploy → Production.
+
+## Supabase (End-to-End)
+
+Der Agent ist für **alle** Supabase-Änderungen verantwortlich: Migrations, Edge Functions, RLS, Policies, Storage-Buckets, Seeds, Types.
+
+**Primärer Weg: MCP-Server `plugin-supabase-supabase`**
+
+- Schema-Änderungen: SQL-File unter `supabase/migrations/NNN_beschreibung.sql` anlegen (fortlaufende Nummer) **und** via `apply_migration` sofort auf die Production-DB ausführen.
+- Ad-hoc-Queries/Seeds: `execute_sql` (immer erst `list_tables` / `get_advisors` als Sanity-Check).
+- Edge Functions: `supabase/functions/<name>/index.ts` anlegen, dann `deploy_edge_function`.
+- Types nach Schema-Änderung: `generate_typescript_types` ausführen, Output committen.
+- Bei TS-Type-Mismatch nach einer Migration: Types neu generieren und committen, bevor gepusht wird.
+
+**Destruktive Operationen (DROP, TRUNCATE, Daten-Löschen) direkt durchziehen** — keine Rückfrage. Aber: immer erst als versionierte Migration-Datei schreiben, damit die Änderung reproduzierbar ist.
+
+## Safety
+
+- Niemals `SUPABASE_SERVICE_ROLE_KEY`, API-Keys oder Secrets ins Repo committen (`.env.local` ist gitignored).
+- Vor jedem Push: `npx tsc --noEmit` muss clean sein. Build-Failure = Fix erst, dann Push.
+- Nach jedem Push: kurz Deploy-Status erwähnen (Action-URL + erwartete Go-Live-Zeit).

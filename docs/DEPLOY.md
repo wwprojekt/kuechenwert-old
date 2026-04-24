@@ -2,13 +2,24 @@
 
 ## 1. Supabase
 
+### Einmalige Einrichtung
+
 1. Neues Projekt in [Supabase Dashboard](https://supabase.com/dashboard) anlegen (Region: Frankfurt).
-2. **SQL Editor**: Inhalt von `supabase/migrations/001_initial_schema.sql` ausführen.
-3. **Project Settings → API**: `NEXT_PUBLIC_SUPABASE_URL` und `NEXT_PUBLIC_SUPABASE_ANON_KEY` kopieren.
-4. **Authentication → Providers → Email**: Magic Links aktivieren (oder E-Mail + Passwort).
-5. **Authentication → URL configuration**:
+2. **Project Settings → API**: `NEXT_PUBLIC_SUPABASE_URL` und `NEXT_PUBLIC_SUPABASE_ANON_KEY` kopieren.
+3. **Authentication → Providers → Email**: Magic Links aktivieren (oder E-Mail + Passwort).
+4. **Authentication → URL configuration**:
    - **Site URL**: `https://küchenwert.de`
    - **Redirect URLs**: `http://localhost:3000/**`, `https://küchenwert.de/**`, `https://www.küchenwert.de/**`
+
+### Migrations, Edge Functions & RLS (laufender Betrieb)
+
+Alle Schema-/Policy-/Function-Änderungen laufen **via Cursor-Agent** (MCP `plugin-supabase-supabase`) direkt gegen Production — siehe `.cursor/rules/agent-workflow.mdc`. Kurz:
+
+- SQL-Migration → versioniert in `supabase/migrations/NNN_*.sql`, dann via `apply_migration` ausgeführt.
+- Edge Functions → `supabase/functions/<name>/index.ts`, deploy via `deploy_edge_function`.
+- Types (`src/types/database.types.ts` o. ä.) nach jeder Schema-Änderung mit `generate_typescript_types` neu erzeugen und committen.
+
+Manuelles Anwenden im SQL-Editor ist nur Fallback, wenn der MCP-Server nicht erreichbar ist.
 
 ## 2. Stripe
 
