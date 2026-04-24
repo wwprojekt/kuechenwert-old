@@ -1,0 +1,50 @@
+---
+description: Strenger Projekt-Scope - Agents duerfen nur KüchenWert anfassen
+alwaysApply: true
+---
+
+# Projekt-Scope — strikt KüchenWert
+
+Verbindliche Regel fuer ALLE Agents in diesem Workspace. Gilt ohne Ausnahme.
+
+## Identitaet dieses Projekts
+
+- **Workspace-Root**: `C:\Users\PCUser\Projects\kuechenwert`
+- **Git-Remote**: `https://github.com/wwprojekt/kuechenwert.git` (origin, `main`)
+- **Dokploy-App-ID**: Wert aus GH-Secret `DOKPLOY_APP_ID` (strikt app-scoped)
+- **Produktions-Domain**: `https://küchenwert.de` (Punycode: `xn--kchenwert-q9a.de`). Ignoriere `kuechenwert.de` ohne Umlaut — das ist ein fremder Domain-Park (nicht unser Server).
+
+## Harte Regeln
+
+1. **Keine Schreib- oder Deploy-Operationen auf anderen Projekten.** Insbesondere verboten sind jede Berührung mit:
+   - `wwprojekt/caravanwert` und alle anderen Repos des GH-Accounts
+   - Andere lokale Projekte (`C:\Users\PCUser\Projects\*` ausser `kuechenwert`)
+   - Andere Dokploy-Apps als die via `DOKPLOY_APP_ID` referenzierte
+   - Andere Domains ausser `küchenwert.de` und ihren Subdomains
+   - Andere Supabase-Projekte als das, das in `NEXT_PUBLIC_SUPABASE_URL` dieses Repos hinterlegt ist
+
+2. **`cd` / Working-Directory-Wechsel raus aus `C:\Users\PCUser\Projects\kuechenwert` ist verboten.** Auch nicht temporaer.
+
+3. **Git-Operationen nur gegen `origin` dieses Repos.** Keine zusaetzlichen Remotes, kein `git push <andere-url>`, kein Clone anderer Repos in diesen Workspace.
+
+4. **GitHub-API / `gh`-Operationen**: Read-only Recherche auf fremden Repos ist erlaubt (z. B. um Beispiele zu lesen), aber **jede schreibende Aktion** (`gh pr create`, `gh issue create`, `gh workflow run`, `gh secret set`, `gh repo edit`, `gh api -X POST/PATCH/PUT/DELETE`) darf sich **ausschliesslich** auf `wwprojekt/kuechenwert` richten.
+
+5. **MCP-Tools (Supabase, Netlify, Slack, Notion, Sentry, Figma, etc.)**: Nur fuer dieses Projekt verwenden. Wenn ein MCP-Server mehrere Projekte sehen kann (z. B. Supabase-Org mit mehreren Projekten, Netlify-Team mit mehreren Sites, Notion-Workspace), **immer erst die Projekt-/Site-/Page-ID verifizieren** und nur gegen die KüchenWert-Ressource schreiben.
+
+6. **Secrets / Env-Vars niemals zwischen Projekten kopieren**, auch nicht "schnell mal zum Testen".
+
+7. **Wenn ein Task nach Cross-Project-Arbeit verlangt** (z. B. "uebernimm das Feature aus caravanwert hierher"): Erst das fremde Repo read-only inspizieren (Clone in Temp-Ordner oder `gh api`-Reads), die Idee im KüchenWert-Workspace frisch implementieren — **niemals Code aus anderen Repos direkt ins hiesige pushen ohne explizite User-Freigabe**, und schon gar nicht umgekehrt.
+
+## Sanity-Check vor jeder schreibenden Operation
+
+Bevor der Agent `git push`, `gh workflow run`, eine MCP-Schreib-Operation oder eine Datei ausserhalb des Workspaces beruehrt:
+
+1. Pruefe `git remote -v` — muss `wwprojekt/kuechenwert` sein.
+2. Pruefe das aktuelle Working-Directory — muss unter `C:\Users\PCUser\Projects\kuechenwert` liegen.
+3. Bei MCP-Calls mit Projekt-/Site-ID: ID im Request-Body gegen die erwartete KüchenWert-Ressource abgleichen.
+
+Wenn einer dieser Checks fehlschlaegt: **STOP**, nichts ausfuehren, den User um Klaerung bitten.
+
+## Bei Unsicherheit
+
+Wenn nicht eindeutig ist, ob eine Operation gegen KüchenWert oder ein Fremd-Projekt laeuft: **nicht ausfuehren**, sondern den User fragen. Lieber einmal mehr nachfragen als ein fremdes Projekt versehentlich veraendern.
