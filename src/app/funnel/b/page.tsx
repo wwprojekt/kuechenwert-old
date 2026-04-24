@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Lightbulb,
   Phone,
-  Check,
   Mail,
   CloudUpload,
   AlertCircle,
@@ -1147,12 +1146,17 @@ function CardGroup({
   onAutoAdvance,
 }: CardGroupProps) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Auf schmalen Spalten (columns=1) behalten wir Icon links + Text rechts —
+  // bei mehreren Spalten schalten wir auf "Quiz-Card": Icon-Bubble zentriert oben,
+  // Text darunter — identischer Look wie Funnel A (kuechenportal-Style).
   const colClass =
     columns === 3
-      ? "sm:grid-cols-3"
+      ? "grid-cols-2 sm:grid-cols-3"
       : columns === 2
-        ? "sm:grid-cols-2"
+        ? "grid-cols-2"
         : "";
+  const isVertical = columns !== 1;
 
   function handleClick(v: string) {
     onChange(v);
@@ -1163,41 +1167,96 @@ function CardGroup({
   }
 
   return (
-    <div className={`grid gap-2 ${colClass}`}>
+    <div className={clsx("grid gap-3 sm:gap-4", colClass)}>
       {options.map((o) => {
         const selected = o.value === value;
+
+        if (isVertical) {
+          return (
+            <button
+              type="button"
+              key={`${o.value}-${o.label}`}
+              onClick={() => handleClick(o.value)}
+              aria-pressed={selected}
+              className={clsx(
+                "group flex flex-col items-center justify-center gap-3 rounded-2xl border-2 px-4 py-6 text-center transition-all",
+                selected
+                  ? "border-brand-500 bg-brand-50 shadow-card-active ring-4 ring-brand-500/15"
+                  : "border-neutral-200 bg-white hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-card-hover",
+              )}
+            >
+              {o.icon && (
+                <div
+                  className={clsx(
+                    "grid h-14 w-14 place-items-center rounded-full transition",
+                    selected
+                      ? "bg-brand-500 text-white"
+                      : "bg-brand-50 text-brand-600 group-hover:bg-brand-100",
+                  )}
+                >
+                  <span className="[&>svg]:h-7 [&>svg]:w-7">{o.icon}</span>
+                </div>
+              )}
+              <div className="flex flex-col gap-1">
+                <span
+                  className={clsx(
+                    "font-display text-[15px] font-bold leading-tight sm:text-base",
+                    selected ? "text-brand-900" : "text-black",
+                  )}
+                >
+                  {o.label}
+                </span>
+                {o.description && (
+                  <span className="text-xs leading-relaxed text-ink-muted">
+                    {o.description}
+                  </span>
+                )}
+              </div>
+            </button>
+          );
+        }
+
+        // 1-Spalten-Layout: kompakter, horizontal — fuer Listen wie
+        // Wohnsituation-Sub-Optionen. Icon links, Text rechts,
+        // aber modernisiert ohne den alten Check-Haken.
         return (
           <button
             type="button"
             key={`${o.value}-${o.label}`}
             onClick={() => handleClick(o.value)}
+            aria-pressed={selected}
             className={clsx(
-              "card-clickable !p-4 text-left",
-              selected && "is-selected",
+              "group flex items-center gap-4 rounded-2xl border-2 px-4 py-4 text-left transition-all",
+              selected
+                ? "border-brand-500 bg-brand-50 shadow-card-active ring-4 ring-brand-500/15"
+                : "border-neutral-200 bg-white hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-card-hover",
             )}
-            data-selected={selected}
           >
-            <div className="flex items-start gap-3">
-              {o.icon && (
-                <div
-                  className={clsx(
-                    "mt-0.5 grid h-8 w-8 flex-none place-items-center rounded-lg transition",
-                    selected
-                      ? "bg-brand-100 text-brand-700"
-                      : "bg-neutral-100 text-ink-muted",
-                  )}
-                >
-                  {o.icon}
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium text-ink">{o.label}</div>
-                {o.description && (
-                  <div className="mt-0.5 text-xs text-ink-muted">{o.description}</div>
+            {o.icon && (
+              <div
+                className={clsx(
+                  "grid h-12 w-12 flex-none place-items-center rounded-full transition",
+                  selected
+                    ? "bg-brand-500 text-white"
+                    : "bg-brand-50 text-brand-600 group-hover:bg-brand-100",
                 )}
+              >
+                <span className="[&>svg]:h-6 [&>svg]:w-6">{o.icon}</span>
               </div>
-              {selected && (
-                <Check className="mt-0.5 h-4 w-4 flex-none text-brand-700" />
+            )}
+            <div className="min-w-0 flex-1">
+              <div
+                className={clsx(
+                  "font-display text-[15px] font-bold leading-tight",
+                  selected ? "text-brand-900" : "text-black",
+                )}
+              >
+                {o.label}
+              </div>
+              {o.description && (
+                <div className="mt-0.5 text-xs leading-relaxed text-ink-muted">
+                  {o.description}
+                </div>
               )}
             </div>
           </button>
