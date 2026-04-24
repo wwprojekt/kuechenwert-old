@@ -1,12 +1,16 @@
 /**
  * Funnel A: "Angebot erhalten" (Lead-Generation)
  *
- * 12-Step-Funnel im küchenportal.de/Aroundhome-Stil.
+ * 17-Step-Funnel im küchenportal.de/Aroundhome-Stil.
  *  - Single-Choice-Steps mit Auto-Advance
- *  - Budget als Slider (3.000 – 50.000 €, Default 10.000 €)
- *  - Kontakt gesplittet: Name/E-Mail ⇒ Telefon-Verifizierung
- *  - Keine Pflicht-Adresse (erst nach Lead-Kauf erfasst)
- * Stammdaten (Fronten, Geraete, Worktops) werden aus DB geladen.
+ *  - 4 ergänzende Quiz-Fragen (Farbe, Kochfeld, Backofen, Kochstil)
+ *    für mehr "easy clicks" → weniger Abbruch vor dem Kontakt-Teil.
+ *  - Arbeitsplatte als 6 Material-Kategorien mit Bildern (nicht mehr
+ *    DB-Stammdaten-Liste — der Händler klärt das Detail am Telefon).
+ *  - Fronten/Geräte-Marken optional (Skip-first).
+ *  - Budget als Slider (3.000 – 50.000 €, Default 10.000 €).
+ *  - Kontakt gesplittet: Name/E-Mail ⇒ Telefon-Verifizierung.
+ *  - Keine Pflicht-Adresse (wird erst nach Lead-Kauf erfasst).
  */
 
 export const FUNNEL_A_ID = "a" as const;
@@ -15,7 +19,6 @@ export type FunnelAStepType =
   | "cards"
   | "image-cards"
   | "multi-cards"
-  | "stammdaten-cards"
   | "stammdaten-multi-cards"
   | "size"
   | "budget-slider"
@@ -68,23 +71,53 @@ export const FUNNEL_A_STEPS: FunnelAStepConfig[] = [
     required: false,
   },
   {
-    slug: "fronten",
-    label: "Fronten",
-    description: "Welche Fronten bevorzugen Sie? (optional, mehrere möglich)",
-    type: "stammdaten-multi-cards",
+    slug: "farbe",
+    label: "Farbwelt",
+    description: "Welche Farbwelt gefällt Ihnen?",
+    type: "cards",
     required: false,
   },
   {
     slug: "arbeitsplatte",
     label: "Arbeitsplatte",
     description: "Welches Material wünschen Sie für die Arbeitsplatte?",
-    type: "stammdaten-cards",
+    type: "image-cards",
+    required: false,
+  },
+  {
+    slug: "kochfeld",
+    label: "Kochfeld",
+    description: "Welches Kochfeld bevorzugen Sie?",
+    type: "cards",
+    required: false,
+  },
+  {
+    slug: "backofen",
+    label: "Backofen",
+    description: "Wie soll der Backofen eingebaut sein?",
+    type: "cards",
+    required: false,
+  },
+  {
+    slug: "kochstil",
+    label: "Kochstil",
+    description: "Wie wird bei Ihnen gekocht?",
+    type: "cards",
+    required: false,
+  },
+  {
+    slug: "fronten",
+    label: "Fronten (optional)",
+    description:
+      "Haben Sie Lieblings-Fronten? Überspringen ist absolut ok – der Küchenplaner empfiehlt passende Fronten beim Termin.",
+    type: "stammdaten-multi-cards",
     required: false,
   },
   {
     slug: "geraete",
-    label: "Geräte-Marken",
-    description: "Welche Geräte-Marken bevorzugen Sie? (optional)",
+    label: "Geräte-Marken (optional)",
+    description:
+      "Gibt es Marken, die Sie bevorzugen? Kein Muss – überspringen Sie, wenn Sie offen sind.",
     type: "stammdaten-multi-cards",
     required: false,
   },
@@ -152,7 +185,11 @@ export const FUNNEL_A_HOUSING = [
 // ---------------------------------------------------------------
 // 3) Kuechenform - mit echten Küchen-Bildern
 // ---------------------------------------------------------------
-import { FUNNEL_KITCHEN_FORMS, FUNNEL_KITCHEN_STYLES } from "@/lib/images";
+import {
+  FUNNEL_KITCHEN_FORMS,
+  FUNNEL_KITCHEN_STYLES,
+  FUNNEL_WORKTOP_CATEGORIES,
+} from "@/lib/images";
 
 export const FUNNEL_A_KITCHEN_FORMS = [
   { id: "zeile", label: "Küchenzeile", description: "Gerade Front", bgClass: "bg-neutral-200", imageSrc: FUNNEL_KITCHEN_FORMS.zeile },
@@ -187,7 +224,99 @@ export const FUNNEL_A_STYLES = [
 ] as const;
 
 // ---------------------------------------------------------------
-// 9) Zeitrahmen
+// 6) Farbwelt (neuer Quiz-Step)
+// ---------------------------------------------------------------
+export const FUNNEL_A_COLORS = [
+  { id: "hell", label: "Hell", description: "Weiß, Creme, Beige" },
+  { id: "holz", label: "Holzton", description: "Natur, warm, Eiche" },
+  { id: "dunkel", label: "Dunkel", description: "Anthrazit, Schwarz, Grau" },
+  { id: "farbig", label: "Farbig", description: "Blau, Grün, Petrol" },
+  { id: "mix", label: "Zweifarbig", description: "Kombination aus 2 Farben" },
+  { id: "unsicher", label: "Weiß noch nicht", description: "Bin offen" },
+] as const;
+
+// ---------------------------------------------------------------
+// 7) Arbeitsplatte — Material-Kategorien (neu: keine DB-Liste mehr)
+// ---------------------------------------------------------------
+export const FUNNEL_A_WORKTOP_CATEGORIES = [
+  {
+    id: "holz",
+    label: "Holz",
+    description: "Massiv, warm, gemütlich",
+    bgClass: "bg-amber-50",
+    imageSrc: FUNNEL_WORKTOP_CATEGORIES.holz,
+  },
+  {
+    id: "naturstein",
+    label: "Naturstein",
+    description: "Granit, Marmor, Schiefer",
+    bgClass: "bg-neutral-200",
+    imageSrc: FUNNEL_WORKTOP_CATEGORIES.naturstein,
+  },
+  {
+    id: "quarz",
+    label: "Quarz / Quarzkomposit",
+    description: "Robust, pflegeleicht",
+    bgClass: "bg-neutral-100",
+    imageSrc: FUNNEL_WORKTOP_CATEGORIES.quarz,
+  },
+  {
+    id: "keramik",
+    label: "Keramik / Sinterstein",
+    description: "Kratz- und hitzefest",
+    bgClass: "bg-neutral-200",
+    imageSrc: FUNNEL_WORKTOP_CATEGORIES.keramik,
+  },
+  {
+    id: "schichtstoff",
+    label: "Schichtstoff",
+    description: "Preiswert, viele Dekore",
+    bgClass: "bg-neutral-100",
+    imageSrc: FUNNEL_WORKTOP_CATEGORIES.schichtstoff,
+  },
+  {
+    id: "unsicher",
+    label: "Beratung gewünscht",
+    description: "Das soll der Planer empfehlen",
+    bgClass: "bg-neutral-200",
+    imageSrc: FUNNEL_WORKTOP_CATEGORIES.unsicher,
+  },
+] as const;
+
+// ---------------------------------------------------------------
+// 8) Kochfeld (neuer Quiz-Step)
+// ---------------------------------------------------------------
+export const FUNNEL_A_COOKTOPS = [
+  { id: "induktion", label: "Induktion", description: "Schnell, sicher, modern" },
+  { id: "ceran", label: "Ceran / Glaskeramik", description: "Bewährter Klassiker" },
+  { id: "gas", label: "Gas", description: "Direkte Hitzeregelung" },
+  { id: "unsicher", label: "Weiß noch nicht", description: "Soll der Planer empfehlen" },
+] as const;
+
+// ---------------------------------------------------------------
+// 9) Backofen-Einbau (neuer Quiz-Step)
+// ---------------------------------------------------------------
+export const FUNNEL_A_OVENS = [
+  { id: "unter-kochfeld", label: "Unter dem Kochfeld", description: "Klassisch, platzsparend" },
+  { id: "augenhoehe", label: "Auf Augenhöhe", description: "Bequem zu bedienen" },
+  { id: "doppelt", label: "Zwei Backöfen", description: "Backofen + Dampfgarer o. ä." },
+  { id: "unsicher", label: "Weiß noch nicht", description: "Bin offen" },
+] as const;
+
+// ---------------------------------------------------------------
+// 10) Kochstil (neuer Quiz-Step)
+// ---------------------------------------------------------------
+export const FUNNEL_A_COOKSTYLES = [
+  { id: "allein", label: "Ich koche alleine", description: "Eher selten, praktisch" },
+  { id: "paar", label: "Zu zweit", description: "Gemütlich, regelmäßig" },
+  { id: "familie", label: "Mit Familie / Kindern", description: "Oft, funktional" },
+  { id: "freunde", label: "Mit Freunden / Gästen", description: "Gerne ausgiebig, offen" },
+  { id: "selten", label: "Eher selten", description: "Schnell & unkompliziert" },
+  { id: "unsicher", label: "Weiß noch nicht", description: "Kein Thema" },
+] as const;
+
+// ---------------------------------------------------------------
+// 11) Zeitrahmen
 // ---------------------------------------------------------------
 export const FUNNEL_A_TIMEFRAMES = [
   { id: "asap", label: "So schnell wie möglich", months: 1 },
@@ -199,7 +328,7 @@ export const FUNNEL_A_TIMEFRAMES = [
 ] as const;
 
 // ---------------------------------------------------------------
-// Budget-Slider-Config (ersetzt die alten BUDGET-Cards)
+// Budget-Slider-Config
 // ---------------------------------------------------------------
 export const FUNNEL_A_BUDGET_SLIDER = {
   min: 3_000,
@@ -219,26 +348,32 @@ export interface FunnelAData {
   size: string;
   style: string;
 
-  // Step 6-8 (Stammdaten-IDs)
+  // Step 6-10 (neue Quiz-Felder)
+  color: string;
+  worktopCategory: string;
+  cooktop: string;
+  oven: string;
+  cookstyle: string;
+
+  // Step 11-12 (Stammdaten-IDs, optional)
   frontMaterialIds: string[];
-  worktopMaterialId: string;
   applianceBrandIds: string[];
 
-  // Step 9-10 (Pflicht)
+  // Step 13-14 (Pflicht)
   timeframe: string;
   /** Budget in Euro (Slider-Wert). 0 = noch nicht gewählt. */
   budget: number;
 
-  // Step 11 (Pflicht)
+  // Step 15 (Pflicht)
   plz: string;
 
-  // Step 12 (Kontakt – ohne Telefon)
+  // Step 16 (Kontakt – ohne Telefon)
   salutation: string;
   firstName: string;
   lastName: string;
   email: string;
 
-  // Step 13 (Telefon-Verifizierung – Pflicht)
+  // Step 17 (Telefon-Verifizierung – Pflicht)
   phone: string;
   consentCall: boolean;
   consentMarketing: boolean;
@@ -251,8 +386,12 @@ export function createEmptyFunnelAData(): FunnelAData {
     kitchenForm: "",
     size: "",
     style: "",
+    color: "",
+    worktopCategory: "",
+    cooktop: "",
+    oven: "",
+    cookstyle: "",
     frontMaterialIds: [],
-    worktopMaterialId: "",
     applianceBrandIds: [],
     timeframe: "",
     budget: 0,
@@ -268,7 +407,7 @@ export function createEmptyFunnelAData(): FunnelAData {
 }
 
 // ---------------------------------------------------------------
-// Stammdaten-Slot-Typen (kommen aus DB)
+// Stammdaten-Slot-Typen (kommen aus DB, nur noch Fronten+Geräte)
 // ---------------------------------------------------------------
 export interface CatalogItem {
   id: string;

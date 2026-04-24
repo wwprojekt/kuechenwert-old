@@ -27,6 +27,11 @@ import {
   FUNNEL_A_KITCHEN_FORMS,
   FUNNEL_A_SIZES,
   FUNNEL_A_STYLES,
+  FUNNEL_A_COLORS,
+  FUNNEL_A_WORKTOP_CATEGORIES,
+  FUNNEL_A_COOKTOPS,
+  FUNNEL_A_OVENS,
+  FUNNEL_A_COOKSTYLES,
   FUNNEL_A_TIMEFRAMES,
   FUNNEL_A_BUDGET_SLIDER,
   createEmptyFunnelAData,
@@ -39,7 +44,10 @@ import {
   HOUSING_ICONS,
   SIZE_ICONS,
   TIMEFRAME_ICONS,
-  WORKTOP_FALLBACK_ICON,
+  COLOR_ICONS,
+  COOKTOP_ICONS,
+  OVEN_ICONS,
+  COOKSTYLE_ICONS,
 } from "@/components/funnel/funnel-a-icons";
 
 const STORAGE_KEY = "kw_funnel_a";
@@ -126,16 +134,18 @@ export function FunnelAClient({
         kitchen_size: data.size,
         kitchenStyle: data.style,
 
+        // Neue Quiz-Felder (landen in funnel_answers JSONB)
+        color_preference: data.color || null,
+        worktop_category: data.worktopCategory || null,
+        cooktop_type: data.cooktop || null,
+        oven_placement: data.oven || null,
+        cooking_style: data.cookstyle || null,
+
         // Stammdaten-Wuensche - als Namen mappen fuer Lesbarkeit im Backend
         front_material_ids: data.frontMaterialIds,
         front_material_names: data.frontMaterialIds
           .map((id) => stammdaten.frontMaterials.find((f) => f.id === id)?.name)
           .filter(Boolean),
-        worktop_material_id: data.worktopMaterialId || null,
-        worktop_material_name:
-          stammdaten.worktopMaterials.find(
-            (w) => w.id === data.worktopMaterialId,
-          )?.name ?? null,
         appliance_brand_ids: data.applianceBrandIds,
         appliance_brand_names: data.applianceBrandIds
           .map(
@@ -196,9 +206,13 @@ export function FunnelAClient({
         return !!data.size || !step.required;
       case "stil":
         return !!data.style || !step.required;
+      case "farbe":
+      case "arbeitsplatte":
+      case "kochfeld":
+      case "backofen":
+      case "kochstil":
       case "fronten":
       case "geraete":
-      case "arbeitsplatte":
         return true;
       case "zeitrahmen":
         return !!data.timeframe;
@@ -236,6 +250,12 @@ export function FunnelAClient({
 
   const isFinal = step.slug === "telefon";
 
+  // Für optionale Stammdaten-Steps: "Überspringen"-Label statt "Weiter",
+  // wenn der Nutzer nichts ausgewählt hat.
+  const isOptionalSkip =
+    (step.slug === "fronten" && data.frontMaterialIds.length === 0) ||
+    (step.slug === "geraete" && data.applianceBrandIds.length === 0);
+
   return (
     <FunnelShell
       currentStep={stepIndex}
@@ -248,6 +268,7 @@ export function FunnelAClient({
       isFinalStep={isFinal}
       isSubmitting={submitting}
       submitLabel="Kostenlose Angebote anfordern"
+      nextLabel={isOptionalSkip ? "Überspringen" : undefined}
     >
       {step.slug === "anlass" && (
         <CardStep
@@ -328,54 +349,124 @@ export function FunnelAClient({
         />
       )}
 
-      {step.slug === "fronten" && (
-        <MultiCardStep
-          options={stammdaten.frontMaterials.map((f) => ({
-            id: f.id,
-            label: f.name,
-          }))}
-          selected={data.frontMaterialIds}
-          onSelectionChange={(ids) => update({ frontMaterialIds: ids })}
-          maxSelections={3}
-          hint="Wählen Sie bis zu 3 Fronten, die Ihnen gefallen – oder überspringen Sie diesen Schritt."
-          columns={2}
-        />
-      )}
-
-      {step.slug === "arbeitsplatte" && (
+      {step.slug === "farbe" && (
         <CardStep
-          options={[
-            {
-              id: "",
-              label: "Egal / Beratung gewünscht",
-              description: "",
-              icon: WORKTOP_FALLBACK_ICON,
-            },
-            ...stammdaten.worktopMaterials.map((w) => ({
-              id: w.id,
-              label: w.name,
-              icon: WORKTOP_FALLBACK_ICON,
-            })),
-          ]}
-          selected={data.worktopMaterialId || ""}
-          onSelect={(id) => update({ worktopMaterialId: id })}
+          options={FUNNEL_A_COLORS.map((c) => ({
+            id: c.id,
+            label: c.label,
+            description: c.description,
+            icon: COLOR_ICONS[c.id],
+          }))}
+          selected={data.color}
+          onSelect={(id) => update({ color: id })}
           onAutoAdvance={goNext}
           columns={3}
         />
       )}
 
-      {step.slug === "geraete" && (
-        <MultiCardStep
-          options={stammdaten.applianceBrands.map((b) => ({
-            id: b.id,
-            label: b.name,
+      {step.slug === "arbeitsplatte" && (
+        <ImageCardStep
+          options={FUNNEL_A_WORKTOP_CATEGORIES.map((w) => ({
+            id: w.id,
+            label: w.label,
+            description: w.description,
+            bgClass: w.bgClass,
+            imageSrc: w.imageSrc,
           }))}
-          selected={data.applianceBrandIds}
-          onSelectionChange={(ids) => update({ applianceBrandIds: ids })}
-          maxSelections={4}
-          hint="Bevorzugen Sie bestimmte Geräte-Marken? (optional, max. 4)"
+          selected={data.worktopCategory ? [data.worktopCategory] : []}
+          onSelectionChange={(ids) =>
+            update({ worktopCategory: ids[0] ?? "" })
+          }
+          autoAdvanceMs={300}
+          onAutoAdvance={goNext}
           columns={3}
         />
+      )}
+
+      {step.slug === "kochfeld" && (
+        <CardStep
+          options={FUNNEL_A_COOKTOPS.map((c) => ({
+            id: c.id,
+            label: c.label,
+            description: c.description,
+            icon: COOKTOP_ICONS[c.id],
+          }))}
+          selected={data.cooktop}
+          onSelect={(id) => update({ cooktop: id })}
+          onAutoAdvance={goNext}
+          columns={2}
+        />
+      )}
+
+      {step.slug === "backofen" && (
+        <CardStep
+          options={FUNNEL_A_OVENS.map((o) => ({
+            id: o.id,
+            label: o.label,
+            description: o.description,
+            icon: OVEN_ICONS[o.id],
+          }))}
+          selected={data.oven}
+          onSelect={(id) => update({ oven: id })}
+          onAutoAdvance={goNext}
+          columns={2}
+        />
+      )}
+
+      {step.slug === "kochstil" && (
+        <CardStep
+          options={FUNNEL_A_COOKSTYLES.map((c) => ({
+            id: c.id,
+            label: c.label,
+            description: c.description,
+            icon: COOKSTYLE_ICONS[c.id],
+          }))}
+          selected={data.cookstyle}
+          onSelect={(id) => update({ cookstyle: id })}
+          onAutoAdvance={goNext}
+          columns={3}
+        />
+      )}
+
+      {step.slug === "fronten" && (
+        <>
+          <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+            <strong className="font-semibold">Kein Muss.</strong>{" "}
+            Überspringen Sie diesen Schritt — der Küchenplaner empfiehlt
+            beim Termin die passenden Fronten. Wer schon Favoriten hat,
+            wählt bis zu 3 aus.
+          </div>
+          <MultiCardStep
+            options={stammdaten.frontMaterials.map((f) => ({
+              id: f.id,
+              label: f.name,
+            }))}
+            selected={data.frontMaterialIds}
+            onSelectionChange={(ids) => update({ frontMaterialIds: ids })}
+            maxSelections={3}
+            columns={2}
+          />
+        </>
+      )}
+
+      {step.slug === "geraete" && (
+        <>
+          <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+            <strong className="font-semibold">Kein Muss.</strong> Wenn Sie
+            offen sind: einfach überspringen. Sonst bis zu 4 bevorzugte
+            Marken markieren.
+          </div>
+          <MultiCardStep
+            options={stammdaten.applianceBrands.map((b) => ({
+              id: b.id,
+              label: b.name,
+            }))}
+            selected={data.applianceBrandIds}
+            onSelectionChange={(ids) => update({ applianceBrandIds: ids })}
+            maxSelections={4}
+            columns={3}
+          />
+        </>
       )}
 
       {step.slug === "zeitrahmen" && (

@@ -32,6 +32,9 @@ export function PlzStep({ value, onChange }: PlzStepProps) {
           pattern="[0-9]{5}"
           maxLength={5}
           placeholder="z.B. 10115"
+          name="postal-code"
+          autoComplete="postal-code"
+          aria-label="Postleitzahl"
           value={value}
           onChange={(e) =>
             onChange(e.target.value.replace(/\D/g, "").slice(0, 5))

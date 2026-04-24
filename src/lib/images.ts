@@ -51,6 +51,23 @@ export const FUNNEL_KITCHEN_STYLES = {
   individuell: u("1560448204-e02f11c3d0e2", 600),    // skandinavisch offen
 };
 
+/**
+ * Funnel A: Arbeitsplatten-Material-Kategorien
+ * (6 Quiz-Karten anstelle der DB-Liste — pragmatisch, unverbindlich,
+ * Händler klärt das Detail später per Telefon).
+ *
+ * Bilder sind bewusst küchennahe Referenzfotos mit passender Material-/
+ * Farbanmutung, keine exakten Material-Closeups (die liefern wir später aus).
+ */
+export const FUNNEL_WORKTOP_CATEGORIES = {
+  holz: u("1600585154340-be6161a56a0c", 600),      // warme Hell/Holz-Anmutung
+  naturstein: u("1556911220-bff31c812dba", 600),    // dunkel, steinartig
+  quarz: u("1556909212-d5b604d0c90d", 600),         // hell, modern
+  keramik: u("1600566753190-17f0baa2a6c8", 600),    // matt-modern
+  schichtstoff: u("1565538810643-b5bdb714032a", 600), // pragmatisch hell
+  unsicher: u("1560448204-e02f11c3d0e2", 600),      // generisch
+};
+
 /** Mapping Küchenform → Thumbnail */
 export function imageForKitchenForm(form: string | null): string {
   switch ((form ?? "").toLowerCase()) {
