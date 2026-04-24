@@ -61,17 +61,18 @@ export default async function InvoicePrintablePage({
             <div>
               <div className="flex items-center gap-2">
                 <span className="grid h-9 w-9 place-items-center rounded-md bg-brand-700 text-sm font-bold text-white">K</span>
-                <strong className="text-lg text-ink">{COMPANY.name}</strong>
+                <strong className="text-lg text-ink">{COMPANY.brand_name}</strong>
               </div>
               <p className="mt-2 text-xs text-ink-muted">
+                {COMPANY.legal_name}<br />
                 {COMPANY.address}<br />
                 {COMPANY.postal_code} {COMPANY.city}<br />
                 USt-IdNr.: {COMPANY.vat_id}
               </p>
             </div>
             <div className="text-right text-xs text-ink-muted">
-              {COMPANY.register && <p>{COMPANY.register}</p>}
-              {COMPANY.director && <p>Geschäftsführer: {COMPANY.director}</p>}
+              <p>{COMPANY.register_court} {COMPANY.register_no}</p>
+              <p>Geschäftsführung: {COMPANY.director}</p>
             </div>
           </div>
 
@@ -152,7 +153,7 @@ export default async function InvoicePrintablePage({
                 <strong>Zahlungsdaten</strong>
                 <table className="mt-2 text-xs">
                   <tbody>
-                    <tr><td className="pr-3 text-ink-subtle">Empfänger</td><td>{COMPANY.name}</td></tr>
+                    <tr><td className="pr-3 text-ink-subtle">Empfänger</td><td>{COMPANY.bank_account_holder}</td></tr>
                     <tr><td className="pr-3 text-ink-subtle">IBAN</td><td className="font-mono">{COMPANY.bank_iban}</td></tr>
                     <tr><td className="pr-3 text-ink-subtle">BIC</td><td className="font-mono">{COMPANY.bank_bic}</td></tr>
                     <tr><td className="pr-3 text-ink-subtle">Bank</td><td>{COMPANY.bank_name}</td></tr>
@@ -189,8 +190,8 @@ export default async function InvoicePrintablePage({
 
           {/* Footer */}
           <div className="mt-16 border-t border-slate-200 pt-4 text-[10px] text-ink-subtle">
-            {COMPANY.name} · {COMPANY.address} · {COMPANY.postal_code} {COMPANY.city} ·
-            USt-IdNr.: {COMPANY.vat_id}{COMPANY.register ? ` · ${COMPANY.register}` : ""}
+            {COMPANY.legal_name} · {COMPANY.address} · {COMPANY.postal_code} {COMPANY.city} ·
+            USt-IdNr.: {COMPANY.vat_id} · {COMPANY.register_court} {COMPANY.register_no}
           </div>
         </div>
       </div>
@@ -221,9 +222,7 @@ function Row({
 
 function labelMethod(m: string) {
   switch (m) {
-    case "wallet_balance": return "Wallet-Verrechnung";
-    case "stripe": return "Online-Zahlung";
-    case "bank_transfer": return "Banküberweisung";
+    case "bank_transfer": return "SEPA-Überweisung";
     case "sepa": return "SEPA-Lastschrift";
     case "manual": return "manuell";
     default: return m;

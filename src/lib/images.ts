@@ -41,31 +41,35 @@ export const FUNNEL_KITCHEN_FORMS = {
   unsicher: u("1560448204-e02f11c3d0e2", 600),      // generisch / Skandi
 };
 
-/** Funnel: Küchen-Stile (Wahl-Karten) */
+/**
+ * Funnel: Küchen-Stile (Wahl-Karten)
+ * Wir nutzen 6 der 7 verifizierten Unsplash-IDs, so dass jede Stil-Karte
+ * ein eigenes Motiv zeigt.
+ */
 export const FUNNEL_KITCHEN_STYLES = {
-  modern: u("1556911220-bff31c812dba", 600),       // dunkle moderne Küche
-  landhaus: u("1565538810643-b5bdb714032a", 600),  // weiß-warm
-  klassisch: u("1600585154340-be6161a56a0c", 600), // hellgrau klassisch
-  minimalistisch: u("1556909212-d5b604d0c90d", 600), // weiß minimal
-  industrial: u("1600566753190-17f0baa2a6c8", 600),  // industrial / dunkel
-  individuell: u("1560448204-e02f11c3d0e2", 600),    // skandinavisch offen
+  modern: u("1556911220-bff31c812dba", 600),            // dunkel-modern
+  landhaus: u("1565538810643-b5bdb714032a", 600),       // warm-hell (Landhaus-Anmutung)
+  klassisch: u("1600585154340-be6161a56a0c", 600),      // L-Form, hell-klassisch
+  minimalistisch: u("1556909212-d5b604d0c90d", 600),    // weiß minimal
+  industrial: u("1600566753190-17f0baa2a6c8", 600),     // dunkel/Insel industrial
+  individuell: u("1560448204-e02f11c3d0e2", 600),       // skandinavisch offen
 };
 
 /**
  * Funnel A: Arbeitsplatten-Material-Kategorien
- * (6 Quiz-Karten anstelle der DB-Liste — pragmatisch, unverbindlich,
- * Händler klärt das Detail später per Telefon).
- *
- * Bilder sind bewusst küchennahe Referenzfotos mit passender Material-/
- * Farbanmutung, keine exakten Material-Closeups (die liefern wir später aus).
+ * Hier rendern wir bewusst die abstrakten SVG-Material-Pictogramme
+ * (Holzmaserung, Granit-Dots, Quarz-Raster etc.) statt Fotos.
+ * Grund: Ohne verifizierte Material-Close-Up-Fotos wirken Küchen-
+ * übersichten hier redundant zum Stil-Step. Die Pictogramme zeigen
+ * die Textur-Idee klarer und sind als Familie konsistent.
  */
 export const FUNNEL_WORKTOP_CATEGORIES = {
-  holz: u("1600585154340-be6161a56a0c", 600),      // warme Hell/Holz-Anmutung
-  naturstein: u("1556911220-bff31c812dba", 600),    // dunkel, steinartig
-  quarz: u("1556909212-d5b604d0c90d", 600),         // hell, modern
-  keramik: u("1600566753190-17f0baa2a6c8", 600),    // matt-modern
-  schichtstoff: u("1565538810643-b5bdb714032a", 600), // pragmatisch hell
-  unsicher: u("1560448204-e02f11c3d0e2", 600),      // generisch
+  holz: u("1565538810643-b5bdb714032a", 600),
+  naturstein: u("1556911220-bff31c812dba", 600),
+  quarz: u("1556909212-d5b604d0c90d", 600),
+  keramik: u("1600566753190-17f0baa2a6c8", 600),
+  schichtstoff: u("1600585154340-be6161a56a0c", 600),
+  unsicher: u("1560448204-e02f11c3d0e2", 600),
 };
 
 /** Mapping Küchenform → Thumbnail */

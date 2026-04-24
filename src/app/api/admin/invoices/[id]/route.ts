@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 
 interface PatchBody {
   action?: "mark_paid" | "cancel" | "resend" | "trigger_dunning";
-  payment_method?: "wallet_balance" | "stripe" | "bank_transfer" | "sepa" | "manual";
+  payment_method?: "bank_transfer" | "sepa" | "manual";
   dunning_level?: 1 | 2 | 3 | 4 | 5;
   notes?: string;
 }

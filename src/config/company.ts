@@ -1,18 +1,54 @@
+/**
+ * Zentrale Firmendaten für Rechnungen, Impressum, Datenschutz und AGB.
+ *
+ * Alle Felder können über Environment-Variablen überschrieben werden, ansonsten
+ * gelten die unten hinterlegten WohnWert-GmbH-Stammdaten.
+ *
+ * TODO: Sobald die Umsatzsteuer-ID zugeteilt ist und die Bankverbindung
+ *       feststeht, hier oder via ENV eintragen.
+ */
 export const COMPANY = {
-  name: process.env.COMPANY_NAME ?? "KüchenWert GmbH",
-  address: process.env.COMPANY_ADDRESS ?? "Musterstraße 1",
-  postal_code: process.env.COMPANY_POSTAL_CODE ?? "10115",
-  city: process.env.COMPANY_CITY ?? "Berlin",
-  vat_id: process.env.COMPANY_VAT_ID ?? "DE000000000",
-  register: process.env.COMPANY_REGISTER ?? "",
-  director: process.env.COMPANY_DIRECTOR ?? "",
-  bank_iban: process.env.COMPANY_BANK_IBAN ?? "",
-  bank_bic: process.env.COMPANY_BANK_BIC ?? "",
-  bank_name: process.env.COMPANY_BANK_NAME ?? "",
+  legal_name: process.env.COMPANY_NAME ?? "WohnWert GmbH",
+  brand_name: process.env.COMPANY_BRAND ?? "KüchenWert",
+
+  // Anschrift
+  address: process.env.COMPANY_ADDRESS ?? "Hannoversche Str. 106",
+  postal_code: process.env.COMPANY_POSTAL_CODE ?? "30627",
+  city: process.env.COMPANY_CITY ?? "Hannover",
+  country: process.env.COMPANY_COUNTRY ?? "Deutschland",
+
+  // Handelsregister
+  register_court: process.env.COMPANY_REGISTER_COURT ?? "Amtsgericht Hannover",
+  register_no: process.env.COMPANY_REGISTER_NO ?? "HRB 230114",
+
+  // Vertretung
+  director: process.env.COMPANY_DIRECTOR ?? "Mona Kareem-Ameen",
+  editor_responsible: process.env.COMPANY_EDITOR ?? "Mona Kareem-Ameen",
+
+  // Kontakt
+  phone: process.env.COMPANY_PHONE ?? "0511 5153247",
+  email: process.env.COMPANY_EMAIL ?? "info@küchenwert.de",
+  email_ascii: process.env.COMPANY_EMAIL_ASCII ?? "info@kuechenwert.de",
+
+  // Steuer
+  vat_id: process.env.COMPANY_VAT_ID ?? "Beantragt",
+
+  // Bankverbindung der WohnWert GmbH
+  bank_account_holder:
+    process.env.COMPANY_BANK_HOLDER ?? "WohnWert GmbH",
+  bank_iban:
+    process.env.COMPANY_BANK_IBAN ?? "DE75 2519 3331 1192 0580 00",
+  bank_bic: process.env.COMPANY_BANK_BIC ?? "GENODEF1PAT",
+  bank_name: process.env.COMPANY_BANK_NAME ?? "Volksbank eG",
 } as const;
+
+export function fullAddress(): string {
+  return `${COMPANY.legal_name}, ${COMPANY.address}, ${COMPANY.postal_code} ${COMPANY.city}, ${COMPANY.country}`;
+}
 
 export const PAYMENT_TERMS_DAYS = 14;
 export const PENALTY_AMOUNT_EUR = 299;
+export const VAT_RATE_PERCENT = 19;
 
 export const DUNNING_LEVELS = [
   // Stufe 1: freundliche Zahlungserinnerung (gebührenfrei)

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin, supabaseAdmin, audit } from "@/lib/supabase/admin";
+import { notifyDealersOfNewAuction } from "@/lib/dealer-notifications";
 
 export const runtime = "nodejs";
 
@@ -70,6 +71,10 @@ export async function PATCH(
       starts_at: startsAt.toISOString(),
       ends_at: endsAt.toISOString(),
     });
+
+    // Alle aktiven Händler per Mail benachrichtigen (non-blocking).
+    void notifyDealersOfNewAuction(id);
+
     return NextResponse.json({ row: updated });
   }
 

@@ -4,7 +4,7 @@ import {
   BadgeEkomiStyle,
   BadgeDsgvoStyle,
   BadgeSslStyle,
-  BadgeStripeStyle,
+  BadgeRechnungStyle,
 } from "./trust-badges";
 
 export function Footer() {
@@ -17,7 +17,7 @@ export function Footer() {
           <BadgeEkomiStyle />
           <BadgeDsgvoStyle />
           <BadgeSslStyle />
-          <BadgeStripeStyle />
+          <BadgeRechnungStyle />
         </div>
       </div>
 
@@ -64,7 +64,7 @@ export function Footer() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-neutral-200 pt-6 text-xs text-ink-subtle md:flex-row">
           <span>© {new Date().getFullYear()} KüchenWert. Alle Rechte vorbehalten.</span>
-          <span>Bezahlung gesichert via Stripe · DSGVO-konform</span>
+          <span>Kauf auf Rechnung · DSGVO-konform · Deutsches Recht</span>
         </div>
       </div>
     </footer>

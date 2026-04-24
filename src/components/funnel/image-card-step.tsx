@@ -79,18 +79,20 @@ export function ImageCardStep({
                 : "border-neutral-200 shadow-sm hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-card-hover",
             )}
           >
-            {/* Visual-Header: Pictogram in neutraler Flaeche ODER Foto */}
+            {/* Visual-Header: Pictogram auf material-getöntem Hintergrund ODER Foto */}
             {hasPictogram ? (
               <div
                 className={clsx(
                   "relative flex aspect-[4/3] items-center justify-center p-3 transition-colors sm:p-4",
-                  isActive ? "bg-brand-50" : "bg-neutral-50",
+                  // Aktive Karte: kräftiger Brand-Tint überschreibt den Material-Tint
+                  // (klare Selection-Signalisierung). Inaktiv: Material-Tint aus bgClass.
+                  isActive ? "bg-brand-50" : opt.bgClass || "bg-neutral-50",
                 )}
               >
                 <div
                   className={clsx(
                     "h-full w-full transition-colors",
-                    isActive ? "text-brand-600" : "text-brand-500",
+                    isActive ? "text-brand-700" : "text-ink/70",
                   )}
                 >
                   {opt.pictogram}
@@ -99,13 +101,40 @@ export function ImageCardStep({
             ) : (
               <div className={clsx("relative aspect-[4/3] overflow-hidden", opt.bgClass)}>
                 {opt.imageSrc && (
-                  <Image
-                    src={opt.imageSrc}
-                    alt={opt.label}
-                    fill
-                    sizes="(max-width: 640px) 50vw, 280px"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+                  <>
+                    <Image
+                      src={opt.imageSrc}
+                      alt={opt.label}
+                      fill
+                      sizes="(max-width: 640px) 50vw, 280px"
+                      className={clsx(
+                        "object-cover transition-transform duration-500",
+                        isActive ? "scale-[1.03]" : "group-hover:scale-105",
+                      )}
+                    />
+                    {/* Subtiler Gradient am unteren Rand für bessere Lesbarkeit
+                        des Label-Bars (der direkt darunter kommt) */}
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent"
+                    />
+                    {isActive && (
+                      <div
+                        aria-hidden
+                        className="pointer-events-none absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-brand-500 text-white shadow-lg"
+                      >
+                        <svg
+                          className="h-4 w-4"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          strokeWidth={3}
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 10l4 4 8-9" />
+                        </svg>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}

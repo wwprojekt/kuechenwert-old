@@ -3,7 +3,15 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
-import { ArrowLeft, ArrowRight, Phone, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Phone,
+  Loader2,
+  BadgeEuro,
+  ShieldCheck,
+  Clock3,
+} from "lucide-react";
 
 interface FunnelShellProps {
   children: React.ReactNode;
@@ -11,9 +19,15 @@ interface FunnelShellProps {
   currentStep: number;
   /** Total number of steps */
   totalSteps: number;
-  /** Step label shown above the content */
+  /**
+   * Kurzer Kontext-Label (z.B. "Anlass"). Wird als dezenter Eyebrow
+   * oberhalb der Frage gerendert, nicht mehr als Haupt-Headline.
+   */
   stepLabel: string;
-  /** Step description */
+  /**
+   * Die eigentliche Frage (h1). Beispiel:
+   * "Was ist der Anlass für Ihre neue Küche?"
+   */
   stepDescription: string;
   /** Called when back button is pressed */
   onBack: () => void;
@@ -37,26 +51,57 @@ const SUPPORT_PHONE_DISPLAY = "+49 30 - 555 80 100";
 const SUPPORT_PHONE_TEL = "+493055580100";
 
 /**
- * Dezenter Progress-Balken im Küchenportal-Stil.
- * Keine Zahlen, kein "X von Y" — nur ein feiner Balken.
+ * Progress-Balken + dezenter Schritt-Counter rechts.
+ * KP-Style, aber mit Orientierungshilfe (bei 17 Schritten essenziell).
  */
 function ProgressBar({ current, total }: { current: number; total: number }) {
   const percentage = Math.min(100, Math.round(((current + 1) / total) * 100));
   return (
-    <div
-      className="w-full"
-      role="progressbar"
-      aria-valuenow={percentage}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-label={`Schritt ${current + 1} von ${total}`}
-    >
-      <div className="h-[3px] w-full overflow-hidden rounded-full bg-neutral-200">
+    <div className="w-full">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+          Ihr Küchen-Match
+        </span>
+        <span className="text-xs font-medium tabular-nums text-ink-muted">
+          Schritt {current + 1} <span className="text-ink-subtle">/ {total}</span>
+        </span>
+      </div>
+      <div
+        role="progressbar"
+        aria-valuenow={percentage}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Schritt ${current + 1} von ${total}`}
+        className="h-[3px] w-full overflow-hidden rounded-full bg-neutral-200"
+      >
         <div
           className="h-full rounded-full bg-brand-500 transition-all duration-500 ease-out"
           style={{ width: `${percentage}%` }}
         />
       </div>
+    </div>
+  );
+}
+
+/**
+ * Trust-Strip unter dem ProgressBar — 3 Mini-USPs, sehr dezent.
+ * KP zeigt "100% kostenlos · Einfach und sicher · Kostenlose Beratung",
+ * wir übersetzen das in unseren Ton.
+ */
+function FunnelTrustStrip() {
+  const items: Array<{ icon: React.ReactNode; label: string }> = [
+    { icon: <BadgeEuro className="h-3.5 w-3.5" aria-hidden />, label: "Kostenlos & unverbindlich" },
+    { icon: <Clock3 className="h-3.5 w-3.5" aria-hidden />, label: "In 2 Minuten fertig" },
+    { icon: <ShieldCheck className="h-3.5 w-3.5" aria-hidden />, label: "DSGVO · Deutsches Recht" },
+  ];
+  return (
+    <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-[12px] text-ink-muted">
+      {items.map((it) => (
+        <span key={it.label} className="inline-flex items-center gap-1.5">
+          <span className="text-brand-600">{it.icon}</span>
+          {it.label}
+        </span>
+      ))}
     </div>
   );
 }
@@ -165,25 +210,26 @@ export function FunnelShell({
       {/* ============ MAIN ============ */}
       <main className="flex flex-1 flex-col items-center px-4 py-6 sm:py-10 lg:py-14">
         <div className="w-full max-w-2xl">
-          {/* Progress */}
+          {/* Progress + Trust-Strip */}
           <ProgressBar current={currentStep} total={totalSteps} />
+          <FunnelTrustStrip />
 
           {/* Step Card */}
           <div
             key={currentStep}
-            className="mt-6 animate-step-in rounded-2xl border border-neutral-200 bg-white p-6 shadow-card sm:p-10 lg:p-12"
+            className="mt-5 animate-step-in rounded-2xl border border-neutral-200 bg-white p-6 shadow-card sm:p-10 lg:p-12"
           >
-            {/* Titel zentriert, groß, KP-Style */}
-            <h1 className="text-center font-display text-2xl font-bold leading-tight tracking-tight-2 text-black sm:text-[2rem] lg:text-[2.25rem]">
-              {stepLabel}
-            </h1>
-            {stepDescription && stepDescription !== stepLabel && (
-              <p className="mx-auto mt-3 max-w-lg text-center text-[15px] leading-relaxed text-ink-muted sm:text-base">
-                {stepDescription}
-              </p>
+            {/* Dezenter Eyebrow (Kontext-Label) + große Frage als h1 */}
+            {stepLabel && stepLabel !== stepDescription && (
+              <div className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-700">
+                {stepLabel}
+              </div>
             )}
+            <h1 className="mx-auto mt-2 max-w-xl text-center font-display text-[26px] font-bold leading-[1.15] tracking-tight-2 text-black sm:text-[2rem] lg:text-[2.25rem]">
+              {stepDescription}
+            </h1>
 
-            <div className="mt-8 sm:mt-10">{children}</div>
+            <div className="mt-7 sm:mt-9">{children}</div>
 
             {/* Desktop-Navigation (Mobile bekommt Sticky-Footer) */}
             <div className="mt-9 hidden items-center justify-between gap-4 sm:flex">
@@ -233,11 +279,11 @@ export function FunnelShell({
             </div>
           </div>
 
-          {/*
-            Trust-Badges + Live-Counter + SSL-Pills bewusst entfernt — im Funnel
-            lenken sie ab und triggern eher Misstrauen. Trust-Signals gehoeren
-            auf die Landing-Page, nicht in den aktiven Flow.
-          */}
+          {/* Zurückhaltender Service-Hinweis unterhalb der Card */}
+          <p className="mt-5 text-center text-[11px] leading-relaxed text-ink-subtle">
+            Ihre Angaben werden verschlüsselt übertragen. Kein Spam, keine
+            Weitergabe an Dritte ohne Ihre Zustimmung.
+          </p>
         </div>
       </main>
 

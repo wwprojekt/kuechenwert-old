@@ -19,7 +19,7 @@ import {
   BadgeEkomiStyle,
   BadgeDsgvoStyle,
   BadgeSslStyle,
-  BadgeStripeStyle,
+  BadgeRechnungStyle,
 } from "@/components/ui/trust-badges";
 import { KITCHEN_IMAGES, AVATARS, imageForKitchenForm } from "@/lib/images";
 
@@ -279,7 +279,7 @@ export default async function HomePage() {
             <span className="hidden h-6 w-px bg-neutral-300 md:block" />
             <BadgeSslStyle />
             <span className="hidden h-6 w-px bg-neutral-300 md:block" />
-            <BadgeStripeStyle />
+            <BadgeRechnungStyle />
           </div>
         </div>
       </section>

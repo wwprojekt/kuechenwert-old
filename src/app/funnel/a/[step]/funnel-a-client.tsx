@@ -51,7 +51,6 @@ import {
 } from "@/components/funnel/funnel-a-icons";
 import {
   KITCHEN_FORM_PICTOGRAMS,
-  KITCHEN_STYLE_PICTOGRAMS,
   WORKTOP_PICTOGRAMS,
 } from "@/components/funnel/funnel-a-pictograms";
 
@@ -344,7 +343,9 @@ export function FunnelAClient({
             label: s.label,
             description: s.description,
             bgClass: s.bgClass,
-            pictogram: KITCHEN_STYLE_PICTOGRAMS[s.id],
+            // Echte Küchenfotos (statt SVG-Pictogramm): KP-Style,
+            // macht den Step sofort premium & konkret.
+            imageSrc: s.imageSrc,
           }))}
           selected={data.style ? [data.style] : []}
           onSelectionChange={(ids) => update({ style: ids[0] ?? "" })}
@@ -435,11 +436,10 @@ export function FunnelAClient({
 
       {step.slug === "fronten" && (
         <>
-          <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-            <strong className="font-semibold">Kein Muss.</strong>{" "}
-            Überspringen Sie diesen Schritt — der Küchenplaner empfiehlt
-            beim Termin die passenden Fronten. Wer schon Favoriten hat,
-            wählt bis zu 3 aus.
+          <div className="mb-5 rounded-lg border border-neutral-200 bg-surface-soft px-4 py-3 text-[13px] leading-relaxed text-ink-muted">
+            <strong className="font-semibold text-ink">Kein Muss.</strong>{" "}
+            Überspringen Sie diesen Schritt — der Küchenplaner empfiehlt beim
+            Termin passende Fronten. Wer schon Favoriten hat, wählt bis zu 3.
           </div>
           <MultiCardStep
             options={stammdaten.frontMaterials.map((f) => ({
@@ -456,9 +456,9 @@ export function FunnelAClient({
 
       {step.slug === "geraete" && (
         <>
-          <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-            <strong className="font-semibold">Kein Muss.</strong> Wenn Sie
-            offen sind: einfach überspringen. Sonst bis zu 4 bevorzugte
+          <div className="mb-5 rounded-lg border border-neutral-200 bg-surface-soft px-4 py-3 text-[13px] leading-relaxed text-ink-muted">
+            <strong className="font-semibold text-ink">Kein Muss.</strong> Wenn
+            Sie offen sind, einfach überspringen. Sonst bis zu 4 bevorzugte
             Marken markieren.
           </div>
           <MultiCardStep

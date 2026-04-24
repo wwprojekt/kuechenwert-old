@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { COMPANY } from "@/config/company";
 
 export const metadata: Metadata = {
   title: "Datenschutzerklärung – KüchenWert",
@@ -22,19 +23,23 @@ export default function DatenschutzPage() {
           Verantwortlicher im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:
           <br />
           <strong className="text-ink">
-            KüchenWert GmbH
+            {COMPANY.legal_name}
             <br />
-            [Straße und Hausnummer]
+            {COMPANY.address}
             <br />
-            [PLZ Ort], Deutschland
+            {COMPANY.postal_code} {COMPANY.city}, {COMPANY.country}
             <br />
           </strong>
+          Telefon: {COMPANY.phone}
+          <br />
           E-Mail:{" "}
-          <a className="text-brand-700 hover:underline" href="mailto:datenschutz@kuechenwert.de">
-            datenschutz@kuechenwert.de
+          <a className="text-brand-700 hover:underline" href={`mailto:${COMPANY.email_ascii}`}>
+            {COMPANY.email}
           </a>
           <br />
-          Vertretungsberechtigt: [Geschäftsführer/in]
+          Vertretungsberechtigt: {COMPANY.director} (Geschäftsführerin)
+          <br />
+          Handelsregister: {COMPANY.register_court}, {COMPANY.register_no}
         </p>
 
         <h2 className="mt-10 text-xl font-bold text-ink">2. Hosting &amp; technische Bereitstellung</h2>
@@ -100,9 +105,10 @@ export default function DatenschutzPage() {
             erfolgtem Lead-Kauf. Funnel B → ausschließlich der gewinnende Händler.
           </li>
           <li>
-            <strong>Auftragsverarbeiter:</strong> Hosting (Hetzner / Dokploy), Datenbank (Supabase),
-            E-Mail-Versand (Resend), Zahlungsabwicklung (Stripe Payments Europe Ltd., Irland).
-            Mit allen Anbietern besteht ein AVV.
+            <strong>Auftragsverarbeiter:</strong> Hosting (Hetzner / Dokploy), Datenbank (Supabase Inc., USA;
+            EU-Region Frankfurt), E-Mail-Versand (Resend). Mit allen Anbietern besteht ein AVV gemäß Art. 28 DSGVO.
+            Zahlungen an uns erfolgen ausschließlich per SEPA-Überweisung; es werden keine externen
+            Zahlungsdienstleister eingebunden.
           </li>
         </ul>
 

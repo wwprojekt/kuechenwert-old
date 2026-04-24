@@ -32,7 +32,7 @@ export function getSiteUrlPretty(): string {
 }
 
 /**
- * URL für Server-zu-Server Aufrufe (`fetch()`, Stripe-Webhooks, Cron-Trigger).
+ * URL für Server-zu-Server Aufrufe (`fetch()`, Cron-Trigger, Webhooks).
  * Konvertiert den Host nach Punycode (IDN → ASCII), Pfad/Port bleiben.
  *
  * Beispiel:
@@ -64,7 +64,7 @@ export function siteUrl(path: string): string {
 /**
  * Baut eine absolute URL aus einem relativen Pfad in der ASCII-Form.
  * Verwendung: alles was per `fetch()` oder von externen Diensten
- * abgerufen wird (Stripe-Webhooks, eigene Cron-Trigger).
+ * abgerufen wird (Cron-Trigger, eigene Webhooks).
  */
 export function siteUrlAscii(path: string): string {
   const base = getSiteUrlAscii();

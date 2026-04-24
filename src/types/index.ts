@@ -62,7 +62,11 @@ export interface Dealer {
   brands: string[];
   service_radius_km: number;
   plan: DealerPlan;
-  stripe_customer_id: string | null;
+  /**
+   * Kontostand-Restfeld (nur informativ, z. B. für Admin-Gutschriften).
+   * Seit Migration 007 wird das Wallet beim Lead-Kauf NICHT mehr belastet,
+   * alle Käufe laufen über Rechnung + SEPA-Überweisung (14 Tage Ziel).
+   */
   wallet_balance_cents: number;
   is_verified: boolean;
   is_active: boolean;

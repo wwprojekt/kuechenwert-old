@@ -29,7 +29,7 @@ export interface CreateInvoiceInput {
   vat_rate?: number;
   /** Wenn true: status='paid' und paid_at=now() (z. B. Lead-Kauf via Wallet) */
   mark_paid_immediately?: boolean;
-  payment_method?: "wallet_balance" | "stripe" | "bank_transfer" | "sepa" | "manual";
+  payment_method?: "bank_transfer" | "sepa" | "manual";
   /** Tage bis Faelligkeit (default 14) */
   due_in_days?: number;
   notes?: string | null;
@@ -299,9 +299,9 @@ export function renderInvoiceEmailHtml(inv: InvoiceWithItems, link: string): str
   const isPaid = inv.status === "paid";
   return `<!doctype html>
 <html><body style="${baseStyle}">
-  <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:32px">
-    <h1 style="margin:0 0 8px;font-size:22px">${esc(COMPANY.name)}</h1>
-    <p style="color:#64748b;margin:0 0 24px">${esc(COMPANY.address)} · ${esc(COMPANY.postal_code)} ${esc(COMPANY.city)}</p>
+  <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:6px;border:1px solid #e2e8f0;padding:32px">
+    <h1 style="margin:0 0 8px;font-size:22px;color:#1f88a3">${esc(COMPANY.brand_name)}</h1>
+    <p style="color:#64748b;margin:0 0 24px">${esc(COMPANY.legal_name)} · ${esc(COMPANY.address)} · ${esc(COMPANY.postal_code)} ${esc(COMPANY.city)}</p>
 
     <h2 style="margin:0 0 12px;font-size:18px">${isPaid ? "Zahlungsbestätigung &amp; Rechnung" : "Rechnung"} ${esc(inv.invoice_number)}</h2>
     <p style="margin:0 0 16px;color:#475569">
@@ -348,26 +348,27 @@ export function renderInvoiceEmailHtml(inv: InvoiceWithItems, link: string): str
 
     ${
       isPaid
-        ? `<p style="margin:16px 0;padding:12px;background:#dcfce7;color:#166534;border-radius:8px;font-size:13px">
-             ✓ Bereits bezahlt am ${formatDate(inv.paid_at)} (Wallet-Verrechnung).
+        ? `<p style="margin:16px 0;padding:12px;background:#dcfce7;color:#166534;border-radius:6px;font-size:13px">
+             ✓ Bereits bezahlt am ${formatDate(inv.paid_at)}.
            </p>`
-        : `<div style="margin:24px 0;padding:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">
-             <strong>Zahlungsdaten</strong><br>
-             Empfänger: ${esc(COMPANY.name)}<br>
+        : `<div style="margin:24px 0;padding:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px">
+             <strong>Zahlungsdaten – bitte per SEPA-Überweisung binnen 14 Tagen</strong><br>
+             Empfänger: ${esc(COMPANY.bank_account_holder)}<br>
              IBAN: ${esc(COMPANY.bank_iban)}<br>
              BIC: ${esc(COMPANY.bank_bic)}<br>
+             Bank: ${esc(COMPANY.bank_name)}<br>
              Verwendungszweck: <strong>${esc(inv.invoice_number)}</strong>
            </div>`
     }
 
     <p style="text-align:center;margin:24px 0">
-      <a href="${esc(link)}" style="display:inline-block;background:#0f3460;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">Rechnung ansehen / drucken</a>
+      <a href="${esc(link)}" style="display:inline-block;background:#1f88a3;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600">Rechnung ansehen / drucken</a>
     </p>
 
     <p style="font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:16px;margin-top:24px">
-      ${esc(COMPANY.name)} · ${esc(COMPANY.address)} · ${esc(COMPANY.postal_code)} ${esc(COMPANY.city)}<br>
-      USt-IdNr.: ${esc(COMPANY.vat_id)} ${COMPANY.register ? "· " + esc(COMPANY.register) : ""}<br>
-      ${COMPANY.director ? "Geschäftsführer: " + esc(COMPANY.director) : ""}
+      ${esc(COMPANY.legal_name)} · ${esc(COMPANY.address)} · ${esc(COMPANY.postal_code)} ${esc(COMPANY.city)}<br>
+      ${esc(COMPANY.register_court)} ${esc(COMPANY.register_no)} · USt-IdNr.: ${esc(COMPANY.vat_id)}<br>
+      Geschäftsführung: ${esc(COMPANY.director)}
     </p>
   </div>
 </body></html>`;
@@ -412,20 +413,21 @@ export function renderDunningEmailHtml(
       <tr style="border-top:2px solid #fca5a5"><td style="padding:12px;font-weight:bold">Gesamt offen</td><td style="padding:12px;font-weight:bold;text-align:right">${fmt(newGrossCents)}</td></tr>
     </table>
 
-    <div style="margin:24px 0;padding:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">
+    <div style="margin:24px 0;padding:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px">
       <strong>Zahlungsdaten</strong><br>
-      Empfänger: ${esc(COMPANY.name)}<br>
+      Empfänger: ${esc(COMPANY.bank_account_holder)}<br>
       IBAN: ${esc(COMPANY.bank_iban)}<br>
       BIC: ${esc(COMPANY.bank_bic)}<br>
+      Bank: ${esc(COMPANY.bank_name)}<br>
       Verwendungszweck: <strong>${esc(inv.invoice_number)}</strong>
     </div>
 
     <p style="text-align:center;margin:24px 0">
-      <a href="${esc(link)}" style="display:inline-block;background:#0f3460;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">Rechnung &amp; Mahnung ansehen</a>
+      <a href="${esc(link)}" style="display:inline-block;background:#1f88a3;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600">Rechnung &amp; Mahnung ansehen</a>
     </p>
 
     <p style="font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:16px;margin-top:24px">
-      ${esc(COMPANY.name)} · USt-IdNr.: ${esc(COMPANY.vat_id)}
+      ${esc(COMPANY.legal_name)} · ${esc(COMPANY.register_court)} ${esc(COMPANY.register_no)} · USt-IdNr.: ${esc(COMPANY.vat_id)}
     </p>
   </div>
 </body></html>`;

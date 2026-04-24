@@ -4,6 +4,7 @@ import { scoreLead } from "@/config/scoring-rules";
 import { BUDGET_RANGES, TIMEFRAMES } from "@/config/funnel-steps";
 import { getRegionByPlz } from "@/config/regions";
 import { recordConsents, getClientIp } from "@/lib/consent";
+import { notifyDealersOfNewLead } from "@/lib/dealer-notifications";
 
 /**
  * Budget midpoint lookup that works across all funnel configs.
@@ -172,6 +173,13 @@ export async function POST(request: Request) {
         userAgent: request.headers.get("user-agent"),
       },
     );
+
+    // Händler-Benachrichtigungen (nur Funnel-A-Leads die auto-qualifiziert sind):
+    // nicht awaiten, damit der Funnel-Response unter 200 ms bleibt. Fehler werden
+    // intern geloggt; Mail-Versand blockiert den Lead-Insert nicht.
+    if (autoQualify) {
+      void notifyDealersOfNewLead(data.id);
+    }
 
     return NextResponse.json({
       id: data.id,

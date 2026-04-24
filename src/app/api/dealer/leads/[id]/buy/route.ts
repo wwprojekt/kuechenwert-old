@@ -6,13 +6,20 @@ import { createInvoice } from "@/lib/invoices";
 export const runtime = "nodejs";
 
 /**
- * Lead-Kauf — atomar via Postgres-Function `purchase_lead_atomic`.
+ * Lead-Kauf (Post-Pay).
  *
- * Garantien:
- *  - Race-frei: pg_advisory_xact_lock auf lead_id verhindert konkurrierende Käufe
- *  - Doppel-Verkauf-frei: partial unique index ux_match_candidates_one_purchase_per_lead
- *  - Wallet/Lead/Match/Payment in EINER Transaktion (alles oder nichts)
- *  - Funktion ist SECURITY DEFINER (umgeht RLS innerhalb der TX)
+ * Ablauf:
+ *  1. Lead laden, Preis berechnen (calculate_lead_price_cents).
+ *  2. Atomarer Kauf via Postgres-Function `purchase_lead_atomic` — legt
+ *     match_candidate an, setzt Lead-Status auf 'sold', erzeugt eine
+ *     payments-Row mit status='pending'.
+ *  3. Rechnung auf dem API-Layer erzeugen (mark_paid_immediately=false,
+ *     Fälligkeit 14 Tage) und per Mail an den Händler versenden.
+ *     Eingang der Zahlung wird später manuell im Admin-Backend
+ *     (/admin/invoices/[id]) als "bezahlt" markiert, alternativ greift
+ *     das bestehende Dunning nach 7 Tagen.
+ *
+ * Kein Wallet mehr — der Händler erhält eine Rechnung mit Überweisungsdaten.
  */
 export async function POST(
   _req: Request,
@@ -22,7 +29,7 @@ export async function POST(
   if (!guard.ok) return guard.response;
   const { id: leadId } = await ctx.params;
 
-  // 1) Lead-Basisdaten + Preis bestimmen (read-only, keine Mutation)
+  // 1) Lead + Preis
   const { data: lead, error: leadErr } = await supabaseAdmin
     .from("leads")
     .select("id, funnel_type, status, tier, budget_midpoint")
@@ -62,7 +69,7 @@ export async function POST(
   }
   const priceCents = Number(priceData);
 
-  // 2) Atomarer Kauf via PG-Function
+  // 2) Atomarer Kauf
   const { data: result, error: rpcErr } = await supabaseAdmin.rpc(
     "purchase_lead_atomic",
     {
@@ -74,7 +81,6 @@ export async function POST(
 
   if (rpcErr) {
     const msg = rpcErr.message || "";
-    // Mapping der custom Errors auf HTTP-Status
     if (msg.includes("already_owned")) {
       return NextResponse.json({ ok: true, already_owned: true });
     }
@@ -84,12 +90,10 @@ export async function POST(
         { status: 409 },
       );
     }
-    if (msg.includes("wallet_insufficient")) {
+    if (msg.includes("dealer_suspended")) {
       return NextResponse.json(
-        {
-          error: `Wallet zu gering. Benötigt: ${(priceCents / 100).toFixed(2)} €`,
-        },
-        { status: 402 },
+        { error: "Händler-Account ist gesperrt. Bitte offene Rechnungen begleichen." },
+        { status: 403 },
       );
     }
     if (msg.includes("lead_not_found") || msg.includes("dealer_not_found")) {
@@ -111,7 +115,6 @@ export async function POST(
     );
   }
 
-  // RPC liefert SETOF, daher Array
   const row = Array.isArray(result) ? result[0] : result;
   const matchCandidateId = row?.match_candidate_id as string | undefined;
   const paymentId = row?.payment_id as string | undefined;
@@ -123,7 +126,7 @@ export async function POST(
     paymentId,
   });
 
-  // 3) Rechnung erzeugen + per E-Mail (außerhalb der TX, idempotent über payment_id)
+  // 3) Rechnung erzeugen (14 Tage Zahlungsziel, Überweisung)
   const netCents = Math.round(priceCents / 1.19);
   let invoiceNumber: string | null = null;
   try {
@@ -132,16 +135,19 @@ export async function POST(
       type: "lead_purchase",
       lines: [
         {
-          description: `Lead-Kauf KüchenWert · Lead #${leadId.slice(0, 8)} · Tier ${lead.tier} · PLZ-Region`,
+          description: `Lead-Kauf KüchenWert · Lead #${leadId.slice(0, 8)} · Tier ${lead.tier}`,
           unit_price_cents: netCents,
         },
       ],
       reference_type: "lead",
       reference_id: leadId,
       related_payment_id: paymentId,
-      mark_paid_immediately: true,
-      payment_method: "wallet_balance",
+      mark_paid_immediately: false,
+      payment_method: "bank_transfer",
+      due_in_days: 14,
       send_email: true,
+      notes:
+        "Zahlbar binnen 14 Tagen per SEPA-Überweisung auf das unten genannte Konto. Bitte Rechnungsnummer als Verwendungszweck angeben.",
     });
     invoiceNumber = invoice.invoice_number;
   } catch (err) {

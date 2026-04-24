@@ -4,7 +4,8 @@
 
 :root {
   color-scheme: light;
-  --kw-radius-card: 1rem;
+  /* CaravanWert --radius: .375rem (6px) */
+  --kw-radius-card: 0.375rem;
 }
 
 body {
@@ -13,23 +14,24 @@ body {
 
 @layer components {
   /* ============ BUTTONS (größer, mehr Confidence, Hover-Microanimation) ============ */
+  /* Cyan-Teal-Shadow (CaravanWert-Style), RGB aus hsl(191 68% 38%) ≈ 31 136 163 */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-7 py-3.5 text-[15px] font-bold text-white shadow-[0_4px_14px_rgba(245,158,11,0.35)] transition hover:bg-brand-600 hover:shadow-[0_8px_22px_rgba(245,158,11,0.45)] hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-50 disabled:hover:translate-y-0;
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-brand-500 px-7 py-3.5 text-[15px] font-bold text-white shadow-[0_4px_14px_rgba(31,136,163,0.30)] transition hover:bg-brand-600 hover:shadow-[0_8px_22px_rgba(31,136,163,0.40)] hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-50 disabled:hover:translate-y-0;
   }
   .btn-primary-lg {
-    @apply inline-flex items-center justify-center gap-2.5 rounded-xl bg-brand-500 px-8 py-4 text-base font-bold text-white shadow-[0_4px_14px_rgba(245,158,11,0.35)] transition hover:bg-brand-600 hover:shadow-[0_10px_28px_rgba(245,158,11,0.5)] hover:-translate-y-0.5 active:translate-y-0;
+    @apply inline-flex items-center justify-center gap-2.5 rounded-md bg-gradient-to-br from-[hsl(191_68%_43%)] to-[hsl(191_68%_32%)] px-8 py-4 text-base font-bold text-white shadow-[0_4px_14px_rgba(31,136,163,0.35)] transition hover:from-[hsl(191_68%_46%)] hover:to-[hsl(191_68%_35%)] hover:shadow-[0_10px_28px_rgba(31,136,163,0.45)] hover:-translate-y-0.5 active:translate-y-0;
   }
   .btn-accent {
     @apply btn-primary;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-300 bg-white px-6 py-3 text-[15px] font-semibold text-ink shadow-sm transition hover:border-neutral-400 hover:bg-surface-soft hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-neutral-300 bg-white px-6 py-3 text-[15px] font-semibold text-ink shadow-sm transition hover:border-neutral-400 hover:bg-surface-soft hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400 disabled:opacity-50;
   }
   .btn-dark {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-neutral-900 px-7 py-3.5 text-[15px] font-bold text-white shadow-md transition hover:bg-black hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-700 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-secondary-900 px-7 py-3.5 text-[15px] font-bold text-white shadow-md transition hover:bg-secondary-950 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-700 disabled:opacity-50;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-ink-muted transition hover:bg-surface-strong hover:text-ink;
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-ink-muted transition hover:bg-surface-strong hover:text-ink;
   }
   .btn-link {
     @apply inline-flex items-center gap-1.5 text-sm font-bold text-brand-700 underline-offset-4 transition hover:text-brand-800 hover:underline;
@@ -51,7 +53,7 @@ body {
 
   /* ============ INPUTS ============ */
   .input-field {
-    @apply w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-subtle focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20;
+    @apply w-full rounded-md border border-neutral-300 bg-white px-4 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-subtle focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20;
   }
   .label-field {
     @apply mb-1.5 block text-sm font-medium text-ink;
@@ -143,7 +145,7 @@ body {
   }
   .hl-mark::after {
     content: "";
-    @apply absolute -bottom-1 left-0 right-0 -z-10 h-3 rounded-sm bg-brand-300/70;
+    @apply absolute -bottom-1 left-0 right-0 -z-10 h-3 rounded-sm bg-brand-200/80;
   }
 
   /* ============ SECTION EYEBROW ============ */

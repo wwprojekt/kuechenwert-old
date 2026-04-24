@@ -45,116 +45,113 @@ export const FUNNEL_A_STEPS: FunnelAStepConfig[] = [
   {
     slug: "wohnsituation",
     label: "Wohnsituation",
-    description: "Wie wohnen Sie?",
+    description: "Wie wohnen Sie aktuell?",
     type: "cards",
     required: true,
   },
   {
     slug: "kuechenform",
     label: "Küchenform",
-    description: "Welche Küchenform schwebt Ihnen vor?",
+    description: "Welche Küchenform haben Sie im Kopf?",
     type: "image-cards",
     required: true,
   },
   {
     slug: "groesse",
-    label: "Größe",
+    label: "Küchengröße",
     description: "Wie groß ist Ihre Küche ungefähr?",
     type: "size",
     required: false,
   },
   {
     slug: "stil",
-    label: "Stil",
-    description: "Welcher Stil gefällt Ihnen?",
+    label: "Stil & Look",
+    description: "Welcher Stil spricht Sie am meisten an?",
     type: "image-cards",
     required: false,
   },
   {
     slug: "farbe",
     label: "Farbwelt",
-    description: "Welche Farbwelt gefällt Ihnen?",
+    description: "In welche Richtung soll die Farbwelt gehen?",
     type: "cards",
     required: false,
   },
   {
     slug: "arbeitsplatte",
     label: "Arbeitsplatte",
-    description: "Welches Material wünschen Sie für die Arbeitsplatte?",
+    description: "Welches Material darf die Arbeitsplatte haben?",
     type: "image-cards",
     required: false,
   },
   {
     slug: "kochfeld",
     label: "Kochfeld",
-    description: "Welches Kochfeld bevorzugen Sie?",
+    description: "Worauf möchten Sie kochen?",
     type: "cards",
     required: false,
   },
   {
     slug: "backofen",
     label: "Backofen",
-    description: "Wie soll der Backofen eingebaut sein?",
+    description: "Wo soll der Backofen eingebaut sein?",
     type: "cards",
     required: false,
   },
   {
     slug: "kochstil",
     label: "Kochstil",
-    description: "Wie wird bei Ihnen gekocht?",
+    description: "Wie wird bei Ihnen zuhause gekocht?",
     type: "cards",
     required: false,
   },
   {
     slug: "fronten",
-    label: "Fronten (optional)",
+    label: "Fronten · optional",
     description:
-      "Haben Sie Lieblings-Fronten? Überspringen ist absolut ok – der Küchenplaner empfiehlt passende Fronten beim Termin.",
+      "Haben Sie schon Lieblings-Fronten? Sonst empfiehlt der Planer passende beim Termin.",
     type: "stammdaten-multi-cards",
     required: false,
   },
   {
     slug: "geraete",
-    label: "Geräte-Marken (optional)",
-    description:
-      "Gibt es Marken, die Sie bevorzugen? Kein Muss – überspringen Sie, wenn Sie offen sind.",
+    label: "Geräte-Marken · optional",
+    description: "Gibt es Marken, auf die Sie Wert legen?",
     type: "stammdaten-multi-cards",
     required: false,
   },
   {
     slug: "zeitrahmen",
     label: "Zeitrahmen",
-    description: "Wann soll Ihre neue Küche geliefert werden?",
+    description: "Wann soll die neue Küche stehen?",
     type: "cards",
     required: true,
   },
   {
     slug: "budget",
     label: "Budget",
-    description:
-      "Welches Budget haben Sie ungefähr eingeplant? (unverbindlich)",
+    description: "Welches Budget haben Sie ungefähr eingeplant?",
     type: "budget-slider",
     required: true,
   },
   {
     slug: "plz",
     label: "Region",
-    description: "Wo suchen Sie ein Küchenstudio?",
+    description: "Wo suchen Sie Ihr Küchenstudio?",
     type: "plz",
     required: true,
   },
   {
     slug: "kontakt",
-    label: "Wer soll die Angebote erhalten?",
-    description: "Damit wir Ihre Angebote richtig adressieren können.",
+    label: "Kontakt",
+    description: "An wen dürfen wir die Angebote senden?",
     type: "contact",
     required: true,
   },
   {
     slug: "telefon",
-    label: "Zur Verifizierung Ihrer Angaben",
-    description:
-      "Damit wir Ihre Anfrage bestätigen und Rückfragen klären können.",
+    label: "Letzter Schritt",
+    description: "Ihre Telefonnummer — damit wir Rückfragen klären können.",
     type: "phone",
     required: true,
   },
@@ -238,47 +235,52 @@ export const FUNNEL_A_COLORS = [
 // ---------------------------------------------------------------
 // 7) Arbeitsplatte — Material-Kategorien (neu: keine DB-Liste mehr)
 // ---------------------------------------------------------------
+/**
+ * Arbeitsplatten-Karten: jede bekommt einen thematischen Background-Tint,
+ * so dass das Pictogramm die Material-Idee UND die Farbanmutung transportiert
+ * (was ein einzelnes Pictogramm allein nicht könnte).
+ */
 export const FUNNEL_A_WORKTOP_CATEGORIES = [
   {
     id: "holz",
     label: "Holz",
     description: "Massiv, warm, gemütlich",
-    bgClass: "bg-amber-50",
+    bgClass: "bg-amber-50", // warmer Honig-Ton
     imageSrc: FUNNEL_WORKTOP_CATEGORIES.holz,
   },
   {
     id: "naturstein",
     label: "Naturstein",
     description: "Granit, Marmor, Schiefer",
-    bgClass: "bg-neutral-200",
+    bgClass: "bg-slate-100", // kühles Stein-Grau
     imageSrc: FUNNEL_WORKTOP_CATEGORIES.naturstein,
   },
   {
     id: "quarz",
     label: "Quarz / Quarzkomposit",
     description: "Robust, pflegeleicht",
-    bgClass: "bg-neutral-100",
+    bgClass: "bg-neutral-50", // hell, fast weiß — modern
     imageSrc: FUNNEL_WORKTOP_CATEGORIES.quarz,
   },
   {
     id: "keramik",
     label: "Keramik / Sinterstein",
     description: "Kratz- und hitzefest",
-    bgClass: "bg-neutral-200",
+    bgClass: "bg-zinc-100", // matt, leicht kühl
     imageSrc: FUNNEL_WORKTOP_CATEGORIES.keramik,
   },
   {
     id: "schichtstoff",
     label: "Schichtstoff",
     description: "Preiswert, viele Dekore",
-    bgClass: "bg-neutral-100",
+    bgClass: "bg-stone-100", // warm-beige, pragmatisch
     imageSrc: FUNNEL_WORKTOP_CATEGORIES.schichtstoff,
   },
   {
     id: "unsicher",
     label: "Beratung gewünscht",
     description: "Das soll der Planer empfehlen",
-    bgClass: "bg-neutral-200",
+    bgClass: "bg-brand-50", // Marken-Tint signalisiert „Gespräch"
     imageSrc: FUNNEL_WORKTOP_CATEGORIES.unsicher,
   },
 ] as const;

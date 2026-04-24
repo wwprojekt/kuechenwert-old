@@ -1,52 +1,57 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * Design-Tokens extrahiert aus dem Live-CSS von caravanwert.de
+ * (index-CiV7EAFp.css, 184 kB). Primärfarbe ist ein tiefes Cyan-Teal
+ *  --primary: hsl(191 68% 38%)  ≈ #1f88a3
+ * Das wird bei uns zur `brand`-Palette; die 10 Stufen sind numerisch
+ * aus dem Primary abgeleitet.
+ */
 export default {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
       colors: {
-        // ============ BRAND = AMBER/HONEY (Warm-DNA, CaravanWert-Style) ============
+        // ============ BRAND = CYAN-TEAL (CaravanWert hsl(191 68% 38%)) ============
         brand: {
-          50: "#fffbeb",
-          100: "#fef3c7",
-          200: "#fde68a",
-          300: "#fcd34d",
-          400: "#fbbf24",
-          500: "#f59e0b", // Primary CTA
-          600: "#d97706", // Primary CTA Hover
-          700: "#b45309", // Dark Accent (Eyebrow, Logo-Gradient-End)
-          800: "#92400e",
-          900: "#78350f", // Dark Text auf hellem BG
-          950: "#451a03",
+          50: "#ecf7fa",
+          100: "#d0ecf3",
+          200: "#a6d9e6",
+          300: "#74c1d5",
+          400: "#40a6c0",
+          500: "#1f88a3", // Primary (CaravanWert --primary)
+          600: "#186e86", // Primary-Dark  (CaravanWert --primary-dark)
+          700: "#155c70",
+          800: "#164a5b",
+          900: "#103c4c",
+          950: "#0a2630",
         },
-        // ============ ACCENT = AMBER-LIGHTER (Hover/Subtle) ============
+        // ============ ACCENT = identisch mit brand (CaravanWert --accent == --primary) ============
         accent: {
-          50: "#fffbeb",
-          100: "#fef3c7",
-          200: "#fde68a",
-          300: "#fcd34d",
-          400: "#fbbf24",
-          500: "#f59e0b",
-          600: "#d97706",
-          700: "#b45309",
-          800: "#92400e",
-          900: "#78350f",
+          50: "#ecf7fa",
+          100: "#d0ecf3",
+          200: "#a6d9e6",
+          300: "#74c1d5",
+          400: "#40a6c0",
+          500: "#1f88a3",
+          600: "#186e86",
+          700: "#155c70",
+          800: "#164a5b",
+          900: "#103c4c",
         },
-        // ============ TEAL = COOL-TRUST (für Trust-Sektionen, Decorations) ============
-        teal: {
-          50: "#f0fdfa",
-          100: "#ccfbf1",
-          200: "#99f6e4",
-          300: "#5eead4",
-          400: "#2dd4bf",
-          500: "#14b8a6",
-          600: "#0d9488",
-          700: "#0f766e",
-          800: "#115e59",
-          900: "#134e4a",
+        // ============ SECONDARY = dunkles Blaugrau (CaravanWert hsl(210 24% 16%)) ============
+        secondary: {
+          50: "#f1f4f7",
+          100: "#dbe1ea",
+          500: "#3d4f66",
+          700: "#243244",
+          900: "#1f2937",
+          950: "#111827",
         },
-        // ============ SUCCESS (nur für Häkchen, Positiv-Indikator) ============
+        // ============ SUCCESS (Häkchen, positive Signale) ============
         success: {
+          50: "#f0fdf4",
+          100: "#dcfce7",
           500: "#22c55e",
           600: "#16a34a",
           700: "#15803d",
@@ -59,17 +64,17 @@ export default {
           500: "#ef4444",
           600: "#dc2626",
         },
-        // ============ SURFACE = WARM-STONE (statt Cool-Slate) ============
+        // ============ SURFACE = kühles Hellgrau (CaravanWert --background hsl(210 20% 96%)) ============
         surface: {
           DEFAULT: "#ffffff",
-          soft: "#fafaf9", // stone-50 (warmes Beige)
-          strong: "#f5f5f4", // stone-100
+          soft: "#f1f5f9", // slate-100-ish, kühler als das frühere stone
+          strong: "#e2e8f0",
         },
-        // ============ INK = ECHTES SCHWARZ (statt Slate) ============
+        // ============ INK = CaravanWert --foreground hsl(210 24% 16%) ============
         ink: {
-          DEFAULT: "#0a0a0a", // fast schwarz, mit Hauch Wärme
-          muted: "#525252", // neutral-600
-          subtle: "#a3a3a3", // neutral-400
+          DEFAULT: "#1f2937",
+          muted: "#475569",
+          subtle: "#94a3b8",
         },
       },
       fontFamily: {
@@ -81,14 +86,21 @@ export default {
         "tight-3": "-0.03em",
       },
       boxShadow: {
-        // Tailwind-default-aligned, sauberer als custom dunkle Shadows
         card: "0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.05)",
         "card-hover": "0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05)",
-        "card-active": "0 20px 25px -5px rgb(245 158 11 / 0.18), 0 8px 10px -6px rgb(245 158 11 / 0.10)",
+        // active = Cyan-Teal-Tint (ersetzt den früheren Amber-Tint)
+        "card-active": "0 20px 25px -5px rgb(31 136 163 / 0.22), 0 8px 10px -6px rgb(31 136 163 / 0.14)",
         "card-elevated": "0 25px 50px -12px rgb(0 0 0 / 0.18)",
       },
       borderRadius: {
-        card: "1rem", // 16px statt 14px (CaravanWert-Standard)
+        // CaravanWert --radius: .375rem (6px)
+        card: "0.375rem",
+      },
+      backgroundImage: {
+        // Exakte Entsprechung zu --gradient-hero von caravanwert.de
+        "hero-gradient": "linear-gradient(135deg, hsl(191 68% 43%) 0%, hsl(191 68% 32%) 100%)",
+        "hero-gradient-hover": "linear-gradient(135deg, hsl(191 68% 46%) 0%, hsl(191 68% 35%) 100%)",
+        "secondary-gradient": "linear-gradient(135deg, hsl(210 24% 16%) 0%, hsl(210 30% 24%) 100%)",
       },
       maxWidth: {
         prose: "65ch",

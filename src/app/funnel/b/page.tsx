@@ -384,7 +384,6 @@ function Step1({ data, update }: StepProps) {
   const brandOptions: ComboboxOption[] = KITCHEN_BRANDS.map((b) => ({
     value: b.slug,
     label: b.name,
-    badge: b.segment,
   }));
 
   const frontMaterialOptions: ComboboxOption[] = FRONT_MATERIALS.map((f) => ({
@@ -546,7 +545,6 @@ function Step3({ data, update }: StepProps) {
   const brandOptions: ComboboxOption[] = APPLIANCE_BRANDS.map((b) => ({
     value: b.slug,
     label: b.name,
-    badge: b.segment,
   }));
 
   return (

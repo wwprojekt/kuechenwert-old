@@ -51,12 +51,16 @@ export function BadgeSslStyle() {
   );
 }
 
-export function BadgeStripeStyle() {
+/**
+ * Handelsregister-Badge statt Zahlungsdienst — spiegelt die Rechnungs-
+ * basierte Abrechnung (kein Online-Payment-Provider mehr).
+ */
+export function BadgeRechnungStyle() {
   return (
-    <svg viewBox="0 0 110 44" className="h-10 w-auto" aria-label="Sichere Zahlung via Stripe">
+    <svg viewBox="0 0 110 44" className="h-10 w-auto" aria-label="Geprüftes Handelsregister">
       <rect x="1" y="1" width="108" height="42" rx="6" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.4" />
-      <text x="55" y="20" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="800" fontSize="13" fill="currentColor" letterSpacing="-0.5">Stripe</text>
-      <text x="55" y="34" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="600" fontSize="9" fill="currentColor" opacity="0.7">Zahlung gesichert</text>
+      <text x="55" y="20" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="800" fontSize="12" fill="currentColor" letterSpacing="0.5">HR-GEPRÜFT</text>
+      <text x="55" y="34" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="600" fontSize="9" fill="currentColor" opacity="0.7">Kauf auf Rechnung</text>
     </svg>
   );
 }
