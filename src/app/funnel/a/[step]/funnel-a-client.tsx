@@ -318,7 +318,7 @@ export function FunnelAClient({
           onSelectionChange={(ids) => update({ kitchenForm: ids[0] ?? "" })}
           autoAdvanceMs={300}
           onAutoAdvance={goNext}
-          columns={2}
+          columns={3}
         />
       )}
 
@@ -350,7 +350,7 @@ export function FunnelAClient({
           onSelectionChange={(ids) => update({ style: ids[0] ?? "" })}
           autoAdvanceMs={300}
           onAutoAdvance={goNext}
-          columns={2}
+          columns={3}
         />
       )}
 
@@ -384,7 +384,7 @@ export function FunnelAClient({
           }
           autoAdvanceMs={300}
           onAutoAdvance={goNext}
-          columns={2}
+          columns={3}
         />
       )}
 

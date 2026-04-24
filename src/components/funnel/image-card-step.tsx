@@ -83,7 +83,7 @@ export function ImageCardStep({
             {hasPictogram ? (
               <div
                 className={clsx(
-                  "relative flex aspect-[5/4] items-center justify-center p-6 transition-colors",
+                  "relative flex aspect-[4/3] items-center justify-center p-3 transition-colors sm:p-4",
                   isActive ? "bg-brand-50" : "bg-neutral-50",
                 )}
               >
@@ -97,13 +97,13 @@ export function ImageCardStep({
                 </div>
               </div>
             ) : (
-              <div className={clsx("relative aspect-[5/4] overflow-hidden", opt.bgClass)}>
+              <div className={clsx("relative aspect-[4/3] overflow-hidden", opt.bgClass)}>
                 {opt.imageSrc && (
                   <Image
                     src={opt.imageSrc}
                     alt={opt.label}
                     fill
-                    sizes="(max-width: 640px) 50vw, 400px"
+                    sizes="(max-width: 640px) 50vw, 280px"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 )}
@@ -113,20 +113,22 @@ export function ImageCardStep({
             {/* Label-Bar (zentriert, KP-Style) */}
             <div
               className={clsx(
-                "px-3 py-3 text-center transition sm:px-4 sm:py-4",
+                "px-2.5 py-2 text-center transition sm:px-3 sm:py-2.5",
                 isActive ? "bg-brand-50" : "bg-white",
               )}
             >
               <div
                 className={clsx(
-                  "font-display text-sm font-bold sm:text-base",
+                  "font-display text-[13px] font-bold leading-tight sm:text-sm",
                   isActive ? "text-brand-900" : "text-black",
                 )}
               >
                 {opt.label}
               </div>
               {opt.description && (
-                <div className="mt-0.5 text-xs text-ink-muted">{opt.description}</div>
+                <div className="mt-0.5 text-[11px] leading-tight text-ink-muted sm:text-xs">
+                  {opt.description}
+                </div>
               )}
             </div>
           </button>
