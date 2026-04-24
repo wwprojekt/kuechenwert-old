@@ -39,9 +39,6 @@ export const KITCHEN_BRANDS: KitchenBrand[] = [
   { slug: "allmilmoe",      name: "Allmilmö",       segment: "premium" },
   { slug: "sachsenkuechen", name: "Sachsenküchen",  segment: "mittel" },
   { slug: "express-kuechen", name: "Express Küchen", segment: "budget" },
-  { slug: "ikea",           name: "IKEA",           segment: "budget" },
-  { slug: "xxxlutz",        name: "XXXLutz",        segment: "budget" },
-  { slug: "hoeffner",       name: "Höffner",        segment: "budget" },
   { slug: "sonstiger",      name: "Sonstiger / weiß ich nicht" },
 ];
 
@@ -257,12 +254,10 @@ export const DELIVERY_MODES = [
   { slug: "delivery_assembly", name: "Lieferung + Montage" },
   { slug: "delivery_only",     name: "Nur Lieferung" },
   { slug: "pickup",            name: "Selbstabholung" },
-  { slug: "unknown",           name: "Egal / weiß ich nicht" },
 ];
 
 export const FINANCING_OPTIONS = [
   { slug: "none",          name: "Keine Finanzierung (Komplettzahlung)" },
   { slug: "zero_interest", name: "Zinsfreie Finanzierung (0 %)" },
   { slug: "with_interest", name: "Finanzierung mit Zinsen" },
-  { slug: "unknown",       name: "Bin offen / Händler darf vorschlagen" },
 ];

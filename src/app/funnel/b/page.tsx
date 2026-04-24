@@ -7,7 +7,6 @@ import { FunnelBShell } from "@/components/funnel/funnel-b-shell";
 import {
   KITCHEN_BRANDS,
   FRONT_MATERIALS,
-  FRONT_CATEGORY_LABEL,
   HANDLE_TYPES,
   WORKTOP_MATERIALS,
   WORKTOP_DESIGNS,
@@ -16,25 +15,20 @@ import {
   SINK_BRANDS,
   SINK_MATERIALS,
   EXTRAS_OPTIONS,
-  HOUSING_TYPES,
   TIMEFRAMES,
   DELIVERY_MODES,
   FINANCING_OPTIONS,
-  type FrontMaterial,
 } from "@/config/funnel-b-stammdaten";
 
 type FunnelBData = {
-  // Step 0 - Situation (PFLICHT: housingType)
-  housingType: string;
-  purchaseReason: string; // optional: neubau / renovierung / erstausstattung
+  // Step 0 - Situation (alles optional - Angebot wird hochgeladen)
   timeframe: string;
-  desiredDeliveryDate: string;
 
   // Step 1 - Korpus & Fronten
   brand: string;
   brandCustom: string;
+  frontName: string; // Freitext, z. B. "Riva", "Sylt"
   frontMaterialName: string;
-  frontMaterialCategory: string;
   handleType: string;
 
   // Step 2 - Arbeitsplatte
@@ -80,14 +74,11 @@ type FunnelBData = {
 };
 
 const initialData: FunnelBData = {
-  housingType: "",
-  purchaseReason: "",
   timeframe: "",
-  desiredDeliveryDate: "",
   brand: "",
   brandCustom: "",
+  frontName: "",
   frontMaterialName: "",
-  frontMaterialCategory: "",
   handleType: "",
   worktopMaterial: "",
   worktopDesign: "",
@@ -119,7 +110,7 @@ const initialData: FunnelBData = {
 };
 
 const STEPS = [
-  { label: "Über Ihre Situation", description: "Eigentum oder Miete? Wann soll die Küche stehen?" },
+  { label: "Ihre Situation", description: "Wann soll die Küche geliefert oder montiert werden?" },
   { label: "Korpus & Fronten", description: "Welche Marke, welches Material, welcher Grifftyp?" },
   { label: "Arbeitsplatte", description: "Material und – falls bekannt – die genaue Bezeichnung." },
   { label: "Geräte", description: "Welche Geräte sind im Angebot? Marke und Modell, falls bekannt." },
@@ -145,10 +136,12 @@ export default function FunnelBPage() {
 
   const canProceed = useMemo(() => {
     switch (step) {
-      case 0:
-        return Boolean(data.housingType);
-      case 7:
-        return Number(data.existingOfferPriceEur) > 0;
+      case 7: {
+        const priceOk = Number(data.existingOfferPriceEur) > 0;
+        const hasAngebot = data.uploads.some((u) => u.category === "angebot");
+        const hasGrundriss = data.uploads.some((u) => u.category === "grundriss");
+        return priceOk && hasAngebot && hasGrundriss;
+      }
       case 8:
         return (
           /^\d{5}$/.test(data.postalCode) &&
@@ -264,7 +257,7 @@ export default function FunnelBPage() {
 }
 
 const TIPS = [
-  "Eigentum oder Miete entscheidet über Mehrwert-Kalkulation. Die Wohnsituation hilft dem Händler bei realistischer Anlieferungs-/Montageplanung.",
+  "Je konkreter der Zeitrahmen, desto besser können Händler Liefertermin und Montage kalkulieren. Fester Liefertermin steigert oft den Rabatt.",
   "Wenn Sie Marke oder Material nicht sicher wissen: einfach 'Sonstiger / weiß ich nicht' wählen. Unser Experte ergänzt das im Telefonat.",
   "Die Bezeichnung der Arbeitsplatte (z. B. „Calacatta Roma\") finden Sie meist auf Ihrem schriftlichen Angebot. Optional!",
   "Marke + Modell pro Gerät steigert die Vergleichbarkeit. Beispiele: „Bosch HBG675BS1\", „Miele DGC 7460\".",
@@ -287,27 +280,6 @@ type StepProps = {
 function Step0({ data, update }: StepProps) {
   return (
     <div className="space-y-6">
-      <Field label="Wohnsituation *" hint="Pflicht – relevant für Vergleich und Liefermodus.">
-        <CardGroup
-          options={HOUSING_TYPES.map((h) => ({ value: h.slug, label: h.name }))}
-          value={data.housingType}
-          onChange={(v) => update({ housingType: v })}
-        />
-      </Field>
-
-      <Field label="Anlass" hint="Optional.">
-        <CardGroup
-          columns={3}
-          options={[
-            { value: "neubau", label: "Neubau / Erstbezug" },
-            { value: "renovierung", label: "Renovierung / Austausch" },
-            { value: "erstausstattung", label: "Erstausstattung Wohnung" },
-          ]}
-          value={data.purchaseReason}
-          onChange={(v) => update({ purchaseReason: v })}
-        />
-      </Field>
-
       <Field label="Wann soll die Küche geliefert/montiert werden?" hint="Optional – hilft bei Verfügbarkeitsprüfung.">
         <CardGroup
           options={TIMEFRAMES.map((t) => ({ value: t.slug, label: t.name }))}
@@ -315,25 +287,11 @@ function Step0({ data, update }: StepProps) {
           onChange={(v) => update({ timeframe: v })}
         />
       </Field>
-
-      <Field label="Konkretes Wunschdatum" hint="Optional. Datum (TT.MM.JJJJ).">
-        <input
-          type="date"
-          className="input-field max-w-xs"
-          value={data.desiredDeliveryDate}
-          onChange={(e) => update({ desiredDeliveryDate: e.target.value })}
-        />
-      </Field>
     </div>
   );
 }
 
 function Step1({ data, update }: StepProps) {
-  const filteredFronts: FrontMaterial[] = useMemo(() => {
-    if (!data.frontMaterialCategory) return FRONT_MATERIALS;
-    return FRONT_MATERIALS.filter((f) => f.category === data.frontMaterialCategory);
-  }, [data.frontMaterialCategory]);
-
   return (
     <div className="space-y-6">
       <Field label="Hersteller / Marke der Küche" hint="Optional. Alle gängigen deutschen Hersteller in der Liste.">
@@ -345,7 +303,7 @@ function Step1({ data, update }: StepProps) {
           <option value="">– Bitte wählen –</option>
           {KITCHEN_BRANDS.map((b) => (
             <option key={b.slug} value={b.slug}>
-              {b.name}{b.segment ? ` (${b.segment})` : ""}
+              {b.name}
             </option>
           ))}
         </select>
@@ -360,27 +318,13 @@ function Step1({ data, update }: StepProps) {
         )}
       </Field>
 
-      <Field label="Front-Kategorie" hint="Optional – Filter für die Materialliste unten.">
-        <CardGroup
-          columns={3}
-          options={[
-            { value: "", label: "Alle anzeigen" },
-            ...Object.entries(FRONT_CATEGORY_LABEL).map(([slug, label]) => ({
-              value: slug,
-              label,
-            })),
-          ]}
-          value={data.frontMaterialCategory}
-          onChange={(v) =>
-            update({
-              frontMaterialCategory: v,
-              frontMaterialName:
-                v && data.frontMaterialName &&
-                FRONT_MATERIALS.find((f) => f.name === data.frontMaterialName)?.category !== v
-                  ? ""
-                  : data.frontMaterialName,
-            })
-          }
+      <Field label="Name der Front" hint={'Optional. Bezeichnung der Front laut Angebot, z. B. „Riva", „Sylt", „Flash".'}>
+        <input
+          type="text"
+          className="input-field"
+          placeholder="z. B. Riva, Sylt, Flash"
+          value={data.frontName}
+          onChange={(e) => update({ frontName: e.target.value })}
         />
       </Field>
 
@@ -391,7 +335,7 @@ function Step1({ data, update }: StepProps) {
           onChange={(e) => update({ frontMaterialName: e.target.value })}
         >
           <option value="">– Bitte wählen –</option>
-          {filteredFronts.map((f) => (
+          {FRONT_MATERIALS.map((f) => (
             <option key={f.name} value={f.name}>
               {f.name}{f.description ? ` – ${f.description}` : ""}
             </option>
@@ -600,11 +544,10 @@ function Step4({ data, update }: StepProps) {
 
       <Field label="Mülltrennsystem" hint="Optional.">
         <CardGroup
-          columns={3}
+          columns={2}
           options={[
             { value: "yes", label: "Ja, vorgesehen" },
             { value: "no", label: "Nein, kein System" },
-            { value: "", label: "Weiß ich nicht" },
           ]}
           value={data.wasteSeparationSystem}
           onChange={(v) => update({ wasteSeparationSystem: v as FunnelBData["wasteSeparationSystem"] })}
@@ -705,7 +648,7 @@ function Step6({ data, update }: StepProps) {
           />
         </Field>
 
-        <Field label="Finanzierung" hint="Optional.">
+        <Field label="Zahlungsmodalitäten" hint="Optional.">
           <select
             className="input-field"
             value={data.paymentFinancing}
@@ -797,22 +740,25 @@ function Step7({ data, update }: StepProps) {
 
       <div className="space-y-3">
         <UploadDrop
-          label="Schriftliches Angebot hochladen"
-          description="PDF oder Bild. Max. 10 MB. Optional aber sehr hilfreich."
+          label="Schriftliches Angebot hochladen *"
+          description="Pflicht. PDF oder Bild. Max. 10 MB."
           accept="application/pdf,image/*"
           onFile={(f) => addFile("angebot", f)}
+          done={data.uploads.some((u) => u.category === "angebot")}
         />
         <UploadDrop
-          label="Grundriss hochladen"
-          description="PDF oder Bild. Max. 10 MB."
+          label="Grundriss hochladen *"
+          description="Pflicht. PDF oder Bild. Max. 10 MB."
           accept="application/pdf,image/*"
           onFile={(f) => addFile("grundriss", f)}
+          done={data.uploads.some((u) => u.category === "grundriss")}
         />
         <UploadDrop
-          label="Bild der gewünschten Küche"
-          description="JPG / PNG. Max. 10 MB."
+          label="Bild der geplanten Küche"
+          description="Optional. JPG / PNG. Max. 10 MB."
           accept="image/*"
           onFile={(f) => addFile("kueche_bild", f)}
+          done={data.uploads.some((u) => u.category === "kueche_bild")}
         />
       </div>
 
@@ -1019,20 +965,28 @@ function UploadDrop({
   description,
   accept,
   onFile,
+  done = false,
 }: {
   label: string;
   description?: string;
   accept?: string;
   onFile: (f: File) => void;
+  done?: boolean;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed border-slate-300 bg-surface-soft p-4 transition hover:border-brand-300 hover:bg-white">
-      <FileUp className="h-5 w-5 flex-none text-brand-700" />
+    <label
+      className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed p-4 transition ${
+        done
+          ? "border-accent-400 bg-accent-50"
+          : "border-slate-300 bg-surface-soft hover:border-brand-300 hover:bg-white"
+      }`}
+    >
+      <FileUp className={`h-5 w-5 flex-none ${done ? "text-accent-700" : "text-brand-700"}`} />
       <div className="flex-1">
         <div className="text-sm font-medium text-ink">{label}</div>
         {description && <div className="text-xs text-ink-muted">{description}</div>}
       </div>
-      <span className="btn-ghost text-xs">Datei wählen</span>
+      <span className="btn-ghost text-xs">{done ? "Weitere Datei" : "Datei wählen"}</span>
       <input
         type="file"
         className="sr-only"

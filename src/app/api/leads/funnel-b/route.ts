@@ -13,14 +13,11 @@ interface ApplianceInput {
 }
 
 interface FunnelBPayload {
-  housingType?: string;
-  purchaseReason?: string;
   timeframe?: string;
-  desiredDeliveryDate?: string;
   brand?: string;
   brandCustom?: string;
+  frontName?: string;
   frontMaterialName?: string;
-  frontMaterialCategory?: string;
   handleType?: string;
   worktopMaterial?: string;
   worktopDesign?: string;
@@ -63,9 +60,8 @@ const TIMEFRAME_TO_MONTHS: Record<string, number | null> = {
   flexibel: null,
 };
 
-const FINANCING_VALID = new Set(["none", "zero_interest", "with_interest", "unknown"]);
-const DELIVERY_VALID = new Set(["delivery_assembly", "delivery_only", "pickup", "unknown"]);
-const HOUSING_VALID = new Set(["own", "rent", "unknown"]);
+const FINANCING_VALID = new Set(["none", "zero_interest", "with_interest"]);
+const DELIVERY_VALID = new Set(["delivery_assembly", "delivery_only", "pickup"]);
 
 export async function POST(request: Request) {
   try {
@@ -83,9 +79,6 @@ export async function POST(request: Request) {
         { error: "Angebotspreis (existingOfferPriceEur) ist Pflicht und muss > 0 sein." },
         { status: 400 },
       );
-    }
-    if (!payload.housingType) {
-      return NextResponse.json({ error: "Wohnsituation ist Pflicht." }, { status: 400 });
     }
     if (!payload.postalCode || !/^\d{5}$/.test(payload.postalCode)) {
       return NextResponse.json({ error: "PLZ ungültig." }, { status: 400 });
@@ -106,7 +99,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const housingType = HOUSING_VALID.has(payload.housingType) ? payload.housingType : "unknown";
     const financing =
       payload.paymentFinancing && FINANCING_VALID.has(payload.paymentFinancing)
         ? payload.paymentFinancing
@@ -136,16 +128,16 @@ export async function POST(request: Request) {
         postal_code: payload.postalCode,
         city: payload.city ?? null,
         region: region?.id ?? null,
-        housing_type: housingType,
+        housing_type: "unknown",
         kitchen_form: null,
         kitchen_style: null,
-        purchase_reason: payload.purchaseReason ?? null,
+        purchase_reason: null,
         timeframe_months: timeframeMonths,
         budget_midpoint: budgetMidpoint,
         has_existing_offer: true,
         existing_offer_price_cents: offerPriceCents,
         existing_offer_studio: payload.existingOfferStudio ?? null,
-        desired_delivery_at: payload.desiredDeliveryDate || null,
+        desired_delivery_at: null,
         delivery_mode: deliveryMode,
         payment_down_payment_percent: payload.paymentDownPaymentPercent
           ? Number(payload.paymentDownPaymentPercent)
@@ -218,13 +210,21 @@ export async function POST(request: Request) {
           sort_order: 5,
         });
       }
+      if (payload.frontName) {
+        specRows.push({
+          auction_id: auction.id,
+          category: "fronten",
+          label: "Name der Front",
+          designation: payload.frontName,
+          sort_order: 8,
+        });
+      }
       if (payload.frontMaterialName) {
         specRows.push({
           auction_id: auction.id,
           category: "fronten",
           label: "Frontmaterial",
           material: payload.frontMaterialName,
-          notes: payload.frontMaterialCategory ?? null,
           sort_order: 10,
         });
       }

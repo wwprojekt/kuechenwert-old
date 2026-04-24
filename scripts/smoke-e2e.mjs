@@ -220,12 +220,10 @@ async function testFunnelB() {
   });
 
   const payload = {
-    housingType: "own",
     timeframe: "3-6",
-    desiredDeliveryDate: null,
     brand: "nobilia",
+    frontName: "Riva",
     frontMaterialName: "Mattlack weiss",
-    frontMaterialCategory: "uv-lack",
     handleType: "grifflos",
     worktopMaterial: "schichtstoff",
     worktopDesign: "Kalakata Roma",
