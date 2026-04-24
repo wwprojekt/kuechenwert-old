@@ -34,6 +34,13 @@ import {
   type FunnelAStammdaten,
 } from "@/config/funnel-a";
 import { getStoredUtm } from "@/lib/utm";
+import {
+  OCCASION_ICONS,
+  HOUSING_ICONS,
+  SIZE_ICONS,
+  TIMEFRAME_ICONS,
+  WORKTOP_FALLBACK_ICON,
+} from "@/components/funnel/funnel-a-icons";
 
 const STORAGE_KEY = "kw_funnel_a";
 
@@ -248,11 +255,12 @@ export function FunnelAClient({
             id: o.id,
             label: o.label,
             description: o.description,
+            icon: OCCASION_ICONS[o.id],
           }))}
           selected={data.occasion}
           onSelect={(id) => update({ occasion: id })}
           onAutoAdvance={goNext}
-          columns={2}
+          columns={3}
         />
       )}
 
@@ -262,11 +270,12 @@ export function FunnelAClient({
             id: h.id,
             label: h.label,
             description: h.description,
+            icon: HOUSING_ICONS[h.id],
           }))}
           selected={data.housing}
           onSelect={(id) => update({ housing: id })}
           onAutoAdvance={goNext}
-          columns={2}
+          columns={3}
         />
       )}
 
@@ -293,6 +302,7 @@ export function FunnelAClient({
             id: s.id,
             label: s.label,
             description: s.description,
+            icon: SIZE_ICONS[s.id],
           }))}
           selected={data.size}
           onSelect={(id) => update({ size: id })}
@@ -335,10 +345,16 @@ export function FunnelAClient({
       {step.slug === "arbeitsplatte" && (
         <CardStep
           options={[
-            { id: "", label: "Egal / Beratung gewünscht", description: "" },
+            {
+              id: "",
+              label: "Egal / Beratung gewünscht",
+              description: "",
+              icon: WORKTOP_FALLBACK_ICON,
+            },
             ...stammdaten.worktopMaterials.map((w) => ({
               id: w.id,
               label: w.name,
+              icon: WORKTOP_FALLBACK_ICON,
             })),
           ]}
           selected={data.worktopMaterialId || ""}
@@ -367,6 +383,7 @@ export function FunnelAClient({
           options={FUNNEL_A_TIMEFRAMES.map((t) => ({
             id: t.id,
             label: t.label,
+            icon: TIMEFRAME_ICONS[t.id],
           }))}
           selected={data.timeframe}
           onSelect={(id) => update({ timeframe: id })}
