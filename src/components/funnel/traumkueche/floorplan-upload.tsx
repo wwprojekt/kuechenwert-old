@@ -19,6 +19,8 @@ interface TurnstileApi {
     opts: {
       sitekey: string;
       callback: (token: string) => void;
+      "expired-callback"?: () => void;
+      "error-callback"?: () => void;
       size?: string;
     },
   ) => string;
@@ -101,6 +103,8 @@ export function FloorplanUpload({
             sitekey: turnstileSiteKey,
             size: "flexible",
             callback: (token: string) => setTurnstileToken(token),
+            "expired-callback": () => setTurnstileToken(undefined),
+            "error-callback": () => setTurnstileToken(undefined),
           });
         } catch {
           // Turnstile weigert sich evtl. bei doppeltem render - ignorieren
@@ -115,6 +119,7 @@ export function FloorplanUpload({
   }, [turnstileSiteKey, widgetId]);
 
   const containerId = `kw-ts-floorplan-${widgetId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const awaitingTurnstile = Boolean(turnstileSiteKey) && !turnstileToken;
 
   const onFile = useCallback(
     async (file: File) => {
@@ -188,12 +193,17 @@ export function FloorplanUpload({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={loading}
+          disabled={loading || awaitingTurnstile}
           className="btn-secondary text-xs"
+          title={awaitingTurnstile ? "Sicherheitscheck laeuft..." : undefined}
         >
           {loading ? (
             <>
               <Loader2 className="h-3.5 w-3.5 animate-spin" /> Analysiere...
+            </>
+          ) : awaitingTurnstile ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Sicherheitscheck...
             </>
           ) : (
             <>

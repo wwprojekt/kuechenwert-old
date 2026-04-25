@@ -92,7 +92,6 @@ export const HANDLE_TYPES: HandleType[] = [
   { slug: "pseudogrifflos-j",     name: "Pseudogrifflos (J-Profil)", description: "Griffleiste in der Front" },
   { slug: "pseudogrifflos-c",     name: "Pseudogrifflos (C-Profil)", description: "Horizontale Griffmulde" },
   { slug: "mischvariante",        name: "Mischvariante", description: "Kombiniert" },
-  { slug: "unbekannt",            name: "Weiß ich nicht" },
 ];
 
 export interface WorktopMaterial {
@@ -112,8 +111,6 @@ export const WORKTOP_MATERIALS: WorktopMaterial[] = [
   { slug: "beton",              name: "Beton" },
   { slug: "glas",               name: "Glas" },
   { slug: "mineralwerkstoff",   name: "Kunststein (Mineralwerkstoff)", description: "Corian, Hi-Macs" },
-  { slug: "duennschichtkeramik", name: "Dünnschichtkeramik" },
-  { slug: "sonstige",           name: "Sonstige / weiß ich nicht" },
 ];
 
 export interface WorktopDesign {

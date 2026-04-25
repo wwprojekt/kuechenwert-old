@@ -207,9 +207,10 @@ export default function FunnelBPage() {
         if (!priceOk) return false;
         if (data.offerDeliveryMethod === "later") return true;
         if (data.offerDeliveryMethod === "now") {
-          const hasAngebot = data.uploads.some((u) => u.category === "angebot");
-          const hasGrundriss = data.uploads.some((u) => u.category === "grundriss");
-          return hasAngebot && hasGrundriss;
+          const hasKuecheBild = data.uploads.some(
+            (u) => u.category === "kueche_bild",
+          );
+          return hasKuecheBild;
         }
         return false;
       }
@@ -878,8 +879,8 @@ function Step7({ data, update }: StepProps) {
       </Field>
 
       <Field
-        label="Wie möchten Sie uns Angebot und Grundriss zukommen lassen? *"
-        hint="Pflicht. Ohne diese Dokumente können die Händler kein verbindliches Gegenangebot abgeben."
+        label="Wie möchten Sie uns das Bild Ihrer geplanten Küche zukommen lassen? *"
+        hint="Pflicht. Mindestens ein Bild der geplanten Küche. Angebot und Grundriss sind optional, helfen den Händlern aber bei einem präziseren Gegenangebot."
       >
         <CardGroup
           columns={2}
@@ -887,7 +888,7 @@ function Step7({ data, update }: StepProps) {
             {
               value: "now",
               label: "Jetzt hochladen",
-              description: "Ich habe Angebot & Grundriss zur Hand",
+              description: "Ich habe das Bild (und evtl. Angebot / Grundriss) zur Hand",
               icon: <CloudUpload className="h-5 w-5" />,
             },
             {
@@ -907,25 +908,25 @@ function Step7({ data, update }: StepProps) {
       {data.offerDeliveryMethod === "now" && (
         <div className="space-y-3">
           <UploadDrop
-            label="Schriftliches Angebot hochladen *"
-            description="Pflicht. PDF oder Bild. Max. 10 MB."
+            label="Bild der geplanten Küche *"
+            description="Pflicht. JPG / PNG. Max. 10 MB."
+            accept="image/*"
+            onFile={(f) => addFile("kueche_bild", f)}
+            done={data.uploads.some((u) => u.category === "kueche_bild")}
+          />
+          <UploadDrop
+            label="Schriftliches Angebot hochladen"
+            description="Optional. PDF oder Bild. Max. 10 MB."
             accept="application/pdf,image/*"
             onFile={(f) => addFile("angebot", f)}
             done={data.uploads.some((u) => u.category === "angebot")}
           />
           <UploadDrop
-            label="Grundriss hochladen *"
-            description="Pflicht. PDF oder Bild. Max. 10 MB."
+            label="Grundriss hochladen"
+            description="Optional. PDF oder Bild. Max. 10 MB."
             accept="application/pdf,image/*"
             onFile={(f) => addFile("grundriss", f)}
             done={data.uploads.some((u) => u.category === "grundriss")}
-          />
-          <UploadDrop
-            label="Bild der geplanten Küche"
-            description="Optional. JPG / PNG. Max. 10 MB."
-            accept="image/*"
-            onFile={(f) => addFile("kueche_bild", f)}
-            done={data.uploads.some((u) => u.category === "kueche_bild")}
           />
 
           {data.uploads.length > 0 && (
@@ -965,8 +966,9 @@ function Step7({ data, update }: StepProps) {
             <div className="font-medium text-ink">Upload-Link per E-Mail</div>
             <p className="mt-1">
               Direkt nach Abschluss dieses Formulars erhalten Sie eine E-Mail mit
-              einem sicheren Upload-Link für Angebot und Grundriss. Ihre Auktion
-              startet, sobald die Dokumente eingegangen sind.
+              einem sicheren Upload-Link für das Bild Ihrer geplanten Küche (Pflicht)
+              sowie optional Angebot und Grundriss. Ihre Auktion startet, sobald das
+              Bild eingegangen ist.
             </p>
           </div>
         </div>

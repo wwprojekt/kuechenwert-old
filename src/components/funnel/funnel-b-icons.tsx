@@ -53,7 +53,6 @@ export const HANDLE_TYPE_ICONS: Record<string, React.ReactNode> = {
   "pseudogrifflos-j": <GripHorizontal className={iconClass} />,
   "pseudogrifflos-c": <SquareStack className={iconClass} />,
   mischvariante: <Layers className={iconClass} />,
-  unbekannt: <HelpCircle className={iconClass} />,
 };
 
 export const WORKTOP_ICONS: Record<string, React.ReactNode> = {
@@ -67,8 +66,6 @@ export const WORKTOP_ICONS: Record<string, React.ReactNode> = {
   beton: <SquareStack className={iconClass} />,
   glas: <FlaskConical className={iconClass} />,
   mineralwerkstoff: <Box className={iconClass} />,
-  duennschichtkeramik: <Layers className={iconClass} />,
-  sonstige: <HelpCircle className={iconClass} />,
 };
 
 export const SINK_MATERIAL_ICONS: Record<string, React.ReactNode> = {

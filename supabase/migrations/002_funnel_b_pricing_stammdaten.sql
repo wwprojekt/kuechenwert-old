@@ -613,8 +613,7 @@ insert into public.catalog_handle_types (name, slug, description, sort_order) va
   ('Grifflos (elektrisch)', 'grifflos-servo', 'Servo-elektrisches Öffnen', 30),
   ('Pseudogrifflos (J-Profil)', 'pseudogrifflos-j', 'Griffleiste in der Front (J-Profil)', 40),
   ('Pseudogrifflos (C-Profil / horizontal)', 'pseudogrifflos-c', 'Horizontale Griffmulde / C-Profil', 50),
-  ('Mischvariante', 'mischvariante', 'Verschiedene Grifftypen kombiniert', 60),
-  ('Weiß ich nicht', 'unbekannt', null, 999)
+  ('Mischvariante', 'mischvariante', 'Verschiedene Grifftypen kombiniert', 60)
 on conflict (slug) do nothing;
 
 -- ============================================================
@@ -630,9 +629,7 @@ insert into public.catalog_worktop_materials (name, slug, description, sort_orde
   ('Edelstahl',                   'edelstahl',        'Profi-Look, hygienisch, kratzempfindlich', 70),
   ('Beton',                       'beton',            'Roher oder versiegelter Beton', 80),
   ('Glas',                        'glas',             'Glasarbeitsplatte (selten)', 90),
-  ('Kunststein (Mineralwerkstoff)', 'mineralwerkstoff', 'Corian, Hi-Macs u.ä.', 100),
-  ('Dünnschichtkeramik',          'duennschichtkeramik', 'Reduzierte Bauhöhe, premium', 110),
-  ('Sonstige',                    'sonstige',         null, 999)
+  ('Kunststein (Mineralwerkstoff)', 'mineralwerkstoff', 'Corian, Hi-Macs u.ä.', 100)
 on conflict (slug) do nothing;
 
 -- ============================================================

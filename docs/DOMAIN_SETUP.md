@@ -6,11 +6,13 @@ als Zonen angelegt (Nameserver auf Cloudflare umgestellt).
 
 ## Rollenverteilung
 
-| Domain | Rolle | MX | Website |
-|---|---|---|---|
-| `küchenwert.de` | Primär (Brand, Canonical, SEO) | ❌ | ✅ |
-| `kuechenwert24.de` | Sekundär (E-Mail + 301-Redirect) | ✅ | ❌ (nur Redirect) |
-| `kuechenwert.de` (ohne `24`) | **Nicht unsere** | — | — |
+
+| Domain                       | Rolle                            | MX  | Website          |
+| ---------------------------- | -------------------------------- | --- | ---------------- |
+| `küchenwert.de`              | Primär (Brand, Canonical, SEO)   | ❌   | ✅                |
+| `kuechenwert24.de`           | Sekundär (E-Mail + 301-Redirect) | ✅   | ❌ (nur Redirect) |
+| `kuechenwert.de` (ohne `24`) | **Nicht unsere**                 | —   | —                |
+
 
 ---
 
@@ -24,6 +26,7 @@ A     www      <dokploy-server-ip>      Proxied
 Kein MX, kein SPF-include für Mail. Diese Zone ist **mail-frei**.
 
 Optional (anti-spoof, damit niemand Mails in deinem Namen verschickt):
+
 ```
 TXT   @        "v=spf1 -all"
 TXT   _dmarc   "v=DMARC1; p=reject; rua=mailto:dmarc@kuechenwert24.de"
@@ -41,14 +44,17 @@ A     www      <dokploy-server-ip>      Proxied
 ### 2b. E-Mail — wähle EINEN Mailanbieter
 
 **Variante A: Google Workspace**
+
 ```
 MX   @   1   smtp.google.com.   DNS only (grey cloud)
 TXT  @       "v=spf1 include:_spf.google.com include:amazonses.com ~all"
 ```
+
 (`amazonses.com` = Resend für Transaktions-Mails; weglassen, wenn du
 Resend nicht einsetzt.)
 
 **Variante B: Mailbox.org**
+
 ```
 MX   @   10  mxext1.mailbox.org.   DNS only
 MX   @   10  mxext2.mailbox.org.   DNS only
@@ -56,10 +62,12 @@ TXT  @       "v=spf1 include:mailbox.org include:amazonses.com ~all"
 ```
 
 **Variante C: Resend-only (keine "normalen" Postfächer, nur Transaktion)**
+
 ```
 MX   send   10  feedback-smtp.eu-west-1.amazonses.com.   DNS only
 TXT  send       "v=spf1 include:amazonses.com ~all"
 ```
+
 → E-Mail-Adressen dann `@send.kuechenwert24.de`, nicht empfehlenswert als
 Haupt-Kontaktadresse.
 
@@ -67,11 +75,13 @@ Haupt-Kontaktadresse.
 
 Nach Verifizierung im Resend-Dashboard bekommst du 3 CNAME-Records —
 Form:
+
 ```
 CNAME   resend._domainkey         resend._domainkey.resend.com.   DNS only
 CNAME   resend2._domainkey        resend2._domainkey.resend.com.  DNS only
 CNAME   resend3._domainkey        resend3._domainkey.resend.com.  DNS only
 ```
+
 (Die konkreten Werte kommen aus Resend → Domains → Add.)
 
 Bei Google/Mailbox zusätzlich deren DKIM-TXT-Record.
@@ -106,9 +116,10 @@ Nach 2 Wochen Monitoring (rua-Reports checken) auf `p=reject` ziehen.
 > Umlaut-Form — Cloudflare Location-Header vertragen keine UTF-8-Hosts.
 > Browser rendern daraus automatisch `küchenwert.de` in der Adresszeile.
 
-**Wichtig**: Die Redirect Rule darf **nicht** für `*/.well-known/acme-challenge/*`
+**Wichtig**: Die Redirect Rule darf **nicht** für `*/.well-known/acme-challenge/`*
 greifen, sonst kann Let's Encrypt kein Zertifikat ausstellen.
 Optional Ausnahme:
+
 ```
 (http.host eq "kuechenwert24.de" or http.host eq "www.kuechenwert24.de")
 and not starts_with(http.request.uri.path, "/.well-known/")
@@ -122,14 +133,14 @@ Dokploy verwaltet die Labels automatisch, wenn du im Dashboard die Domain
 einträgst. Du brauchst **zwei Domain-Einträge** auf derselben App:
 
 1. **Primary**: `küchenwert.de` + `www.küchenwert.de`
-   - HTTPS: ✅
-   - Redirect `www` → apex: ✅
-   - Let's Encrypt: ✅
+  - HTTPS: ✅
+  - Redirect `www` → apex: ✅
+  - Let's Encrypt: ✅
 2. **Secondary**: `kuechenwert24.de` + `www.kuechenwert24.de`
-   - HTTPS: ✅
-   - Redirect: nicht in Dokploy setzen (macht Cloudflare via Redirect Rule)
-   - Let's Encrypt: ✅ (Dokploy holt Zert, auch wenn Cloudflare proxyd — dafür
-     Cloudflare SSL/TLS auf **Full (strict)** stellen)
+  - HTTPS: ✅
+  - Redirect: nicht in Dokploy setzen (macht Cloudflare via Redirect Rule)
+  - Let's Encrypt: ✅ (Dokploy holt Zert, auch wenn Cloudflare proxyd — dafür
+  Cloudflare SSL/TLS auf **Full (strict)** stellen)
 
 **Wenn du den Redirect lieber in Traefik statt Cloudflare möchtest**,
 füge im Dokploy-Advanced-Tab unter "Traefik Custom Labels" hinzu:
@@ -162,11 +173,13 @@ Entweder-oder: **Cloudflare-Rule oder Traefik-Middleware**, nicht beides
 Dashboard → Authentication → URL Configuration:
 
 **Site URL**:
+
 ```
 https://küchenwert.de
 ```
 
 **Redirect URLs** (alle eintragen):
+
 ```
 http://localhost:3000/**
 https://küchenwert.de/**
@@ -193,11 +206,11 @@ rendert sie trotzdem als `küchenwert.de`).
 3. Die 3 DKIM-CNAMEs + SPF-TXT in Cloudflare kopieren
 4. Warten bis alle 3 Checks grün sind (~5-30 min nach DNS-Propagation)
 5. In Dokploy ENV eintragen:
-   ```
+  ```
    RESEND_API_KEY=re_...
    EMAIL_FROM="KüchenWert <info@kuechenwert24.de>"
    EMAIL_BCC_BUCHHALTUNG=buchhaltung@kuechenwert24.de
-   ```
+  ```
 
 ---
 
@@ -234,8 +247,9 @@ curl -vI https://kuechenwert24.de 2>&1 | grep -E "subject|issuer"
 ## 8. SEO-Hinweis
 
 - **Google Search Console**: beide Domains **separat** als Properties anlegen
-  (sowohl `https://küchenwert.de` als auch `https://kuechenwert24.de`),
-  damit du siehst ob jemand irrtümlich die 24er-Variante verlinkt.
+(sowohl `https://küchenwert.de` als auch `https://kuechenwert24.de`),
+damit du siehst ob jemand irrtümlich die 24er-Variante verlinkt.
 - **Canonical-Tags**: Next.js rendert via `NEXT_PUBLIC_SITE_URL=https://küchenwert.de`
-  automatisch die richtige Canonical-URL. Nicht manuell überschreiben.
+automatisch die richtige Canonical-URL. Nicht manuell überschreiben.
 - **sitemap.xml**: enthält nur `küchenwert.de`-URLs.
+
