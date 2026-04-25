@@ -400,6 +400,37 @@ async function testTraumkuecheFunnel() {
       .eq("session_token", sessionToken);
   }
 
+  // 4. Phase-2 Refine (nur wenn LLM erreichbar - sonst Mock-Path)
+  step("Funnel-C: Refine-Chat (Phase 2)");
+  const refine = await postJson("/api/planner/refine", {
+    sessionToken,
+    message: "Bitte eine dunklere Farbe und Keramik als Arbeitsplatte",
+  });
+  assert(refine.ok, `POST /api/planner/refine -> ${refine.status}`, refine);
+  if (refine.ok) {
+    assert(
+      Array.isArray(refine.json.applied),
+      "Refine: applied-Array vorhanden",
+      refine.json,
+    );
+    if (refine.json.mock) ok("LLM-Mock-Mode aktiv (kein OPENAI_API_KEY)");
+    if (refine.json.renderId) {
+      // Neuer Render wurde angestossen - kurz pollen
+      const pollStart = Date.now();
+      while (Date.now() - pollStart < 90_000) {
+        await new Promise((r) => setTimeout(r, 1500));
+        const p = await fetch(`${BASE_URL}/api/planner/renders/${refine.json.renderId}`);
+        const pj = await p.json().catch(() => ({}));
+        if (pj.status === "success" || pj.status === "failed") {
+          assert(pj.status === "success", `Refine-Render status=${pj.status}`, pj);
+          break;
+        }
+      }
+    } else {
+      ok("Refine: kein neuer Render (Rueckfrage oder keine validen Tool-Calls)");
+    }
+  }
+
   return { leadId: contact.json.leadId, sessionToken };
 }
 

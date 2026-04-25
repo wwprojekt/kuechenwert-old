@@ -140,6 +140,7 @@ export async function createRender(params: {
   negativePrompt: string;
   specSnapshot: Record<string, unknown>;
   modelSlug: string;
+  userMessage?: string;
 }): Promise<PlannerRenderRow> {
   // Naechste Version ermitteln
   const { data: maxRow } = await supabaseAdmin
@@ -161,12 +162,26 @@ export async function createRender(params: {
       spec_snapshot: params.specSnapshot,
       model_slug: params.modelSlug,
       status: "pending",
+      user_message: params.userMessage ?? null,
     })
     .select("*")
     .single();
 
   if (error) throw new Error(`[render] insert failed: ${error.message}`);
   return data as PlannerRenderRow;
+}
+
+/**
+ * Zaehlt erfolgreiche + pending Renders (Version > 1 = Refines).
+ * Fuer das Iterations-Limit in /api/planner/refine.
+ */
+export async function countRefineIterations(sessionId: string): Promise<number> {
+  const { count } = await supabaseAdmin
+    .from("planner_renders")
+    .select("id", { count: "exact", head: true })
+    .eq("session_id", sessionId)
+    .gt("version", 1);
+  return count ?? 0;
 }
 
 export async function markRenderRunning(
@@ -239,6 +254,25 @@ export async function getRendersForSession(sessionId: string): Promise<PlannerRe
     .eq("session_id", sessionId)
     .order("version", { ascending: true });
   return (data as PlannerRenderRow[] | null) ?? [];
+}
+
+/**
+ * Ersetzt das komplette `spec` Objekt auf der Session (nicht merge).
+ * Fuer Refine-Flow, wo wir bewusst Felder LOESCHEN koennen (z.B. via
+ * remove_appliance_layout).
+ */
+export async function replaceSessionSpec(params: {
+  sessionId: string;
+  spec: Record<string, unknown>;
+}): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from("planner_sessions")
+    .update({
+      spec: params.spec,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", params.sessionId);
+  if (error) throw new Error(`[session] replaceSpec failed: ${error.message}`);
 }
 
 export async function updateSessionPriceRange(params: {

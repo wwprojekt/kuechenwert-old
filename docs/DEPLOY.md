@@ -127,6 +127,10 @@ Zusaetzliche Env-Vars fuer den KI-Planer. Siehe `.env.example` fuer Details.
 | `META_CAPI_ACCESS_TOKEN` | Meta Conversions API Access Token |
 | `GA_MEASUREMENT_ID` | Google Measurement Protocol |
 | `GA_MEASUREMENT_API_SECRET` | Google Measurement Protocol API-Secret |
+| `OPENAI_API_KEY` | Phase 2: Chat-Refinement + Grundriss-Analyse |
+| `OPENAI_BASE_URL` | Optional (Azure/LiteLLM Proxy) |
+| `OPENAI_REFINE_MODEL` | Default `gpt-4o-mini` (Tool-Calls, guenstig) |
+| `OPENAI_VISION_MODEL` | Default `gpt-4o` (Vision-Capable) |
 
 > **Build-Args**: Alle `NEXT_PUBLIC_*`-Werte werden beim `next build`
 > inlined. In Dokploy daher zwingend als Build-Args setzen
@@ -161,6 +165,18 @@ Zusaetzliche Env-Vars fuer den KI-Planer. Siehe `.env.example` fuer Details.
 - Hard-Limit: `rate_limit_buckets` (pro Session max 3 Renders/Stunde, pro IP max 8/Stunde)
 - Soft-Monitoring: `SELECT sum(cost_cents)/100.0 as cost_eur, count(*) FROM planner_renders WHERE created_at > now() - interval '1 day';`
 
+### Phase-2 Kostenkontrolle (Chat + Vision)
+
+- **Chat-Refinement** (`/api/planner/refine`): Pro Aufruf 1x LLM-Call
+  (Tool-Call, ~500 tokens) + 1x FLUX-Render. Hard-Limit: 5 Refines pro
+  Session, 15/Stunde/IP, 8/Stunde/Session. Bei `gpt-4o-mini` kostet der
+  LLM-Call < 0.1 Cent, der Haupttreiber bleibt Fal.ai.
+- **Grundriss-Analyse** (`/api/planner/analyze-floorplan`): 1x Vision-Call
+  (`gpt-4o`, ~1-2 Cent pro Analyse). Hard-Limit: 3/Stunde/Session,
+  10/Stunde/IP.
+- Falls `OPENAI_API_KEY` nicht gesetzt ist, laufen beide Routen im
+  Mock-Modus mit deterministischen Responses (ok fuer Smoke/CI).
+
 ## 7. Checkliste nach Go-Live
 
 - [ ] Supabase Site URL und Redirect URLs auf echte HTTPS-Domain(s)
@@ -173,6 +189,7 @@ Zusaetzliche Env-Vars fuer den KI-Planer. Siehe `.env.example` fuer Details.
 - [ ] Login + Funnel end-to-end testen (Magic Link kommt an!)
 - [ ] `www` vs. non-`www` Redirect konsistent
 - [ ] KI-Traumkueche: `FAL_KEY` gesetzt, `/traumkueche` laedt, Funnel rendert ein Test-Bild
+- [ ] KI-Traumkueche Phase 2: `OPENAI_API_KEY` gesetzt (sonst Mock-Modus); Refine-Chat funktioniert; Grundriss-Upload liefert usable-Ergebnis mit Beispiel-Image
 - [ ] Cloudflare Turnstile auf Lead-Gate sichtbar (nicht fail-open in Prod)
 - [ ] Meta Pixel + GA4 feuern nach Cookie-Accept (Events Manager live-check)
 - [ ] Meta CAPI Events Manager zeigt "Lead" Events mit `event_id` Match (Deduplication client<->server)

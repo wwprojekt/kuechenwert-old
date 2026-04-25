@@ -14,8 +14,12 @@ import {
   getSessionById,
   getRendersForSession,
   getSignedImageUrl,
+  countRefineIterations,
 } from "@/lib/planner/session";
 import type { TraumkuecheData } from "@/config/funnel-traumkueche";
+import { RefineChat } from "@/components/funnel/traumkueche/refine-chat";
+import { REFINE_ITERATION_LIMIT } from "@/lib/planner/refine-limits";
+import { renderFloorplanSvg } from "@/lib/planner/floorplan-svg";
 import {
   APPLIANCE_SEGMENTS,
   FRONT_COLORS,
@@ -77,6 +81,11 @@ export default async function TraumkuecheErgebnisPage({ params }: Props) {
   const segment = APPLIANCE_SEGMENTS.find((a) => a.slug === spec.applianceSegment);
 
   const contactCaptured = !!session.contact_captured_at;
+  const iterationCount = await countRefineIterations(session.id);
+  const floorplanSvg = renderFloorplanSvg(spec as TraumkuecheData, {
+    width: 720,
+    height: 420,
+  });
 
   return (
     <div className="min-h-screen bg-surface-soft">
@@ -147,6 +156,18 @@ export default async function TraumkuecheErgebnisPage({ params }: Props) {
               )}
             </div>
 
+            {/* Phase 2: schematische Draufsicht */}
+            <div className="mt-4 overflow-hidden rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+                Schematische Draufsicht
+              </div>
+              <div
+                className="mt-2 flex justify-center"
+                aria-label="Draufsicht der Kueche"
+                dangerouslySetInnerHTML={{ __html: floorplanSvg }}
+              />
+            </div>
+
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <ShareButton sessionId={sessionId} />
               <Link
@@ -157,6 +178,24 @@ export default async function TraumkuecheErgebnisPage({ params }: Props) {
                 Neu planen
               </Link>
             </div>
+
+            {/* Phase 2: Refine-Chat */}
+            {imageUrl && latestSuccess && (
+              <div className="mt-6">
+                <RefineChat
+                  sessionToken={session.session_token}
+                  sessionId={session.id}
+                  initialRender={{
+                    id: latestSuccess.id,
+                    imageUrl,
+                    version: latestSuccess.version,
+                  }}
+                  enabled={contactCaptured}
+                  initialIterationCount={iterationCount}
+                  iterationLimit={REFINE_ITERATION_LIMIT}
+                />
+              </div>
+            )}
           </div>
 
           {/* Rechte Spalte: Preisrange + Spec + CTAs */}

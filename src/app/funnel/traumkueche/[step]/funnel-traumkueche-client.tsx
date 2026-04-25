@@ -11,6 +11,7 @@ import { MultiFeatureStep } from "@/components/funnel/traumkueche/multi-feature-
 import { GeneratingStep } from "@/components/funnel/traumkueche/generating-step";
 import { RevealStep } from "@/components/funnel/traumkueche/reveal-step";
 import { LeadGateStep } from "@/components/funnel/traumkueche/lead-gate-step";
+import { FloorplanUpload } from "@/components/funnel/traumkueche/floorplan-upload";
 import {
   APPLIANCE_LAYOUTS,
   APPLIANCE_SEGMENTS,
@@ -538,6 +539,10 @@ export function FunnelTraumkuecheClient({
               columns={4}
             />
           </div>
+          <FloorplanUpload
+            sessionToken={data.sessionToken}
+            onAppliedForm={(form) => update({ kitchenForm: form })}
+          />
         </div>
       )}
 

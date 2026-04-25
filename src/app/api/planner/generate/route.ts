@@ -11,25 +11,16 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { buildKitchenPrompt } from "@/lib/planner/prompt-builder";
-import {
-  DEFAULT_IMAGE_COST_CENTS,
-  getFluxResult,
-  getFluxStatus,
-  isMockMode,
-  submitFluxJob,
-} from "@/lib/planner/fal-client";
+import { isMockMode } from "@/lib/planner/fal-client";
 import {
   createRender,
-  markRenderFailed,
-  markRenderRunning,
-  markRenderSuccess,
   updateSessionPriceRange,
   upsertPlannerSession,
 } from "@/lib/planner/session";
 import { calculatePriceRange } from "@/lib/planner/price-range";
 import { checkRateLimit, clientIpFromHeaders } from "@/lib/planner/rate-limit";
 import { looksLikeBot, verifyTurnstile } from "@/lib/planner/turnstile";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { runBackgroundRender } from "@/lib/planner/render-job";
 import type { TraumkuecheData } from "@/config/funnel-traumkueche";
 
 export const runtime = "nodejs";
@@ -146,7 +137,7 @@ export async function POST(req: NextRequest) {
     })();
 
     // 5) Generation starten (non-blocking)
-    void runGeneration({
+    void runBackgroundRender({
       sessionId: session.id,
       renderId: render.id,
       prompt,
@@ -168,119 +159,3 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/**
- * Hintergrundjob: Fal.ai submit, pollt, laedt Bild in Storage, updated DB.
- */
-async function runGeneration(params: {
-  sessionId: string;
-  renderId: string;
-  prompt: string;
-  model: string;
-}) {
-  const startedAt = Date.now();
-  try {
-    // Submit Job
-    const { requestId } = await submitFluxJob({
-      prompt: params.prompt,
-      aspectRatio: "16:9",
-      numImages: 1,
-      model: params.model,
-    });
-
-    await markRenderRunning(params.renderId, requestId);
-
-    // Poll
-    const timeoutMs = 90_000;
-    const intervalMs = 1_500;
-    let result;
-    while (Date.now() - startedAt < timeoutMs) {
-      const status = await getFluxStatus(requestId, params.model);
-      if (status.status === "COMPLETED") {
-        result = await getFluxResult(requestId, params.model);
-        break;
-      }
-      if (status.status === "FAILED") {
-        throw new Error(`FLUX status FAILED: ${status.error ?? "unknown"}`);
-      }
-      await new Promise((resolve) => setTimeout(resolve, intervalMs));
-    }
-
-    if (!result) {
-      throw new Error(`FLUX timeout nach ${timeoutMs}ms`);
-    }
-
-    // Bild herunterladen + Supabase Storage upload
-    const imagePath = `planner/${params.sessionId}/v${Date.now()}.jpg`;
-    const uploadSuccess = isMockMode()
-      ? await uploadMockImage(imagePath)
-      : await downloadAndStoreImage(result.imageUrl, imagePath);
-    if (!uploadSuccess) {
-      throw new Error("Image upload to storage failed");
-    }
-
-    const elapsed = Date.now() - startedAt;
-    await markRenderSuccess({
-      renderId: params.renderId,
-      sessionId: params.sessionId,
-      imagePath,
-      width: result.width,
-      height: result.height,
-      generationMs: elapsed,
-      costCents: DEFAULT_IMAGE_COST_CENTS,
-    });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    console.error("[planner/generate:bg] failed:", msg);
-    await markRenderFailed(params.renderId, msg);
-  }
-}
-
-/**
- * Im Mock-Mode (kein FAL_KEY oder FAL_MOCK=1) schreiben wir ein
- * minimales embedded JPEG in den Storage, damit der Smoke-Test komplett
- * durchlaufen kann ohne externe Abhaengigkeiten.
- */
-async function uploadMockImage(path: string): Promise<boolean> {
-  try {
-    // 1x1-Pixel JPEG (smallest valid), base64-dekodiert
-    const MIN_JPEG_B64 =
-      "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AKpgP//Z";
-    const buffer = Buffer.from(MIN_JPEG_B64, "base64");
-    const { error } = await supabaseAdmin.storage
-      .from("lead-files")
-      .upload(path, buffer, { contentType: "image/jpeg", upsert: true });
-    if (error) {
-      console.error("[planner/generate:bg] mock upload error:", error);
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.error("[planner/generate:bg] mock upload exception:", e);
-    return false;
-  }
-}
-
-async function downloadAndStoreImage(url: string, path: string): Promise<boolean> {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      console.error("[planner/generate:bg] fetch failed:", res.status, res.statusText);
-      return false;
-    }
-    const buffer = Buffer.from(await res.arrayBuffer());
-    const contentType = res.headers.get("content-type") ?? "image/jpeg";
-
-    const { error } = await supabaseAdmin.storage
-      .from("lead-files")
-      .upload(path, buffer, { contentType, upsert: true });
-
-    if (error) {
-      console.error("[planner/generate:bg] storage upload error:", error);
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.error("[planner/generate:bg] download exception:", e);
-    return false;
-  }
-}
