@@ -34,7 +34,7 @@ const TIMEFRAME_MONTHS: Record<string, number> = {
 };
 
 /** Erlaubte Werte fuer leads.funnel_type. */
-const ALLOWED_FUNNEL_TYPES = new Set(["a", "b"]);
+const ALLOWED_FUNNEL_TYPES = new Set(["a", "b", "traumkueche"]);
 
 /** Erlaubte Werte fuer leads.housing_type. */
 const ALLOWED_HOUSING_TYPES = new Set(["rent", "own", "unknown"]);

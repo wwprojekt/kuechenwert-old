@@ -4,7 +4,11 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 /** Aktuelle Version unserer Datenschutzerklärung. Bei Änderungen hochzählen. */
 export const PRIVACY_POLICY_VERSION = "v1.0-2026-04";
 
-export type ConsentSource = "funnel_a" | "funnel_b" | "register_dealer";
+export type ConsentSource =
+  | "funnel_a"
+  | "funnel_b"
+  | "funnel_traumkueche"
+  | "register_dealer";
 
 export interface ConsentInput {
   /** "privacy_policy" | "marketing_call" | "marketing_email" */
