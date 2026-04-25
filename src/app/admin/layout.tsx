@@ -64,10 +64,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, first_name, last_name, email")
+    .select("role, first_name, last_name")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
   if (profile?.role !== "admin") redirect("/");
+
+  const email = user.email ?? "";
 
   return (
     <div className="flex min-h-screen bg-surface-soft">
@@ -111,7 +113,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="font-medium text-ink">
             {profile?.first_name} {profile?.last_name}
           </div>
-          <div className="truncate">{profile?.email}</div>
+          <div className="truncate">{email}</div>
         </div>
       </aside>
       <main className="flex-1 overflow-x-hidden p-6 lg:p-10">{children}</main>
