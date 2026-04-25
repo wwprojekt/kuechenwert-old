@@ -250,10 +250,7 @@ function drawAppliances(
 // ============================================================
 
 function pickDims(spec: TraumkuecheData, opts: FloorplanSvgOptions): RoomDims {
-  const floorplan = (spec as unknown as { floorplan?: { analysis?: { approxLengthMeters?: number | null; approxDepthMeters?: number | null } } })
-    .floorplan;
-
-  const fromAnalysis = floorplan?.analysis;
+  const fromAnalysis = spec.floorplan?.analysis;
   const length =
     opts.lengthMeters ??
     (fromAnalysis?.approxLengthMeters && fromAnalysis.approxLengthMeters > 0

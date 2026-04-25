@@ -172,7 +172,9 @@ export async function createRender(params: {
 }
 
 /**
- * Zaehlt erfolgreiche + pending Renders (Version > 1 = Refines).
+ * Zaehlt Refine-Renders (Version > 1), die NICHT fehlgeschlagen sind.
+ * Fehlgeschlagene Renders sollen nicht auf das User-Budget zaehlen, weil der
+ * User weder Bild noch verwertbares Ergebnis bekommen hat.
  * Fuer das Iterations-Limit in /api/planner/refine.
  */
 export async function countRefineIterations(sessionId: string): Promise<number> {
@@ -180,7 +182,8 @@ export async function countRefineIterations(sessionId: string): Promise<number> 
     .from("planner_renders")
     .select("id", { count: "exact", head: true })
     .eq("session_id", sessionId)
-    .gt("version", 1);
+    .gt("version", 1)
+    .neq("status", "failed");
   return count ?? 0;
 }
 

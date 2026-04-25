@@ -184,7 +184,6 @@ export default async function TraumkuecheErgebnisPage({ params }: Props) {
               <div className="mt-6">
                 <RefineChat
                   sessionToken={session.session_token}
-                  sessionId={session.id}
                   initialRender={{
                     id: latestSuccess.id,
                     imageUrl,

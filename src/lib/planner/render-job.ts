@@ -63,7 +63,9 @@ export async function runBackgroundRender(params: RunGenerationParams): Promise<
 
     if (!result) throw new Error(`FLUX timeout nach ${timeoutMs}ms`);
 
-    const imagePath = `planner/${params.sessionId}/v${Date.now()}.jpg`;
+    // Kollisionsfreier Pfad: renderId ist eine UUID, daher pro Render
+    // garantiert einzigartig - auch wenn zwei Renders in derselben ms laufen.
+    const imagePath = `planner/${params.sessionId}/${params.renderId}.jpg`;
     const uploadOk = isMockMode()
       ? await uploadMockImage(imagePath)
       : await downloadAndStoreImage(result.imageUrl, imagePath);

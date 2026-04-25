@@ -148,8 +148,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 4) Spec updaten (merge, bei usable auch kitchenForm)
-  const currentSpec = session.spec as unknown as TraumkuecheData;
+  // 4) Spec updaten (merge, bei usable auch kitchenForm).
+  //    session.spec kann theoretisch null sein (alte Rows) - defensiv auf {} casten.
+  const currentSpec = (session.spec ?? {}) as unknown as TraumkuecheData;
   const nextSpec: Record<string, unknown> = {
     ...currentSpec,
     floorplan: {

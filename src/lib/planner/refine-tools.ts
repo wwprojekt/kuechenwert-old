@@ -197,12 +197,12 @@ export function buildRefineSystemPrompt(): string {
     "Erlaubte Stauraum-Features (featureSlug):",
     storageList,
     "",
-    "Erlaubte Geraete-Anordnungen (layoutSlug):",
+    "Erlaubte Geräte-Anordnungen (layoutSlug):",
     layoutList,
     "",
-    "Wenn der Nutzer einen ungefaehren Begriff nutzt, matche auf das ",
-    "semantisch naechste Slug. Beispiel: 'heller' -> zuerst pruefen, ob ",
-    "eine helle Farb-Alternative konkret genannt wird; 'gruen' -> ",
+    "Wenn der Nutzer einen ungefähren Begriff nutzt, matche auf das ",
+    "semantisch nächste Slug. Beispiel: 'heller' → zuerst prüfen, ob ",
+    "eine helle Farb-Alternative konkret genannt wird; 'grün' → ",
     "'farbig-salbeigruen' oder 'farbig-dunkelgruen' je nach Kontext.",
   ].join("\n");
 }

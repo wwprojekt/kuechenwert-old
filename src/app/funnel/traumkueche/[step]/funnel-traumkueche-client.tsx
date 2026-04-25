@@ -542,6 +542,7 @@ export function FunnelTraumkuecheClient({
           <FloorplanUpload
             sessionToken={data.sessionToken}
             onAppliedForm={(form) => update({ kitchenForm: form })}
+            turnstileSiteKey={turnstileSiteKey}
           />
         </div>
       )}

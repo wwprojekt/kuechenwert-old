@@ -15,7 +15,6 @@ import { Sparkles, Send, RefreshCcw, CheckCircle2, AlertCircle, ChevronLeft, Che
 
 interface RefineChatProps {
   sessionToken: string;
-  sessionId: string;
   /** Initialer Render als "Vorher"-Basis */
   initialRender: {
     id: string;
@@ -28,8 +27,6 @@ interface RefineChatProps {
   initialIterationCount: number;
   /** Absolutes Limit pro Session */
   iterationLimit: number;
-  /** Optionaler Turnstile-Site-Key fuer Re-Challenge */
-  turnstileSiteKey?: string;
 }
 
 interface HistoryEntry {
@@ -64,7 +61,6 @@ interface RefineResponse {
 
 export function RefineChat({
   sessionToken,
-  sessionId: _sessionId,
   initialRender,
   enabled,
   initialIterationCount,
@@ -90,7 +86,12 @@ export function RefineChat({
   const remaining = Math.max(0, iterationLimit - iterationCount);
   const canRefine = enabled && remaining > 0 && !loading && !polling;
 
-  const pollRender = useCallback(async (renderId: string): Promise<string | null> => {
+  type PollOutcome =
+    | { kind: "success"; imageUrl: string }
+    | { kind: "failed"; error: string }
+    | { kind: "timeout" };
+
+  const pollRender = useCallback(async (renderId: string): Promise<PollOutcome> => {
     const start = Date.now();
     const timeout = 120_000;
     while (Date.now() - start < timeout) {
@@ -98,14 +99,22 @@ export function RefineChat({
       try {
         const res = await fetch(`/api/planner/renders/${renderId}`, { cache: "no-store" });
         if (!res.ok) continue;
-        const json = await res.json();
-        if (json.status === "success" && json.imageUrl) return json.imageUrl as string;
-        if (json.status === "failed") return null;
+        const json = (await res.json()) as {
+          status?: string;
+          imageUrl?: string | null;
+          error?: string;
+        };
+        if (json.status === "success" && json.imageUrl) {
+          return { kind: "success", imageUrl: json.imageUrl };
+        }
+        if (json.status === "failed") {
+          return { kind: "failed", error: json.error ?? "Unbekannter Fehler beim Render." };
+        }
       } catch {
         // ignore and retry
       }
     }
-    return null;
+    return { kind: "timeout" };
   }, []);
 
   const submit = useCallback(async () => {
@@ -137,9 +146,13 @@ export function RefineChat({
 
       // Polling auf neuen Render
       setPolling(true);
-      const imageUrl = await pollRender(json.renderId);
-      if (!imageUrl) {
-        setError("Render ist leider nicht durchgelaufen. Bitte noch einmal versuchen.");
+      const outcome = await pollRender(json.renderId);
+      if (outcome.kind === "failed") {
+        setError(`Render fehlgeschlagen: ${outcome.error}`);
+        return;
+      }
+      if (outcome.kind === "timeout") {
+        setError("Render hat laenger gedauert als erwartet. Bitte Seite neu laden.");
         return;
       }
 
@@ -148,7 +161,7 @@ export function RefineChat({
         {
           renderId: json.renderId!,
           version: json.version ?? prev.length + 2,
-          imageUrl,
+          imageUrl: outcome.imageUrl,
           userMessage: outgoing,
           assistantMessage: json.assistantMessage ?? "",
           appliedSummary: summarizeApplied(json.applied),

@@ -10,6 +10,28 @@
 
 import type { Segment, KitchenFormSlug } from "./funnel-traumkueche-stammdaten";
 
+// ============================================================
+// Floorplan-Analyse (Phase 2)
+// ============================================================
+
+export interface TraumkuecheFloorplanAnalysis {
+  kitchenForm: KitchenFormSlug | null;
+  approxLengthMeters: number | null;
+  approxDepthMeters: number | null;
+  doorsDetected: number | null;
+  windowsDetected: number | null;
+  recommendedLayout: string | null;
+  confidence: number;
+  warnings: string[];
+  usable: boolean;
+}
+
+export interface TraumkuecheFloorplan {
+  filePath: string;
+  analyzedAt: string;
+  analysis: TraumkuecheFloorplanAnalysis;
+}
+
 export const FUNNEL_TRAUMKUECHE_ID = "traumkueche" as const;
 
 export type TraumkuecheStepType =
@@ -174,6 +196,9 @@ export interface TraumkuecheData {
   priceRangeMinCents?: number;
   priceRangeMaxCents?: number;
   expertNote?: string;
+
+  /** Phase 2: Optionale Grundriss-Analyse */
+  floorplan?: TraumkuecheFloorplan;
 
   contact?: Partial<TraumkuecheContact>;
 }

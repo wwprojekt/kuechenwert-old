@@ -271,14 +271,16 @@ function buildMockResponse(opts: LlmChatOptions, model: string): LlmCompletionRe
 }
 
 function buildMockJson(_opts: LlmChatOptions): Record<string, unknown> {
+  // Wir setzen confidence absichtlich unter 0.5, damit im Dev-Mode die
+  // manuell gewaehlte kitchenForm NICHT ueberschrieben wird.
   return {
     kitchenForm: "l",
     approxLengthMeters: 3.6,
     approxDepthMeters: 2.8,
     doorsDetected: 1,
     windowsDetected: 1,
-    recommendedLayout: "workspace-window-side",
-    confidence: 0.6,
+    recommendedLayout: "Arbeitszone parallel zum Fenster platzieren",
+    confidence: 0.4,
     warnings: ["Mock-Daten - kein echter LLM-Call."],
   };
 }

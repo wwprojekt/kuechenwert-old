@@ -17,6 +17,7 @@
 
 import { llmJson, visionModel } from "@/lib/planner/llm-client";
 import type { KitchenFormSlug } from "@/config/funnel-traumkueche-stammdaten";
+import type { TraumkuecheFloorplanAnalysis } from "@/config/funnel-traumkueche";
 
 export interface FloorplanAnalysisRaw {
   kitchenForm?: string;
@@ -29,18 +30,8 @@ export interface FloorplanAnalysisRaw {
   warnings?: string[];
 }
 
-export interface FloorplanAnalysisResult {
-  kitchenForm: KitchenFormSlug | null;
-  approxLengthMeters: number | null;
-  approxDepthMeters: number | null;
-  doorsDetected: number | null;
-  windowsDetected: number | null;
-  recommendedLayout: string | null;
-  confidence: number;
-  warnings: string[];
-  /** True, wenn das Ergebnis als Spec-Fuellung sicher genug ist */
-  usable: boolean;
-}
+/** Re-export fuer Konsumenten, die nur dieses Modul kennen */
+export type FloorplanAnalysisResult = TraumkuecheFloorplanAnalysis;
 
 const VALID_FORMS: KitchenFormSlug[] = ["zeile", "l", "u", "parallel", "g", "insel"];
 

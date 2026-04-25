@@ -9,9 +9,21 @@
  * - Bei Fehler / low confidence: sichtbarer Fallback-Hinweis.
  */
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Upload, CheckCircle2, AlertTriangle, Loader2, X } from "lucide-react";
 import type { KitchenFormSlug } from "@/config/funnel-traumkueche-stammdaten";
+
+interface TurnstileApi {
+  render: (
+    container: HTMLElement | string,
+    opts: {
+      sitekey: string;
+      callback: (token: string) => void;
+      size?: string;
+    },
+  ) => string;
+  reset: (widgetId?: string) => void;
+}
 
 interface FloorplanAnalysis {
   kitchenForm: KitchenFormSlug | null;
@@ -36,17 +48,73 @@ interface AnalyzeResponse {
 export function FloorplanUpload({
   sessionToken,
   onAppliedForm,
-  turnstileToken,
+  turnstileSiteKey,
 }: {
   sessionToken: string;
   onAppliedForm?: (form: KitchenFormSlug) => void;
-  turnstileToken?: string;
+  /**
+   * Wenn gesetzt, wird ein unsichtbares Turnstile-Widget gemountet, das
+   * automatisch einen Token ausstellt. In Dev (kein Site-Key) laeuft der
+   * Upload ohne Token - die Server-Seite laeuft dort fail-open.
+   */
+  turnstileSiteKey?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
+  const widgetId = useId();
+  const widgetMountedRef = useRef(false);
+
+  useEffect(() => {
+    if (!turnstileSiteKey || typeof window === "undefined") return;
+    if (!document.getElementById("kw-turnstile-script")) {
+      const s = document.createElement("script");
+      s.id = "kw-turnstile-script";
+      s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+      s.async = true;
+      s.defer = true;
+      document.head.appendChild(s);
+    }
+  }, [turnstileSiteKey]);
+
+  useEffect(() => {
+    if (!turnstileSiteKey || typeof window === "undefined") return;
+    const containerId = `kw-ts-floorplan-${widgetId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    let attempts = 0;
+    const maxAttempts = 40;
+    const interval = setInterval(() => {
+      if (widgetMountedRef.current) {
+        clearInterval(interval);
+        return;
+      }
+      const ts = (window as unknown as { turnstile?: TurnstileApi }).turnstile;
+      if (ts && container) {
+        widgetMountedRef.current = true;
+        try {
+          ts.render(container, {
+            sitekey: turnstileSiteKey,
+            size: "flexible",
+            callback: (token: string) => setTurnstileToken(token),
+          });
+        } catch {
+          // Turnstile weigert sich evtl. bei doppeltem render - ignorieren
+        }
+        clearInterval(interval);
+      }
+      attempts += 1;
+      if (attempts > maxAttempts) clearInterval(interval);
+    }, 250);
+
+    return () => clearInterval(interval);
+  }, [turnstileSiteKey, widgetId]);
+
+  const containerId = `kw-ts-floorplan-${widgetId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
   const onFile = useCallback(
     async (file: File) => {
@@ -200,6 +268,15 @@ export function FloorplanUpload({
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-[12px] text-red-800">
           {error}
+        </div>
+      )}
+
+      {turnstileSiteKey && (
+        <div className="pt-1">
+          <div id={containerId} />
+          <div className="mt-1 text-[10px] text-ink-subtle">
+            Bot-Schutz durch Cloudflare
+          </div>
         </div>
       )}
     </div>

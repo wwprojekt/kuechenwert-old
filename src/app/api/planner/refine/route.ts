@@ -86,16 +86,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Bot-Zugriff blockiert." }, { status: 403 });
   }
 
-  const tsResult = await verifyTurnstile(body.turnstileToken, ip);
-  if (!tsResult.success && !tsResult.skipped) {
-    return NextResponse.json(
-      { error: "Bot-Schutz fehlgeschlagen.", errors: tsResult.errors },
-      { status: 403 },
-    );
-  }
-
-  // Rate-Limits - konservativer als generate, weil jeder Refine auch
-  // ein FLUX-Call + LLM-Call ist.
+  // Rate-Limits zuerst pruefen (billig, ohne DB-Lookup der Session).
+  // Konservativer als generate, weil jeder Refine einen FLUX- + LLM-Call kostet.
   const [ipLimit, sessionLimit] = await Promise.all([
     checkRateLimit(`planner-refine:ip:${ip}`, 3600, 15),
     checkRateLimit(`planner-refine:session:${body.sessionToken}`, 3600, 8),
@@ -113,6 +105,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Session nicht gefunden" }, { status: 404 });
   }
 
+  // Turnstile: Der Refine-Chat steht HINTER dem Lead-Gate. Wenn der Nutzer
+  // Kontakt captured hat, gilt er als verifiziert - er hat auf dem Lead-Gate
+  // bereits ein Turnstile-Widget geloest. Zusaetzlichen Token verlangen wir
+  // nicht (der Widget wird im Refine-Chat nicht re-rendered). Wenn kein
+  // Kontakt captured ist (ausnahme: direkter POST von aussen), erzwingen wir
+  // Turnstile weiterhin.
+  if (!session.contact_captured_at) {
+    const tsResult = await verifyTurnstile(body.turnstileToken, ip);
+    if (!tsResult.success && !tsResult.skipped) {
+      return NextResponse.json(
+        { error: "Bot-Schutz fehlgeschlagen.", errors: tsResult.errors },
+        { status: 403 },
+      );
+    }
+  }
+
   // Iterations-Limit pruefen
   const iterationCount = await countRefineIterations(session.id);
   if (iterationCount >= REFINE_ITERATION_LIMIT) {
@@ -126,8 +134,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Current spec
-  const currentSpec = session.spec as unknown as TraumkuecheData;
+  // Current spec - defensiv: spec kann theoretisch null sein (alte Rows).
+  const currentSpec = (session.spec ?? {}) as unknown as TraumkuecheData;
 
   // LLM call: tool-call-only refine
   let llmResult;
@@ -190,16 +198,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // 1) Session-Spec aktualisieren
-    await replaceSessionSpec({
-      sessionId: session.id,
-      spec: newSpec as unknown as Record<string, unknown>,
-    });
-
-    // 2) Prompt bauen
+    // 1) Prompt bauen
     const { prompt, negativePrompt } = buildKitchenPrompt(newSpec);
 
-    // 3) Render-Row anlegen
+    // 2) Render-Row anlegen (mit Snapshot). Zuerst, damit bei DB-Fehler
+    //    die Session-Spec nicht bereits geaendert wurde (kein halber State).
     const render = await createRender({
       sessionId: session.id,
       prompt,
@@ -207,6 +210,12 @@ export async function POST(req: NextRequest) {
       specSnapshot: newSpec as unknown as Record<string, unknown>,
       modelSlug: MODEL_SLUG,
       userMessage: message,
+    });
+
+    // 3) Session-Spec aktualisieren (erst jetzt, wenn Render-Row existiert)
+    await replaceSessionSpec({
+      sessionId: session.id,
+      spec: newSpec as unknown as Record<string, unknown>,
     });
 
     // 4) Preis-Range neu rechnen (parallel)
