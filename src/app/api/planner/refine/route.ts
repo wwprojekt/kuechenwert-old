@@ -198,11 +198,20 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // 1) Prompt bauen
+    // 1) Session-Spec aktualisieren. Zuerst, damit wir bei einem DB-Fehler
+    //    hier KEINE orphan 'pending'-Render-Row produzieren, die niemand
+    //    als 'failed' markiert und die einen Iteration-Slot frisst.
+    //    Tool-Calls sind idempotent: bei Retry sieht der LLM bereits den
+    //    (neuen) Stand und erzeugt keinen Doppel-Effekt.
+    await replaceSessionSpec({
+      sessionId: session.id,
+      spec: newSpec as unknown as Record<string, unknown>,
+    });
+
+    // 2) Prompt bauen
     const { prompt, negativePrompt } = buildKitchenPrompt(newSpec);
 
-    // 2) Render-Row anlegen (mit Snapshot). Zuerst, damit bei DB-Fehler
-    //    die Session-Spec nicht bereits geaendert wurde (kein halber State).
+    // 3) Render-Row anlegen (mit Snapshot)
     const render = await createRender({
       sessionId: session.id,
       prompt,
@@ -210,12 +219,6 @@ export async function POST(req: NextRequest) {
       specSnapshot: newSpec as unknown as Record<string, unknown>,
       modelSlug: MODEL_SLUG,
       userMessage: message,
-    });
-
-    // 3) Session-Spec aktualisieren (erst jetzt, wenn Render-Row existiert)
-    await replaceSessionSpec({
-      sessionId: session.id,
-      spec: newSpec as unknown as Record<string, unknown>,
     });
 
     // 4) Preis-Range neu rechnen (parallel)
