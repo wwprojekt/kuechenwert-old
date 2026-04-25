@@ -17,13 +17,27 @@ export function LoginForm({ next }: { next?: string }) {
     setError(null);
     setLoading(true);
     const supabase = createClient();
-    const { error: e2 } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
+    const { data, error: e2 } = await supabase.auth.signInWithPassword({ email, password });
     if (e2) {
+      setLoading(false);
       setError(e2.message);
       return;
     }
-    router.push(next || "/dealer/dashboard");
+
+    // Rolle aus profiles lesen, damit Admins nicht in /dealer/dashboard laufen
+    // (requireDealer() würde sie sonst auf /auth/register-dealer umleiten).
+    let destination = next || "/dealer/dashboard";
+    if (!next && data.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .maybeSingle();
+      if (profile?.role === "admin") destination = "/admin";
+    }
+
+    setLoading(false);
+    router.push(destination);
     router.refresh();
   };
 
