@@ -211,7 +211,9 @@ async function runGeneration(params: {
 
     // Bild herunterladen + Supabase Storage upload
     const imagePath = `planner/${params.sessionId}/v${Date.now()}.jpg`;
-    const uploadSuccess = await downloadAndStoreImage(result.imageUrl, imagePath);
+    const uploadSuccess = isMockMode()
+      ? await uploadMockImage(imagePath)
+      : await downloadAndStoreImage(result.imageUrl, imagePath);
     if (!uploadSuccess) {
       throw new Error("Image upload to storage failed");
     }
@@ -230,6 +232,31 @@ async function runGeneration(params: {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("[planner/generate:bg] failed:", msg);
     await markRenderFailed(params.renderId, msg);
+  }
+}
+
+/**
+ * Im Mock-Mode (kein FAL_KEY oder FAL_MOCK=1) schreiben wir ein
+ * minimales embedded JPEG in den Storage, damit der Smoke-Test komplett
+ * durchlaufen kann ohne externe Abhaengigkeiten.
+ */
+async function uploadMockImage(path: string): Promise<boolean> {
+  try {
+    // 1x1-Pixel JPEG (smallest valid), base64-dekodiert
+    const MIN_JPEG_B64 =
+      "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AKpgP//Z";
+    const buffer = Buffer.from(MIN_JPEG_B64, "base64");
+    const { error } = await supabaseAdmin.storage
+      .from("lead-files")
+      .upload(path, buffer, { contentType: "image/jpeg", upsert: true });
+    if (error) {
+      console.error("[planner/generate:bg] mock upload error:", error);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("[planner/generate:bg] mock upload exception:", e);
+    return false;
   }
 }
 

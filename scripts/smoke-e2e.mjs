@@ -304,6 +304,118 @@ async function testFunnelB() {
   return { leadId: r.json.id, auctionId: r.json.auction_id };
 }
 
+async function testTraumkuecheFunnel() {
+  step("Funnel-C (Traumkueche): Generate -> Poll -> Save-Contact");
+
+  // 1. Trigger Generation (nutzt Mock-Mode wenn FAL_KEY nicht gesetzt)
+  const sessionToken = `smoke-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const spec = {
+    sessionToken,
+    styleSlug: "modern-grifflos",
+    surfaceFinishSlug: "matt-antifingerprint",
+    frontColorSlug: "dunkel-anthrazit",
+    worktopSlug: "keramik",
+    storageFeatures: ["deckenhoch", "beleuchtung-unterboden"],
+    applianceLayouts: ["backofen-hoch-kaffee-daneben", "kochfeld-muldenlueftung"],
+    applianceSegment: "premium",
+    kitchenForm: "l",
+    kitchenSize: "mittel",
+  };
+
+  const gen = await postJson("/api/planner/generate", {
+    sessionToken,
+    spec,
+    utm: { utm_source: SMOKE_TAG },
+  });
+  assert(gen.ok, "POST /api/planner/generate -> 200", gen);
+  if (!gen.ok) return null;
+  assert(!!gen.json.renderId, "renderId returned", gen.json);
+  assert(!!gen.json.sessionId, "sessionId returned", gen.json);
+  if (gen.json.mock) ok("Mock-Mode aktiv (kein Fal-Key gesetzt)");
+
+  // 2. Polling-Loop
+  let polled = null;
+  const pollStart = Date.now();
+  const pollTimeoutMs = 120_000;
+  while (Date.now() - pollStart < pollTimeoutMs) {
+    await new Promise((r) => setTimeout(r, 1500));
+    const p = await fetch(`${BASE_URL}/api/planner/renders/${gen.json.renderId}`);
+    polled = await p.json().catch(() => ({}));
+    if (polled.status === "success" || polled.status === "failed") break;
+  }
+  assert(polled?.status === "success", `Poll erfolgreich (status=${polled?.status})`, polled);
+  if (polled?.status !== "success") return null;
+  assert(!!polled.imageUrl, "imageUrl vorhanden", polled);
+  assert(!!polled.priceRange, "priceRange vorhanden", polled);
+
+  // 3. Save-Contact
+  const contact = await postJson("/api/planner/save-contact", {
+    sessionToken,
+    firstName: "Smoke",
+    lastName: "Traumkueche",
+    email: `smoke+tk+${Date.now()}@kuechenwert.test`,
+    phone: "+49 30 0000000",
+    plz: "10115",
+    consentDatenschutz: true,
+    consentAi: true,
+    consentCallback: true,
+    consentMarketing: false,
+  });
+  assert(contact.ok, "POST /api/planner/save-contact -> 200", contact);
+  if (!contact.ok) return null;
+  assert(!!contact.json.leadId, "leadId returned", contact.json);
+
+  if (supabase) {
+    const { data: lead } = await supabase
+      .from("leads")
+      .select("funnel_type, status, funnel_answers")
+      .eq("id", contact.json.leadId)
+      .single();
+    assert(lead?.funnel_type === "traumkueche", "funnel_type='traumkueche'", lead);
+
+    const { data: session } = await supabase
+      .from("planner_sessions")
+      .select("lead_id, contact_captured_at, price_range_min_cents, price_range_max_cents")
+      .eq("session_token", sessionToken)
+      .single();
+    assert(session?.lead_id === contact.json.leadId, "planner_session.lead_id verknuepft", session);
+    assert(!!session?.contact_captured_at, "contact_captured_at gesetzt", session);
+    assert(
+      session?.price_range_min_cents != null,
+      "Preisrange berechnet",
+      session,
+    );
+
+    const { count: fileCount } = await supabase
+      .from("lead_files")
+      .select("*", { count: "exact", head: true })
+      .eq("lead_id", contact.json.leadId);
+    assert((fileCount ?? 0) >= 1, `Rendering als lead_file (${fileCount})`, { fileCount });
+
+    // Update UTM-Source fuer Cleanup
+    await supabase.from("leads").update({ utm_source: SMOKE_TAG }).eq("id", contact.json.leadId);
+    await supabase
+      .from("planner_sessions")
+      .update({ utm_source: SMOKE_TAG })
+      .eq("session_token", sessionToken);
+  }
+
+  return { leadId: contact.json.leadId, sessionToken };
+}
+
+async function cleanupPlannerSessions() {
+  if (!supabase) return;
+  const { data: sessions } = await supabase
+    .from("planner_sessions")
+    .select("id")
+    .eq("utm_source", SMOKE_TAG);
+  const sessionIds = (sessions ?? []).map((s) => s.id);
+  if (sessionIds.length === 0) return;
+  await supabase.from("planner_renders").delete().in("session_id", sessionIds);
+  await supabase.from("planner_sessions").delete().in("id", sessionIds);
+  ok(`${sessionIds.length} Planner-Sessions bereinigt`);
+}
+
 async function testCronJobs() {
   step("Cron: finalize-auctions (Manual-Trigger)");
   const r1 = await postCron("/api/cron/finalize-auctions");
@@ -394,11 +506,13 @@ async function main() {
     await testFunnelAQualified();
     await testFunnelAStandard();
     await testFunnelB();
+    await testTraumkuecheFunnel();
     await testCronJobs();
   } catch (err) {
     fail("Unerwarteter Crash im Smoke-Lauf", err);
   } finally {
     await cleanup();
+    await cleanupPlannerSessions();
   }
 
   console.log(

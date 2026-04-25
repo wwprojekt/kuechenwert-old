@@ -26,7 +26,7 @@ export default async function AdminLeadsPage({
     )
     .order("created_at", { ascending: false })
     .limit(100);
-  if (funnel === "a" || funnel === "b") q = q.eq("funnel_type", funnel);
+  if (funnel === "a" || funnel === "b" || funnel === "traumkueche") q = q.eq("funnel_type", funnel);
   if (status) q = q.eq("status", status);
 
   const { data: leadsRaw } = await q;
@@ -110,6 +110,11 @@ export default async function AdminLeadsPage({
         <FilterChip href="/admin/leads" active={!funnel} label="Alle" />
         <FilterChip href="/admin/leads?funnel=a" active={funnel === "a"} label="Funnel A" />
         <FilterChip href="/admin/leads?funnel=b" active={funnel === "b"} label="Funnel B" />
+        <FilterChip
+          href="/admin/leads?funnel=traumkueche"
+          active={funnel === "traumkueche"}
+          label="KI-Traumkueche"
+        />
         <span className="ml-4 font-semibold uppercase text-ink-subtle">Status:</span>
         {["new", "qualified", "in_auction", "sold", "disqualified"].map((s) => (
           <FilterChip
@@ -143,9 +148,7 @@ export default async function AdminLeadsPage({
             {leads.map((l) => (
               <tr key={l.id} className="hover:bg-surface-soft">
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${l.funnel_type === "b" ? "bg-brand-100 text-brand-800" : "bg-accent-50 text-accent-700"}`}>
-                    {(l.funnel_type ?? "a").toUpperCase()}
-                  </span>
+                  <FunnelCell type={l.funnel_type} />
                 </td>
                 <td className="px-4 py-3"><span className="chip">{l.status}</span></td>
                 <td className="px-4 py-3">
@@ -189,6 +192,21 @@ export default async function AdminLeadsPage({
         </table>
       </div>
     </div>
+  );
+}
+
+function FunnelCell({ type }: { type: string }) {
+  const map: Record<string, { cls: string; label: string }> = {
+    a: { cls: "bg-accent-50 text-accent-700", label: "A" },
+    b: { cls: "bg-brand-100 text-brand-800", label: "B" },
+    traumkueche: { cls: "bg-purple-100 text-purple-800", label: "KI" },
+  };
+  const t = (type ?? "a") as keyof typeof map;
+  const entry = map[t] ?? map.a!;
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${entry.cls}`}>
+      {entry.label}
+    </span>
   );
 }
 

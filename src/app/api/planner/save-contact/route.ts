@@ -27,6 +27,7 @@ import {
 } from "@/lib/planner/session";
 import { checkRateLimit, clientIpFromHeaders } from "@/lib/planner/rate-limit";
 import { summarizeSpec } from "@/lib/planner/prompt-builder";
+import { emitLeadConversion } from "@/lib/analytics-server";
 import type { TraumkuecheData } from "@/config/funnel-traumkueche";
 
 export const runtime = "nodejs";
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const spec = (session.spec ?? {}) as TraumkuecheData;
+  const spec = (session.spec ?? {}) as unknown as TraumkuecheData;
 
   // Scoring (ohne Upload, ohne existing-offer)
   const scoring = scoreLead({
@@ -221,6 +222,20 @@ export async function POST(request: NextRequest) {
   if (body.phone && QUALIFIED_TIERS.has(scoring.tier)) {
     void notifyDealersOfNewLead(leadId);
   }
+
+  // Server-seitige CAPI / Enhanced Conversions (fire-and-forget)
+  void emitLeadConversion({
+    leadId,
+    email: body.email,
+    phone: body.phone,
+    firstName: body.firstName,
+    lastName: body.lastName,
+    plz: body.plz,
+    ip,
+    userAgent: request.headers.get("user-agent"),
+    valueEur: estimateBudgetFromSession(session) ?? null,
+    funnel: "traumkueche",
+  });
 
   return NextResponse.json({
     sessionId: session.id,

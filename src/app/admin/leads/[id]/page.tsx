@@ -1,10 +1,12 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Mail, Phone, MapPin, FileText, Image as ImgIcon, Map, Gavel } from "lucide-react";
+import { ChevronLeft, Mail, Phone, MapPin, FileText, Image as ImgIcon, Map, Gavel, Sparkles } from "lucide-react";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { LeadEditor } from "@/components/admin/lead-editor";
 import { AuctionEditor } from "@/components/admin/auction-editor";
 import { LeadQuickActions } from "@/components/admin/lead-quick-actions";
+import { getSignedImageUrl } from "@/lib/planner/session";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +70,49 @@ export default async function LeadDetailPage({
       .eq("auction_id", auction.id)
       .order("sort_order", { ascending: true });
     specItems = data ?? [];
+  }
+
+  // Planner-Session + Renders (nur bei funnel_type='traumkueche')
+  interface PlannerSessionLite {
+    id: string;
+    session_token: string;
+    spec: Record<string, unknown>;
+    price_range_min_cents: number | null;
+    price_range_max_cents: number | null;
+    expert_note: string | null;
+  }
+  interface PlannerRenderLite {
+    id: string;
+    version: number;
+    status: string;
+    image_path: string | null;
+    created_at: string;
+    signedUrl?: string | null;
+  }
+  let plannerSession: PlannerSessionLite | null = null;
+  let plannerRenders: PlannerRenderLite[] = [];
+
+  if (lead.funnel_type === "traumkueche") {
+    const { data: sessionRow } = await supabaseAdmin
+      .from("planner_sessions")
+      .select("id, session_token, spec, price_range_min_cents, price_range_max_cents, expert_note")
+      .eq("lead_id", id)
+      .maybeSingle();
+    if (sessionRow) {
+      plannerSession = sessionRow as unknown as PlannerSessionLite;
+      const { data: rendersRaw } = await supabaseAdmin
+        .from("planner_renders")
+        .select("id, version, status, image_path, created_at")
+        .eq("session_id", plannerSession.id)
+        .order("version", { ascending: true });
+      const rendersList = (rendersRaw ?? []) as unknown as PlannerRenderLite[];
+      plannerRenders = await Promise.all(
+        rendersList.map(async (r) => ({
+          ...r,
+          signedUrl: r.image_path ? await getSignedImageUrl(r.image_path, 3600) : null,
+        })),
+      );
+    }
   }
 
   return (
@@ -172,6 +217,78 @@ export default async function LeadDetailPage({
             </section>
           )}
 
+          {/* KI-Traumkueche-Planer */}
+          {plannerSession && (
+            <section className="card">
+              <h2 className="flex items-center gap-2 font-semibold text-ink">
+                <Sparkles className="h-4 w-4 text-brand-700" />
+                KI-Traumkueche-Planer
+              </h2>
+
+              {(plannerSession.price_range_min_cents != null &&
+                plannerSession.price_range_max_cents != null) && (
+                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-surface-soft px-3 py-1.5 text-sm">
+                  <span className="text-ink-subtle">Preisrange:</span>
+                  <strong>
+                    {fmtEur(plannerSession.price_range_min_cents)} -{" "}
+                    {fmtEur(plannerSession.price_range_max_cents)} EUR
+                  </strong>
+                </div>
+              )}
+
+              {plannerSession.expert_note && (
+                <div className="mt-3 rounded-lg bg-surface-soft p-3 text-sm leading-relaxed text-ink-muted">
+                  {plannerSession.expert_note}
+                </div>
+              )}
+
+              <div className="mt-4">
+                <div className="text-xs font-semibold uppercase tracking-wider text-ink-subtle">
+                  Auswahl
+                </div>
+                <pre className="mt-2 max-h-64 overflow-auto rounded-md bg-surface-soft p-3 text-xs text-ink-muted">
+                  {JSON.stringify(plannerSession.spec, null, 2)}
+                </pre>
+              </div>
+
+              {plannerRenders.length > 0 && (
+                <div className="mt-5">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-ink-subtle">
+                    Renderings ({plannerRenders.length})
+                  </div>
+                  <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {plannerRenders.map((r) => (
+                      <div
+                        key={r.id}
+                        className="relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100"
+                      >
+                        {r.signedUrl ? (
+                          <a href={r.signedUrl} target="_blank" rel="noreferrer">
+                            <Image
+                              src={r.signedUrl}
+                              alt={`v${r.version}`}
+                              width={320}
+                              height={180}
+                              unoptimized
+                              className="h-auto w-full object-cover"
+                            />
+                          </a>
+                        ) : (
+                          <div className="grid aspect-video place-items-center text-xs text-ink-subtle">
+                            {r.status}
+                          </div>
+                        )}
+                        <div className="px-2 py-1 text-[11px] text-ink-subtle">
+                          v{r.version} · {new Date(r.created_at).toLocaleString("de-DE")}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
           {/* Funnel-Answers (raw) */}
           {lead.funnel_answers && Object.keys(lead.funnel_answers).length > 0 && (
             <section className="card">
@@ -264,16 +381,26 @@ export default async function LeadDetailPage({
 }
 
 function FunnelBadge({ type }: { type: string }) {
-  const isB = type === "b";
+  const classes: Record<string, string> = {
+    a: "bg-accent-50 text-accent-700",
+    b: "bg-brand-100 text-brand-800",
+    traumkueche: "bg-purple-100 text-purple-800",
+  };
+  const label: Record<string, string> = {
+    a: "Funnel A",
+    b: "Funnel B",
+    traumkueche: "KI-Traumkueche",
+  };
+  const t = (type ?? "a") as keyof typeof classes;
   return (
-    <span
-      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-        isB ? "bg-brand-100 text-brand-800" : "bg-accent-50 text-accent-700"
-      }`}
-    >
-      Funnel {(type ?? "a").toUpperCase()}
+    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${classes[t] ?? classes.a}`}>
+      {label[t] ?? `Funnel ${String(type).toUpperCase()}`}
     </span>
   );
+}
+
+function fmtEur(cents: number): string {
+  return new Intl.NumberFormat("de-DE").format(Math.round(cents / 100));
 }
 
 function StatusBadge({ status }: { status: string }) {

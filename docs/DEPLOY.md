@@ -111,6 +111,56 @@ Alle produktiven Absender (Resend, ggf. Google Workspace) laufen über
 `küchenwert.de` bekommt **keine** MX-Records — dort läuft ausschließlich die
 Website, kein Mail-Versand, kein Mail-Empfang.
 
+## 6b. KI-Traumkueche-Funnel (Funnel C)
+
+Zusaetzliche Env-Vars fuer den KI-Planer. Siehe `.env.example` fuer Details.
+
+| Name | Quelle |
+|------|--------|
+| `FAL_KEY` | [fal.ai Dashboard](https://fal.ai/dashboard/keys) — `keyId:secret` |
+| `FAL_MODEL_SLUG` | Default `fal-ai/flux-pro/v1.1` |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | [Cloudflare Turnstile](https://dash.cloudflare.com) |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile (server-side) |
+| `NEXT_PUBLIC_META_PIXEL_ID` | Meta Events Manager |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 Measurement ID (`G-XXXX`) |
+| `META_PIXEL_ID` | Meta CAPI (gleich NEXT_PUBLIC_..., oder separate Production-ID) |
+| `META_CAPI_ACCESS_TOKEN` | Meta Conversions API Access Token |
+| `GA_MEASUREMENT_ID` | Google Measurement Protocol |
+| `GA_MEASUREMENT_API_SECRET` | Google Measurement Protocol API-Secret |
+
+> **Build-Args**: Alle `NEXT_PUBLIC_*`-Werte werden beim `next build`
+> inlined. In Dokploy daher zwingend als Build-Args setzen
+> (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `NEXT_PUBLIC_META_PIXEL_ID`,
+> `NEXT_PUBLIC_GA_MEASUREMENT_ID`) — siehe Dockerfile. Nur-Runtime reicht
+> fuer diese Variablen NICHT.
+
+### Wichtige Dokploy/Traefik-Hinweise
+
+1. **Traefik-Timeouts**: Fal.ai-Generierung laeuft asynchron via Polling
+   (`/api/planner/generate` returnt nach ~500 ms, Client pollt `/api/planner/renders/[id]`).
+   Trotzdem **Traefik `responseForwardingTimeouts.flushInterval`** auf mindestens
+   `60s` setzen - sonst schneidet Traefik Polling-Streams ab.
+
+   In der Dokploy-Middleware `traefik.http.middlewares.long-poll.buffering.maxResponseBodyBytes=0`
+   und `traefik.http.services.<app>.loadbalancer.responseforwarding.flushinterval=60s`.
+
+2. **Next.js `maxDuration`**: Die Generate-Route setzt `export const maxDuration = 30`.
+   Dokploy/Traefik muss mindestens 60s zulassen, damit der "fire-and-forget"-
+   Fal-Call durchlaufen kann.
+
+3. **Dummy-Route zur Timeout-Verifikation**: `curl -s -o /dev/null -w "%{http_code} %{time_total}\n" https://deine-domain/api/planner/ping-sleep?ms=45000`
+   sollte 200 liefern (nicht 502/504).
+
+4. **Cloudflare Pro WAF-Rule**: Eine Rate-Limit-Rule auf `/api/planner/*` mit
+   max 30 req/min/IP gibt zusaetzliche Abuse-Sicherheit zu den DB-Buckets.
+
+### Fal.ai-Kostenkontrolle
+
+- FLUX.1 [pro] v1.1: ~5-6 Cent/Bild bei 1920x1080
+- Bei 100 Sessions/Tag mit 1 Render/Session: ~6 EUR/Tag
+- Hard-Limit: `rate_limit_buckets` (pro Session max 3 Renders/Stunde, pro IP max 8/Stunde)
+- Soft-Monitoring: `SELECT sum(cost_cents)/100.0 as cost_eur, count(*) FROM planner_renders WHERE created_at > now() - interval '1 day';`
+
 ## 7. Checkliste nach Go-Live
 
 - [ ] Supabase Site URL und Redirect URLs auf echte HTTPS-Domain(s)
@@ -122,3 +172,8 @@ Website, kein Mail-Versand, kein Mail-Empfang.
 - [ ] Cookie-Banner / CMP testen
 - [ ] Login + Funnel end-to-end testen (Magic Link kommt an!)
 - [ ] `www` vs. non-`www` Redirect konsistent
+- [ ] KI-Traumkueche: `FAL_KEY` gesetzt, `/traumkueche` laedt, Funnel rendert ein Test-Bild
+- [ ] Cloudflare Turnstile auf Lead-Gate sichtbar (nicht fail-open in Prod)
+- [ ] Meta Pixel + GA4 feuern nach Cookie-Accept (Events Manager live-check)
+- [ ] Meta CAPI Events Manager zeigt "Lead" Events mit `event_id` Match (Deduplication client<->server)
+- [ ] `node scripts/smoke-e2e.mjs --base https://küchenwert.de` komplett gruen
