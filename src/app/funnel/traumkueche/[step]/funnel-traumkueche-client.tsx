@@ -12,6 +12,7 @@ import { GeneratingStep } from "@/components/funnel/traumkueche/generating-step"
 import { RevealStep } from "@/components/funnel/traumkueche/reveal-step";
 import { LeadGateStep } from "@/components/funnel/traumkueche/lead-gate-step";
 import { FloorplanUpload } from "@/components/funnel/traumkueche/floorplan-upload";
+import { TurnstileBackground } from "@/components/funnel/traumkueche/turnstile-background";
 import {
   APPLIANCE_LAYOUTS,
   APPLIANCE_SEGMENTS,
@@ -351,6 +352,10 @@ export function FunnelTraumkuecheClient({
       submitLabel="Moodboard sichern"
       showExitIntent={step.type !== "generating" && step.type !== "reveal"}
     >
+      <TurnstileBackground
+        siteKey={turnstileSiteKey}
+        onToken={setTurnstileToken}
+      />
       <SubheadlineBlock text={step.subheadline} />
 
       {step.type === "style-hero" && (
@@ -583,7 +588,6 @@ export function FunnelTraumkuecheClient({
           submitting={submitting}
           submitError={submitError}
           turnstileSiteKey={turnstileSiteKey}
-          onTurnstileToken={setTurnstileToken}
           imageUrl={renderResult?.imageUrl ?? undefined}
           priceRangeFormatted={
             renderResult?.priceRange

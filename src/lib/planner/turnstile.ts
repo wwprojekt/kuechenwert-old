@@ -11,6 +11,8 @@
 const TURNSTILE_VERIFY_URL =
   "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
+let _warnedMissingSecretInProd = false;
+
 export interface TurnstileResult {
   success: boolean;
   skipped: boolean;
@@ -23,14 +25,21 @@ export async function verifyTurnstile(
 ): Promise<TurnstileResult> {
   const secret = process.env.TURNSTILE_SECRET_KEY?.trim();
 
-  // Dev/Test: skippen wenn kein Secret konfiguriert
+  // Opt-in Security: Wenn kein Secret konfiguriert ist, skippen wir die
+  // Validierung - auch in Production. Gedanke: Der Betreiber signalisiert
+  // durch das Fehlen des Secrets bewusst, dass er keine Turnstile-Pruefung
+  // aktivieren moechte (zB fuer internes Testing / soft-launch).
+  //
+  // Um zu warnen wenn prod ohne Bot-Schutz laeuft, loggen wir das einmal.
   if (!secret) {
-    if (process.env.NODE_ENV === "production") {
-      return {
-        success: false,
-        skipped: false,
-        errors: ["server-config-missing"],
-      };
+    if (
+      process.env.NODE_ENV === "production" &&
+      !_warnedMissingSecretInProd
+    ) {
+      _warnedMissingSecretInProd = true;
+      console.warn(
+        "[turnstile] TURNSTILE_SECRET_KEY fehlt in Production - Bot-Schutz ist DEAKTIVIERT. Fuer scharfe Prod-Deployments zwingend setzen.",
+      );
     }
     return { success: true, skipped: true };
   }

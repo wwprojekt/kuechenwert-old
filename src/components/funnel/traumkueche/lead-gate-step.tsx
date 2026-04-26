@@ -1,7 +1,7 @@
 "use client";
 
 import { clsx } from "clsx";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Loader2, Phone, ShieldCheck, Sparkles } from "lucide-react";
 import type { TraumkuecheContact } from "@/config/funnel-traumkueche";
 
@@ -12,22 +12,8 @@ interface LeadGateStepProps {
   submitting: boolean;
   submitError?: string | null;
   turnstileSiteKey?: string;
-  onTurnstileToken?: (token: string) => void;
   imageUrl?: string;
   priceRangeFormatted?: string;
-}
-
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (
-        container: HTMLElement,
-        opts: { sitekey: string; callback: (token: string) => void },
-      ) => string;
-      reset: (widgetId?: string) => void;
-    };
-    __kwTurnstileReady?: boolean;
-  }
 }
 
 export function LeadGateStep({
@@ -37,7 +23,6 @@ export function LeadGateStep({
   submitting,
   submitError,
   turnstileSiteKey,
-  onTurnstileToken,
   imageUrl,
   priceRangeFormatted,
 }: LeadGateStepProps) {
@@ -51,40 +36,6 @@ export function LeadGateStep({
 
   const canSubmit =
     firstNameOk && lastNameOk && emailOk && plzOk && consentsOk && !submitting;
-
-  useEffect(() => {
-    if (!turnstileSiteKey || typeof window === "undefined") return;
-    if (document.getElementById("kw-turnstile-script")) return;
-    const s = document.createElement("script");
-    s.id = "kw-turnstile-script";
-    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
-    s.async = true;
-    s.defer = true;
-    document.head.appendChild(s);
-  }, [turnstileSiteKey]);
-
-  useEffect(() => {
-    if (!turnstileSiteKey || !onTurnstileToken) return;
-    let attempts = 0;
-    const maxAttempts = 40;
-    const container = document.getElementById("kw-turnstile-widget");
-    if (!container) return;
-
-    const interval = setInterval(() => {
-      if (window.turnstile && container && !window.__kwTurnstileReady) {
-        window.__kwTurnstileReady = true;
-        window.turnstile.render(container, {
-          sitekey: turnstileSiteKey,
-          callback: (token: string) => onTurnstileToken(token),
-        });
-        clearInterval(interval);
-      }
-      attempts += 1;
-      if (attempts > maxAttempts) clearInterval(interval);
-    }, 250);
-
-    return () => clearInterval(interval);
-  }, [turnstileSiteKey, onTurnstileToken]);
 
   return (
     <div className="space-y-5">
@@ -187,8 +138,9 @@ export function LeadGateStep({
       </div>
 
       {turnstileSiteKey && (
-        <div className="flex justify-center">
-          <div id="kw-turnstile-widget" />
+        <div className="flex items-center justify-center gap-1.5 text-[11px] text-ink-subtle">
+          <ShieldCheck className="h-3 w-3" aria-hidden />
+          <span>Bot-Schutz durch Cloudflare aktiv</span>
         </div>
       )}
 
