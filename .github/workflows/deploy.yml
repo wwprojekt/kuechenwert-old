@@ -33,6 +33,13 @@ jobs:
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           STRIPE_PK: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          # Traumkueche-Funnel (AI-Planner)
+          FAL_KEY: ${{ secrets.FAL_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_REFINE_MODEL: ${{ secrets.OPENAI_REFINE_MODEL }}
+          OPENAI_VISION_MODEL: ${{ secrets.OPENAI_VISION_MODEL }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          TURNSTILE_SITE_KEY_PUB: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
           FORCE_SYNC: ${{ github.event.inputs.force_env_sync || 'false' }}
         run: |
           set -e
@@ -79,6 +86,13 @@ jobs:
             [ -n "$STRIPE_SECRET_KEY" ]     && NEW_VARS["STRIPE_SECRET_KEY"]="$STRIPE_SECRET_KEY"
             [ -n "$STRIPE_WEBHOOK_SECRET" ] && NEW_VARS["STRIPE_WEBHOOK_SECRET"]="$STRIPE_WEBHOOK_SECRET"
             [ -n "$STRIPE_PK" ]             && NEW_VARS["NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"]="$STRIPE_PK"
+            # Traumkueche-Funnel (AI-Planner) - nur setzen wenn Secret vorhanden
+            [ -n "$FAL_KEY" ]                 && NEW_VARS["FAL_KEY"]="$FAL_KEY"
+            [ -n "$OPENAI_API_KEY" ]          && NEW_VARS["OPENAI_API_KEY"]="$OPENAI_API_KEY"
+            [ -n "$OPENAI_REFINE_MODEL" ]     && NEW_VARS["OPENAI_REFINE_MODEL"]="$OPENAI_REFINE_MODEL"
+            [ -n "$OPENAI_VISION_MODEL" ]     && NEW_VARS["OPENAI_VISION_MODEL"]="$OPENAI_VISION_MODEL"
+            [ -n "$TURNSTILE_SECRET_KEY" ]    && NEW_VARS["TURNSTILE_SECRET_KEY"]="$TURNSTILE_SECRET_KEY"
+            [ -n "$TURNSTILE_SITE_KEY_PUB" ]  && NEW_VARS["NEXT_PUBLIC_TURNSTILE_SITE_KEY"]="$TURNSTILE_SITE_KEY_PUB"
 
             for KEY in "${!NEW_VARS[@]}"; do
               VAL="${NEW_VARS[$KEY]}"
