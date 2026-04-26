@@ -3,9 +3,9 @@ import { TRAUMKUECHE_STEPS } from "@/config/funnel-traumkueche";
 import { FunnelTraumkuecheClient } from "./funnel-traumkueche-client";
 
 export const metadata = {
-  title: "Deine Traumkueche in 30 Sekunden - KuechenWert",
+  title: "Deine Traumküche in 30 Sekunden – KüchenWert",
   description:
-    "KI-gestuetzter Kuechen-Planer. Stil, Farben, Geraete waehlen - dein persoenliches Moodboard mit Preisrange in unter einer Minute.",
+    "KI-gestützter Küchen-Planer. Stil, Farben, Geräte wählen – dein persönliches Moodboard mit Preisrange in unter einer Minute.",
 };
 
 export const dynamic = "force-dynamic";

@@ -39,11 +39,11 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { sessionId } = await params;
   return {
-    title: "Dein Moodboard - KuechenWert",
-    description: "Dein persoenliches KI-generiertes Kuechen-Moodboard plus Preisrange.",
+    title: "Dein Moodboard - KüchenWert",
+    description: "Dein persönliches KI-generiertes Küchen-Moodboard plus Preisrange.",
     openGraph: {
       title: "Meine Traumkueche - Moodboard",
-      description: "Mit dem KI-Planer von KuechenWert erstellt.",
+      description: "Mit dem KI-Planer von KüchenWert erstellt.",
       images: sessionId ? [`/api/planner/sessions/${sessionId}/og`] : [],
     },
     robots: { index: false, follow: false },
@@ -96,7 +96,7 @@ export default async function TraumkuecheErgebnisPage({ params }: Props) {
             href="/"
             className="inline-flex items-center gap-1 font-display text-lg font-bold tracking-tight-2 text-black"
           >
-            <span>Kuechen</span>
+            <span>Küchen</span>
             <span>Wert</span>
             <span
               className="ml-0.5 inline-block h-1.5 w-1.5 translate-y-1 rounded-full bg-brand-500"
@@ -143,15 +143,19 @@ export default async function TraumkuecheErgebnisPage({ params }: Props) {
                   unoptimized
                 />
               ) : (
-                <div className="grid aspect-video place-items-center p-6 text-center text-sm text-ink-muted">
-                  Kein Render verfuegbar. Starte den Planer erneut:{" "}
+                <div className="grid aspect-video place-items-center gap-2 p-6 text-center text-sm text-ink-muted">
+                  <div className="font-semibold text-ink">
+                    Dein Moodboard wird noch gerendert …
+                  </div>
+                  <p className="text-[13px]">
+                    Das dauert meist nur wenige Sekunden. Lade die Seite gleich neu.
+                  </p>
                   <Link
                     href="/funnel/traumkueche/stil"
-                    className="ml-1 font-semibold text-brand-700 underline"
+                    className="text-[13px] font-semibold text-brand-700 underline"
                   >
-                    hier
+                    Oder Planer neu starten
                   </Link>
-                  .
                 </div>
               )}
             </div>
@@ -163,7 +167,7 @@ export default async function TraumkuecheErgebnisPage({ params }: Props) {
               </div>
               <div
                 className="mt-2 flex justify-center"
-                aria-label="Draufsicht der Kueche"
+                aria-label="Draufsicht der Küche"
                 dangerouslySetInnerHTML={{ __html: floorplanSvg }}
               />
             </div>
@@ -202,7 +206,7 @@ export default async function TraumkuecheErgebnisPage({ params }: Props) {
             {priceRangeFormatted && (
               <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
                 <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-                  Vorlaeufige Preisrange
+                  Vorläufige Preisrange
                 </div>
                 <div className="mt-1 font-display text-2xl font-bold tracking-tight-2 text-black">
                   {priceRangeFormatted}
@@ -225,12 +229,12 @@ export default async function TraumkuecheErgebnisPage({ params }: Props) {
               </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {style && <SpecPill label="Stil" value={style.label} />}
-                {surface && <SpecPill label="Oberflaeche" value={surface.label} />}
+                {surface && <SpecPill label="Oberfläche" value={surface.label} />}
                 {color && <SpecPill label="Farbe" value={color.label} swatch={color.hex} />}
                 {worktop && <SpecPill label="Arbeitsplatte" value={worktop.label} />}
                 {form && <SpecPill label="Form" value={form.label} />}
-                {size && <SpecPill label="Groesse" value={size.label} />}
-                {segment && <SpecPill label="Geraete" value={segment.label} />}
+                {size && <SpecPill label="Größe" value={size.label} />}
+                {segment && <SpecPill label="Geräte" value={segment.label} />}
                 {(spec.storageFeatures ?? []).length > 0 && (
                   <SpecPill
                     label="Ausstattung"
@@ -256,8 +260,8 @@ export default async function TraumkuecheErgebnisPage({ params }: Props) {
                     </div>
                     <p className="mt-1 text-[13px] leading-relaxed text-ink-muted">
                       Unser Experte meldet sich kurzfristig per E-Mail mit deiner
-                      detaillierten Einschaetzung und einer Empfehlung fuer einen
-                      passenden Kuechenstudio-Partner in deiner Region.
+                      detaillierten Einschätzung und einer Empfehlung für einen
+                      passenden Küchenstudio-Partner in deiner Region.
                     </p>
                   </div>
                 </div>
@@ -280,7 +284,7 @@ export default async function TraumkuecheErgebnisPage({ params }: Props) {
                 </div>
                 <p className="text-[13px] leading-relaxed text-ink-muted">
                   Name und E-Mail angeben, damit der Experte dir die genaue
-                  Einschaetzung sendet und du das Ergebnis teilen kannst.
+                  Einschätzung sendet und du das Ergebnis teilen kannst.
                 </p>
                 <Link
                   href="/funnel/traumkueche/kontakt"
@@ -297,7 +301,7 @@ export default async function TraumkuecheErgebnisPage({ params }: Props) {
 
       <footer className="border-t border-neutral-200 bg-white py-6">
         <div className="section-container flex flex-wrap items-center justify-between gap-3 text-[12px] text-ink-muted">
-          <div>(C) KuechenWert</div>
+          <div>(C) KüchenWert</div>
           <div className="flex gap-4">
             <Link href="/impressum" className="hover:underline">
               Impressum
@@ -341,7 +345,7 @@ function ShareButton({ sessionId }: { sessionId: string }) {
   const url = `${base}/funnel/traumkueche/ergebnis/${sessionId}`;
   return (
     <a
-      href={`mailto:?subject=Meine Traumkueche&body=Hier mein KuechenWert-Moodboard: ${encodeURIComponent(
+      href={`mailto:?subject=Meine Traumkueche&body=Hier mein KüchenWert-Moodboard: ${encodeURIComponent(
         url,
       )}`}
       className="btn-secondary"

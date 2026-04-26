@@ -1,11 +1,11 @@
 /**
- * Funnel C ("Traumkueche") - Stammdaten fuer KI-Kuechen-Planer.
+ * Funnel C ("Traumkueche") - Stammdaten für KI-Küchen-Planer.
  *
- * Jeder Eintrag hat ein `promptFragment`-Feld fuer den FLUX-Prompt-Builder.
+ * Jeder Eintrag hat ein `promptFragment`-Feld für den FLUX-Prompt-Builder.
  * Die Fragmente sind bewusst generisch (keine Markennamen) um Markenrechts-
  * Probleme bei der Bildgenerierung zu vermeiden.
  *
- * Die Segmente ('budget'/'mittel'/'premium'/'luxus') werden fuer die
+ * Die Segmente ('budget'/'mittel'/'premium'/'luxus') werden für die
  * Preisrange-Lookup in `kitchen_price_brackets` verwendet.
  */
 
@@ -83,7 +83,7 @@ export const KITCHEN_STYLES: KitchenStyle[] = [
 ];
 
 // ============================================================
-// 2) SURFACE_FINISHES - Oberflaechen-Charakteristik
+// 2) SURFACE_FINISHES - Oberflächen-Charakteristik
 // ============================================================
 export interface SurfaceFinish {
   slug: string;
@@ -96,7 +96,7 @@ export const SURFACE_FINISHES: SurfaceFinish[] = [
   {
     slug: "matt-antifingerprint",
     label: "Matt (Anti-Fingerprint)",
-    description: "Samtmatte Oberflaeche, keine Fingerabdruecke",
+    description: "Samtmatte Oberfläche, keine Fingerabdrücke",
     promptFragment: "ultra-matte anti-fingerprint finish, velvet-smooth surface, no reflections",
   },
   {
@@ -114,19 +114,19 @@ export const SURFACE_FINISHES: SurfaceFinish[] = [
   {
     slug: "hochglanz",
     label: "Hochglanz",
-    description: "Spiegelnd, lichtdurchflutet, luxurioes",
+    description: "Spiegelnd, lichtdurchflutet, luxuriös",
     promptFragment: "high-gloss lacquered finish, mirror-like reflections, polished surfaces",
   },
   {
     slug: "struktur-holz",
     label: "Holzmaserung sichtbar",
-    description: "Natuerliche Oberflaeche, Poren und Struktur fuehlbar",
+    description: "Natürliche Oberfläche, Poren und Struktur fühlbar",
     promptFragment: "natural wood grain texture, visible pores and structure, tactile wood feel",
   },
   {
     slug: "strukturiert-stein",
     label: "Stein-Struktur",
-    description: "Rauere, natuerlich anmutende Oberflaeche",
+    description: "Rauere, natürlich anmutende Oberfläche",
     promptFragment: "textured stone-like surface with natural roughness",
   },
 ];
@@ -144,8 +144,8 @@ export interface FrontColor {
 
 export const FRONT_COLORS: FrontColor[] = [
   // Helle Neutralwelt
-  { slug: "weiss-reinweiss", label: "Reinweiss", family: "hell", hex: "#FFFFFF", promptFragment: "pure bright white" },
-  { slug: "weiss-alpinweiss", label: "Alpinweiss", family: "hell", hex: "#F5F3EF", promptFragment: "warm alpine white with subtle cream undertone" },
+  { slug: "weiss-reinweiss", label: "Reinweiß", family: "hell", hex: "#FFFFFF", promptFragment: "pure bright white" },
+  { slug: "weiss-alpinweiss", label: "Alpinweiß", family: "hell", hex: "#F5F3EF", promptFragment: "warm alpine white with subtle cream undertone" },
   { slug: "creme", label: "Creme", family: "hell", hex: "#EEE3D2", promptFragment: "soft cream beige" },
   { slug: "beige-kaschmir", label: "Kaschmir", family: "hell", hex: "#CDB999", promptFragment: "warm cashmere beige" },
 
@@ -160,8 +160,8 @@ export const FRONT_COLORS: FrontColor[] = [
   { slug: "dunkel-schwarz-matt", label: "Schwarz matt", family: "dunkel", hex: "#111111", promptFragment: "matte deep black" },
 
   // Farbig
-  { slug: "farbig-salbeigruen", label: "Salbeigruen", family: "farbig", hex: "#A4B29A", promptFragment: "muted sage green" },
-  { slug: "farbig-dunkelgruen", label: "Dunkelgruen", family: "farbig", hex: "#3E5B47", promptFragment: "deep forest green" },
+  { slug: "farbig-salbeigruen", label: "Salbeigrün", family: "farbig", hex: "#A4B29A", promptFragment: "muted sage green" },
+  { slug: "farbig-dunkelgruen", label: "Dunkelgrün", family: "farbig", hex: "#3E5B47", promptFragment: "deep forest green" },
   { slug: "farbig-petrol", label: "Petrol", family: "farbig", hex: "#2D5B66", promptFragment: "deep petrol blue-green" },
   { slug: "farbig-marineblau", label: "Marineblau", family: "farbig", hex: "#1E2A4A", promptFragment: "navy marine blue" },
   { slug: "farbig-terrakotta", label: "Terrakotta", family: "warm", hex: "#B26547", promptFragment: "warm terracotta clay" },
@@ -218,28 +218,28 @@ export const WORKTOP_CHOICES: WorktopChoice[] = [
   {
     slug: "massivholz",
     label: "Massivholz",
-    description: "Eiche, Nussbaum - warm, natuerlich",
+    description: "Eiche, Nussbaum - warm, natürlich",
     tier: "mid",
     promptFragment: "solid oak wood worktop with visible grain and warm tone",
   },
   {
     slug: "schichtstoff",
     label: "Schichtstoff / HPL",
-    description: "Guenstig, viele Dekore, pflegeleicht",
+    description: "Günstig, viele Dekore, pflegeleicht",
     tier: "basic",
     promptFragment: "laminate HPL worktop in clean neutral tone",
   },
   {
     slug: "beton",
     label: "Beton-Optik",
-    description: "Industrial, matt, zeitgenoessisch",
+    description: "Industrial, matt, zeitgenössisch",
     tier: "mid",
     promptFragment: "concrete-look worktop with industrial matte finish",
   },
   {
     slug: "edelstahl",
     label: "Edelstahl",
-    description: "Profi-Kueche, hygienisch, hitzebestaendig",
+    description: "Profi-Küche, hygienisch, hitzebeständig",
     tier: "premium",
     promptFragment: "brushed stainless steel worktop, professional kitchen feel",
   },
@@ -258,14 +258,14 @@ export interface StorageFeature {
 export const STORAGE_FEATURES: StorageFeature[] = [
   {
     slug: "deckenhoch",
-    label: "Hochschraenke bis zur Decke",
+    label: "Hochschränke bis zur Decke",
     description: "Maximaler Stauraum, keine Staubkanten",
     promptFragment: "floor-to-ceiling tall cabinets, no gap to ceiling, maximum storage",
   },
   {
     slug: "insel-rueckseite-schraenke",
-    label: "Schraenke an Insel-Rueckseite",
-    description: "Zusaetzlicher Stauraum auf der abgewandten Seite",
+    label: "Schränke an Insel-Rückseite",
+    description: "Zusätzlicher Stauraum auf der abgewandten Seite",
     promptFragment: "kitchen island with additional cabinets on the back side",
   },
   {
@@ -276,50 +276,50 @@ export const STORAGE_FEATURES: StorageFeature[] = [
   },
   {
     slug: "eckkarussell",
-    label: "Eckkarussell / Eckschrank-Loesung",
+    label: "Eckkarussell / Eckschrank-Lösung",
     description: "Drehbares Karussell oder Le-Mans-Ausstattung",
     promptFragment: "corner cabinet with rotating carousel solution",
   },
   {
     slug: "sockelschublade",
     label: "Sockel-Schubladen",
-    description: "Nutzen den Sockelraum unter Unterschraenken",
+    description: "Nutzen den Sockelraum unter Unterschränken",
     promptFragment: "plinth drawers in the base of the cabinets",
   },
   {
     slug: "beleuchtung-unterboden",
-    label: "Beleuchtung unter Haengeschraenken",
+    label: "Beleuchtung unter Hängeschränken",
     description: "LED-Leisten beleuchten Arbeitsplatte",
     promptFragment: "integrated LED under-cabinet lighting illuminating the worktop",
   },
   {
     slug: "beleuchtung-innen",
-    label: "Beleuchtung in Schraenken",
-    description: "Sensor-LED beim Oeffnen",
+    label: "Beleuchtung in Schränken",
+    description: "Sensor-LED beim Öffnen",
     promptFragment: "sensor-activated LED lighting inside cabinets",
   },
   {
     slug: "beleuchtung-nischen",
     label: "Nischen-/Sockelbeleuchtung",
-    description: "Indirekte Beleuchtung fuer Ambiente",
+    description: "Indirekte Beleuchtung für Ambiente",
     promptFragment: "indirect ambient LED lighting in plinths and niches",
   },
   {
     slug: "kraeuterregal",
-    label: "Kraeuter- / Gewuerzregal",
+    label: "Kräuter- / Gewürzregal",
     description: "Integriertes schmales Regal",
     promptFragment: "integrated narrow herb and spice rack",
   },
   {
     slug: "glas-rueckwand",
-    label: "Glas-Rueckwand / Spritzschutz",
+    label: "Glas-Rückwand / Spritzschutz",
     description: "Durchgehender Spritzschutz aus Glas",
     promptFragment: "continuous glass splashback behind the worktop",
   },
   {
     slug: "abfalltrennung",
     label: "Abfalltrennung integriert",
-    description: "Auszug unter Spuele mit mehreren Behaeltern",
+    description: "Auszug unter Spüle mit mehreren Behältern",
     promptFragment: "integrated waste separation pullout under the sink",
   },
   {
@@ -346,7 +346,7 @@ export const APPLIANCE_LAYOUTS: ApplianceLayout[] = [
   {
     slug: "backofen-hoch-kaffee-daneben",
     label: "Backofen hoch + Kaffeemaschine daneben",
-    description: "Beide in Augenhoehe nebeneinander im Hochschrank",
+    description: "Beide in Augenhöhe nebeneinander im Hochschrank",
     category: "backofen",
     promptFragment:
       "built-in oven and built-in coffee machine side-by-side in tall cabinet at eye level",
@@ -354,7 +354,7 @@ export const APPLIANCE_LAYOUTS: ApplianceLayout[] = [
   {
     slug: "backofen-hoch-mikro-daneben",
     label: "Backofen hoch + Mikrowelle",
-    description: "Backofen mit Mikrowelle/Dampfgarer kombiniert in Augenhoehe",
+    description: "Backofen mit Mikrowelle/Dampfgarer kombiniert in Augenhöhe",
     category: "backofen",
     promptFragment:
       "built-in oven stacked with microwave steam oven in tall cabinet at eye level",
@@ -377,8 +377,8 @@ export const APPLIANCE_LAYOUTS: ApplianceLayout[] = [
   },
   {
     slug: "kochfeld-muldenlueftung",
-    label: "Induktion mit Muldenlueftung",
-    description: "Dunstabzug nach unten, kein Hut darueber",
+    label: "Induktion mit Muldenlüftung",
+    description: "Dunstabzug nach unten, kein Hut darüber",
     category: "kochfeld",
     promptFragment:
       "induction cooktop with integrated downdraft extractor in the center, no overhead hood",
@@ -391,42 +391,42 @@ export const APPLIANCE_LAYOUTS: ApplianceLayout[] = [
     promptFragment: "professional gas cooktop with cast-iron grates",
   },
 
-  // Kuehlschrank
+  // Kühlschrank
   {
     slug: "kuehl-hochintegriert",
-    label: "Kuehlschrank hoch integriert (ohne Griffmulde)",
-    description: "Komplett in der Kuechenfront verborgen",
+    label: "Kühlschrank hoch integriert (ohne Griffmulde)",
+    description: "Komplett in der Küchenfront verborgen",
     category: "kuehlschrank",
     promptFragment:
       "fully integrated tall fridge-freezer hidden behind matching cabinet front, no visible handle",
   },
   {
     slug: "kuehl-amerikanisch",
-    label: "Side-by-Side Kuehlschrank",
+    label: "Side-by-Side Kühlschrank",
     description: "Amerikanischer Look, freistehend",
     category: "kuehlschrank",
     promptFragment: "American side-by-side fridge freezer, freestanding",
   },
   {
     slug: "kuehl-griffmulde",
-    label: "Kuehlschrank mit Griffmulde",
+    label: "Kühlschrank mit Griffmulde",
     description: "Integriert, aber mit sichtbarer Griffmulde",
     category: "kuehlschrank",
     promptFragment: "integrated fridge with visible recessed grip groove",
   },
 
-  // Geschirrspueler
+  // Geschirrspüler
   {
     slug: "gs-vollintegriert",
-    label: "Geschirrspueler vollintegriert",
+    label: "Geschirrspüler vollintegriert",
     description: "Unsichtbar hinter Front",
     category: "geschirrspueler",
     promptFragment: "fully integrated dishwasher hidden behind cabinet front",
   },
   {
     slug: "gs-hoch",
-    label: "Geschirrspueler in Arbeitshoehe",
-    description: "Ergonomisch, rueckenschonend",
+    label: "Geschirrspüler in Arbeitshöhe",
+    description: "Ergonomisch, rückenschonend",
     category: "geschirrspueler",
     promptFragment: "dishwasher raised to countertop height for ergonomic loading",
   },
@@ -434,7 +434,7 @@ export const APPLIANCE_LAYOUTS: ApplianceLayout[] = [
   // Extras
   {
     slug: "weinkuehler",
-    label: "Weinkuehlschrank",
+    label: "Weinkühlschrank",
     description: "Separat integriert",
     category: "extras",
     promptFragment: "built-in wine refrigerator with glass door",
@@ -449,7 +449,7 @@ export const APPLIANCE_LAYOUTS: ApplianceLayout[] = [
 ];
 
 // ============================================================
-// 7) APPLIANCE_SEGMENTS - Marken-Segment fuer Preisrange
+// 7) APPLIANCE_SEGMENTS - Marken-Segment für Preisrange
 // ============================================================
 export interface ApplianceSegment {
   slug: Segment;
@@ -468,25 +468,25 @@ export const APPLIANCE_SEGMENTS: ApplianceSegment[] = [
   {
     slug: "mittel",
     label: "Mittelklasse",
-    description: "Bewaehrte Markenqualitaet, breites Feature-Set",
+    description: "Bewährte Markenqualität, breites Feature-Set",
     exampleBrands: "z.B. Bosch, Siemens, Neff, AEG",
   },
   {
     slug: "premium",
     label: "Premium",
-    description: "Spitzenqualitaet, lange Lebensdauer, Top-Features",
+    description: "Spitzenqualität, lange Lebensdauer, Top-Features",
     exampleBrands: "z.B. Miele, V-Zug, Liebherr",
   },
   {
     slug: "luxus",
     label: "Luxus",
-    description: "Exklusivitaet, Top-of-the-line",
+    description: "Exklusivität, Top-of-the-line",
     exampleBrands: "z.B. Gaggenau, Sub-Zero, Wolf",
   },
 ];
 
 // ============================================================
-// 8) KITCHEN_FORMS - Form + Groesse fuer Funnel C
+// 8) KITCHEN_FORMS - Form + Groesse für Funnel C
 // ============================================================
 export interface KitchenForm {
   slug: KitchenFormSlug;
@@ -499,7 +499,7 @@ export interface KitchenForm {
 export const KITCHEN_FORMS: KitchenForm[] = [
   {
     slug: "zeile",
-    label: "Kuechenzeile",
+    label: "Küchenzeile",
     description: "Gerade Front an einer Wand",
     promptFragment: "single-wall straight kitchen layout",
     heroImage: "/traumkueche/forms/zeile.webp",
@@ -507,7 +507,7 @@ export const KITCHEN_FORMS: KitchenForm[] = [
   {
     slug: "l",
     label: "L-Form",
-    description: "Ueber Eck, zwei Wandseiten",
+    description: "Über Eck, zwei Wandseiten",
     promptFragment: "L-shaped kitchen layout with cabinets along two walls",
     heroImage: "/traumkueche/forms/l.webp",
   },
@@ -521,7 +521,7 @@ export const KITCHEN_FORMS: KitchenForm[] = [
   {
     slug: "parallel",
     label: "Zweizeilig",
-    description: "Zwei parallele Fronten gegenueber",
+    description: "Zwei parallele Fronten gegenüber",
     promptFragment: "galley kitchen with two parallel rows of cabinets",
     heroImage: "/traumkueche/forms/parallel.webp",
   },
@@ -543,9 +543,9 @@ export const KITCHEN_FORMS: KitchenForm[] = [
 
 export const KITCHEN_SIZES = [
   { slug: "klein", label: "Bis 10 m²", description: "Kompakt, effizient" },
-  { slug: "mittel", label: "10 - 20 m²", description: "Standard-Kueche" },
+  { slug: "mittel", label: "10 - 20 m²", description: "Standard-Küche" },
   { slug: "gross", label: "20 - 35 m²", description: "Wohnkueche, offen" },
-  { slug: "xl", label: "Ueber 35 m²", description: "Grosszuegig, Loft" },
+  { slug: "xl", label: "Über 35 m²", description: "Großzügig, Loft" },
 ] as const;
 
 // ============================================================

@@ -63,17 +63,17 @@ export const TRAUMKUECHE_STEPS: TraumkuecheStepConfig[] = [
   {
     slug: "stil",
     label: "Stil",
-    headline: "Wie soll deine Traumkueche aussehen?",
-    subheadline: "Waehle den Stil, der dich am meisten anspricht.",
+    headline: "Wie soll deine Traumküche aussehen?",
+    subheadline: "Wähle den Stil, der dich am meisten anspricht.",
     type: "style-hero",
     required: true,
     category: "stil",
   },
   {
     slug: "oberflaeche",
-    label: "Oberflaeche",
-    headline: "Welche Oberflaeche willst du fuehlen?",
-    subheadline: "Matt, seidig oder spiegelglatt - das praegt den Charakter.",
+    label: "Oberfläche",
+    headline: "Welche Oberfläche willst du fühlen?",
+    subheadline: "Matt, seidig oder spiegelglatt – das prägt den Charakter.",
     type: "surface-finish",
     required: true,
     category: "stil",
@@ -82,7 +82,7 @@ export const TRAUMKUECHE_STEPS: TraumkuecheStepConfig[] = [
     slug: "farbe",
     label: "Farbe",
     headline: "Welche Farbe soll deine Front haben?",
-    subheadline: "Von klassisch weiss bis dunkles Anthrazit.",
+    subheadline: "Von klassisch Weiß bis dunkles Anthrazit.",
     type: "color-swatch",
     required: true,
     category: "stil",
@@ -91,7 +91,7 @@ export const TRAUMKUECHE_STEPS: TraumkuecheStepConfig[] = [
     slug: "arbeitsplatte",
     label: "Arbeitsplatte",
     headline: "Welche Arbeitsplatte passt zu dir?",
-    subheadline: "Keramik, Naturstein, Holz - jedes Material wirkt anders.",
+    subheadline: "Keramik, Naturstein, Holz – jedes Material wirkt anders.",
     type: "worktop",
     required: true,
     category: "material",
@@ -107,9 +107,9 @@ export const TRAUMKUECHE_STEPS: TraumkuecheStepConfig[] = [
   },
   {
     slug: "geraete",
-    label: "Geraete",
-    headline: "Wie sollen deine Geraete angeordnet sein?",
-    subheadline: "Backofen hoch, Induktion mit Muldenlueftung - du entscheidest.",
+    label: "Geräte",
+    headline: "Wie sollen deine Geräte angeordnet sein?",
+    subheadline: "Backofen hoch, Induktion mit Muldenlüftung – du entscheidest.",
     type: "appliance-layouts",
     required: false,
     category: "ausstattung",
@@ -117,7 +117,7 @@ export const TRAUMKUECHE_STEPS: TraumkuecheStepConfig[] = [
   {
     slug: "geraete-segment",
     label: "Marken-Stufe",
-    headline: "In welcher Qualitaetsstufe sollen die Geraete sein?",
+    headline: "In welcher Qualitätsstufe sollen die Geräte sein?",
     subheadline: "Von solide bis absolute Spitzenklasse.",
     type: "appliance-segment",
     required: true,
@@ -126,35 +126,17 @@ export const TRAUMKUECHE_STEPS: TraumkuecheStepConfig[] = [
   {
     slug: "form",
     label: "Form",
-    headline: "Welche Kuechenform hast du im Raum?",
-    subheadline: "Form und ungefaehre Groesse - damit die KI es richtig zeichnet.",
+    headline: "Welche Küchenform hast du im Raum?",
+    subheadline: "Form und ungefähre Größe – damit die KI es richtig zeichnet.",
     type: "form-size",
-    required: true,
-    category: "form",
-  },
-  {
-    slug: "render",
-    label: "KI-Render",
-    headline: "Deine Traumkueche entsteht...",
-    subheadline: "Die KI zeichnet jetzt dein Moodboard. Dauert etwa 10 Sekunden.",
-    type: "generating",
-    required: true,
-    category: "form",
-  },
-  {
-    slug: "ergebnis",
-    label: "Enthuellung",
-    headline: "Hier ist deine Kueche!",
-    subheadline: "Gefaellt dir, was du siehst?",
-    type: "reveal",
     required: true,
     category: "form",
   },
   {
     slug: "kontakt",
     label: "Kontakt",
-    headline: "Lass uns dein Moodboard sichern",
-    subheadline: "Name und E-Mail - damit du zurueckkommen und teilen kannst.",
+    headline: "Fast geschafft – wohin schicken wir dein Moodboard?",
+    subheadline: "Während du das ausfüllst, rendert die KI deine Küche im Hintergrund.",
     type: "lead-gate",
     required: true,
     category: "kontakt",
@@ -264,33 +246,33 @@ export function validateStep(
 
   switch (step.type) {
     case "style-hero":
-      if (!data.styleSlug) return "Bitte waehle einen Stil.";
+      if (!data.styleSlug) return "Bitte wähle einen Stil.";
       break;
     case "surface-finish":
-      if (!data.surfaceFinishSlug) return "Bitte waehle eine Oberflaeche.";
+      if (!data.surfaceFinishSlug) return "Bitte wähle eine Oberfläche.";
       break;
     case "color-swatch":
-      if (!data.frontColorSlug) return "Bitte waehle eine Farbe.";
+      if (!data.frontColorSlug) return "Bitte wähle eine Farbe.";
       break;
     case "worktop":
-      if (!data.worktopSlug) return "Bitte waehle eine Arbeitsplatte.";
+      if (!data.worktopSlug) return "Bitte wähle eine Arbeitsplatte.";
       break;
     case "appliance-segment":
-      if (!data.applianceSegment) return "Bitte waehle eine Qualitaetsstufe.";
+      if (!data.applianceSegment) return "Bitte wähle eine Qualitätsstufe.";
       break;
     case "form-size":
-      if (!data.kitchenForm) return "Bitte waehle eine Kuechenform.";
-      if (!data.kitchenSize) return "Bitte gib eine ungefaehre Groesse an.";
+      if (!data.kitchenForm) return "Bitte wähle eine Küchenform.";
+      if (!data.kitchenSize) return "Bitte gib eine ungefähre Größe an.";
       break;
     case "lead-gate":
       if (!data.contact?.firstName) return "Vorname fehlt.";
       if (!data.contact?.lastName) return "Nachname fehlt.";
       if (!data.contact?.email || !data.contact.email.includes("@"))
-        return "Gueltige E-Mail fehlt.";
+        return "Gültige E-Mail fehlt.";
       if (!data.contact?.plz || !/^\d{5}$/.test(data.contact.plz))
-        return "Gueltige PLZ fehlt.";
+        return "Gültige PLZ fehlt.";
       if (!data.contact?.consentDatenschutz)
-        return "Datenschutzerklaerung muss akzeptiert werden.";
+        return "Datenschutzerklärung muss akzeptiert werden.";
       if (!data.contact?.consentAi)
         return "KI-Verarbeitungs-Einwilligung muss akzeptiert werden.";
       break;
@@ -311,7 +293,7 @@ export const TRAUMKUECHE_CATEGORIES: Array<{
   { key: "stil", label: "Stil" },
   { key: "material", label: "Material" },
   { key: "ausstattung", label: "Ausstattung" },
-  { key: "form", label: "Ergebnis" },
+  { key: "form", label: "Form" },
   { key: "kontakt", label: "Abschluss" },
 ];
 

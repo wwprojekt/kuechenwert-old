@@ -5,6 +5,8 @@ import { useState } from "react";
 import { Loader2, Phone, ShieldCheck, Sparkles } from "lucide-react";
 import type { TraumkuecheContact } from "@/config/funnel-traumkueche";
 
+type RenderStatus = "idle" | "pending" | "success" | "failed";
+
 interface LeadGateStepProps {
   contact: Partial<TraumkuecheContact>;
   onChange: (patch: Partial<TraumkuecheContact>) => void;
@@ -14,6 +16,9 @@ interface LeadGateStepProps {
   turnstileSiteKey?: string;
   imageUrl?: string;
   priceRangeFormatted?: string;
+  /** Status der Hintergrund-KI-Generierung. Zeigt Live-Indikator. */
+  renderStatus?: RenderStatus;
+  renderElapsedMs?: number;
 }
 
 export function LeadGateStep({
@@ -25,6 +30,8 @@ export function LeadGateStep({
   turnstileSiteKey,
   imageUrl,
   priceRangeFormatted,
+  renderStatus = "idle",
+  renderElapsedMs = 0,
 }: LeadGateStepProps) {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
@@ -37,17 +44,20 @@ export function LeadGateStep({
   const canSubmit =
     firstNameOk && lastNameOk && emailOk && plzOk && consentsOk && !submitting;
 
+  const secondsElapsed = Math.floor(renderElapsedMs / 1000);
+
   return (
     <div className="space-y-5">
-      {imageUrl && (
-        <div className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-2 shadow-sm">
+      {/* Live-Status des Hintergrund-Renders */}
+      {imageUrl ? (
+        <div className="flex items-center gap-3 rounded-xl border border-brand-200 bg-gradient-to-br from-brand-50/60 to-white p-2 shadow-sm">
           <div className="h-16 w-20 overflow-hidden rounded-lg bg-neutral-100">
             <img src={imageUrl} alt="Dein Moodboard" className="h-full w-full object-cover" />
           </div>
           <div className="flex-1">
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-700">
               <Sparkles className="mr-1 inline-block h-3 w-3" />
-              Dein Moodboard
+              Dein Moodboard ist fertig
             </div>
             {priceRangeFormatted && (
               <div className="mt-0.5 font-display text-[15px] font-bold text-black">
@@ -56,7 +66,31 @@ export function LeadGateStep({
             )}
           </div>
         </div>
-      )}
+      ) : renderStatus === "pending" ? (
+        <div className="flex items-center gap-3 rounded-xl border border-brand-200 bg-gradient-to-br from-brand-50/60 to-white p-3 shadow-sm">
+          <div className="relative flex h-12 w-12 items-center justify-center rounded-lg bg-brand-100/60">
+            <Loader2 className="h-5 w-5 animate-spin text-brand-600" />
+          </div>
+          <div className="flex-1 text-[13px] leading-snug">
+            <div className="font-semibold text-black">
+              KI rendert dein Moodboard …
+            </div>
+            <div className="text-ink-muted">
+              {secondsElapsed < 8
+                ? "Dauert ca. 10 Sekunden. Fülle währenddessen das Formular aus."
+                : `Noch einen Moment … (${secondsElapsed}s)`}
+            </div>
+          </div>
+        </div>
+      ) : renderStatus === "failed" ? (
+        <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50/60 p-3 shadow-sm">
+          <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
+          <div className="flex-1 text-[13px] leading-snug text-amber-900">
+            Der Live-Render klappt gerade nicht – kein Problem, wir erstellen
+            dein Moodboard nach dem Absenden erneut.
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Input
@@ -81,7 +115,7 @@ export function LeadGateStep({
           value={contact.email ?? ""}
           onChange={(v) => onChange({ email: v })}
           onBlur={() => setTouched((t) => ({ ...t, email: true }))}
-          error={touched.email && !emailOk ? "Gueltige E-Mail benoetigt" : null}
+          error={touched.email && !emailOk ? "Gültige E-Mail benötigt" : null}
           autoComplete="email"
         />
         <Input
@@ -95,7 +129,7 @@ export function LeadGateStep({
         />
         <Input
           className="sm:col-span-2"
-          label="Telefon (optional, fuer schnelleren Rueckruf)"
+          label="Telefon (optional, für schnelleren Rückruf)"
           type="tel"
           value={contact.phone ?? ""}
           onChange={(v) => onChange({ phone: v })}
@@ -112,7 +146,7 @@ export function LeadGateStep({
             <>
               Ich habe die{" "}
               <a href="/datenschutz" target="_blank" className="underline">
-                Datenschutzerklaerung
+                Datenschutzerklärung
               </a>{" "}
               gelesen und stimme der Verarbeitung meiner Daten zu.
             </>
@@ -124,7 +158,7 @@ export function LeadGateStep({
           onChange={(v) => onChange({ consentAi: v })}
           label={
             <>
-              Ich willige ein, dass meine Eingaben fuer die KI-Bildgenerierung
+              Ich willige ein, dass meine Eingaben für die KI-Bildgenerierung
               genutzt und meine Ergebnisse gespeichert werden.
             </>
           }
@@ -133,7 +167,7 @@ export function LeadGateStep({
         <Checkbox
           checked={!!contact.consentCallback}
           onChange={(v) => onChange({ consentCallback: v })}
-          label="Ich moechte einen kostenlosen Rueckruf vom Experten fuer die finale Einschaetzung."
+          label="Ich möchte einen kostenlosen Rückruf vom Experten für die finale Einschätzung."
         />
       </div>
 
@@ -162,12 +196,12 @@ export function LeadGateStep({
         {submitting ? (
           <span className="inline-flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Wird gespeichert ...
+            {renderStatus === "pending" && !imageUrl
+              ? "Moodboard wird fertiggestellt …"
+              : "Wird gespeichert …"}
           </span>
         ) : (
-          <>
-            Moodboard sichern + Einschaetzung erhalten
-          </>
+          <>Moodboard sichern + Einschätzung erhalten</>
         )}
       </button>
 

@@ -15,10 +15,10 @@ interface GeneratingStepProps {
  * ohne konkretes Pipeline-Wissen preiszugeben.
  */
 const STATUS_MESSAGES = [
-  { icon: "sparkles", label: "KI interpretiert deine Wuensche ..." },
-  { icon: "brush", label: "Oberflaechen + Materialien werden abgestimmt ..." },
-  { icon: "lightbulb", label: "Licht + Perspektive werden gesetzt ..." },
-  { icon: "sparkles", label: "Finale Details werden polished ..." },
+  { icon: "sparkles", label: "KI interpretiert deine Wünsche …" },
+  { icon: "brush", label: "Oberflächen + Materialien werden abgestimmt …" },
+  { icon: "lightbulb", label: "Licht + Perspektive werden gesetzt …" },
+  { icon: "sparkles", label: "Finale Details werden poliert …" },
 ];
 
 export function GeneratingStep({ elapsedMs, estimatedMs = 12_000 }: GeneratingStepProps) {

@@ -8,8 +8,6 @@ import { ImageCardStep } from "@/components/funnel/image-card-step";
 import { StyleHeroCardStep } from "@/components/funnel/traumkueche/style-hero-card-step";
 import { ColorSwatchStep } from "@/components/funnel/traumkueche/color-swatch-step";
 import { MultiFeatureStep } from "@/components/funnel/traumkueche/multi-feature-step";
-import { GeneratingStep } from "@/components/funnel/traumkueche/generating-step";
-import { RevealStep } from "@/components/funnel/traumkueche/reveal-step";
 import { LeadGateStep } from "@/components/funnel/traumkueche/lead-gate-step";
 import { FloorplanUpload } from "@/components/funnel/traumkueche/floorplan-upload";
 import { TurnstileBackground } from "@/components/funnel/traumkueche/turnstile-background";
@@ -153,13 +151,21 @@ export function FunnelTraumkuecheClient({
   }, [stepIndex, goTo, router]);
 
   // ============================================================
-  // Generation: startet automatisch beim Betreten des render-Steps
+  // Generation: startet automatisch beim Betreten des Lead-Gate-Steps,
+  // läuft parallel im Hintergrund während User das Kontaktformular ausfüllt.
   // ============================================================
   const generationStartedRef = useRef(false);
+  const renderStatusRef = useRef<"idle" | "pending" | "success" | "failed">("idle");
 
   useEffect(() => {
-    if (step.type !== "generating") return;
+    // Wenn User zurück navigiert, Flag zurücksetzen damit beim erneuten
+    // Erreichen des lead-gate-Steps eine frische Generation startet.
+    if (step.type !== "lead-gate") {
+      generationStartedRef.current = false;
+      return;
+    }
     if (generationStartedRef.current) return;
+    if (!data.styleSlug || !data.kitchenForm || !data.kitchenSize) return;
     generationStartedRef.current = true;
 
     void startGeneration();
@@ -168,6 +174,7 @@ export function FunnelTraumkuecheClient({
 
   async function startGeneration() {
     setGenerating(true);
+    renderStatusRef.current = "pending";
     setRenderError(null);
     setRenderResult(null);
     setRenderElapsed(0);
@@ -192,7 +199,6 @@ export function FunnelTraumkuecheClient({
       const payload = (await res.json()) as GenerateResponse;
       setRenderId(payload.renderId);
 
-      // Polling
       const startedAt = Date.now();
       let lastResult: RenderPollResponse | null = null;
       const timeoutMs = 120_000;
@@ -210,6 +216,7 @@ export function FunnelTraumkuecheClient({
 
         if (lastResult.status === "success") {
           setRenderResult(lastResult);
+          renderStatusRef.current = "success";
           update({
             currentRenderId: lastResult.renderId,
             priceRangeMinCents: lastResult.priceRange?.minCents,
@@ -221,7 +228,6 @@ export function FunnelTraumkuecheClient({
             generationMs: Date.now() - startedAt,
           });
           setGenerating(false);
-          goTo("ergebnis");
           return;
         }
         if (lastResult.status === "failed") {
@@ -229,19 +235,12 @@ export function FunnelTraumkuecheClient({
         }
       }
 
-      throw new Error("Zeitueberschreitung");
+      throw new Error("Zeitüberschreitung");
     } catch (e) {
+      renderStatusRef.current = "failed";
       setRenderError(e instanceof Error ? e.message : "Unbekannter Fehler");
       setGenerating(false);
     }
-  }
-
-  async function retryGeneration() {
-    generationStartedRef.current = false;
-    setRenderError(null);
-    // Re-trigger
-    generationStartedRef.current = true;
-    await startGeneration();
   }
 
   // ============================================================
@@ -283,11 +282,22 @@ export function FunnelTraumkuecheClient({
         plzRegion: (data.contact?.plz ?? "").slice(0, 2),
       });
 
+      // Falls der KI-Render noch läuft, kurz warten (max. 30s) damit die
+      // Ergebnis-Seite direkt mit Bild rendert.
+      if (renderStatusRef.current === "pending") {
+        const waitStart = Date.now();
+        while (
+          renderStatusRef.current === "pending" &&
+          Date.now() - waitStart < 30_000
+        ) {
+          await sleep(500);
+        }
+      }
+
       sessionStorage.removeItem(STORAGE_KEY);
       router.push(`/funnel/traumkueche/ergebnis/${payload.sessionId}`);
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "Senden fehlgeschlagen");
-    } finally {
       setSubmitting(false);
     }
   }
@@ -313,10 +323,6 @@ export function FunnelTraumkuecheClient({
         return !!data.applianceSegment;
       case "form-size":
         return !!data.kitchenForm && !!data.kitchenSize;
-      case "generating":
-        return !!renderResult;
-      case "reveal":
-        return true;
       case "lead-gate":
         const c = data.contact;
         return (
@@ -350,7 +356,6 @@ export function FunnelTraumkuecheClient({
       isFinalStep={isFinal}
       isSubmitting={submitting}
       submitLabel="Moodboard sichern"
-      showExitIntent={step.type !== "generating" && step.type !== "reveal"}
     >
       <TurnstileBackground
         siteKey={turnstileSiteKey}
@@ -478,7 +483,7 @@ export function FunnelTraumkuecheClient({
             },
             {
               key: "geschirrspueler",
-              label: "Geschirrspueler",
+              label: "Geschirrspüler",
               slugs: APPLIANCE_LAYOUTS.filter(
                 (a) => a.category === "geschirrspueler",
               ).map((a) => a.slug),
@@ -512,7 +517,7 @@ export function FunnelTraumkuecheClient({
         <div className="space-y-6">
           <div>
             <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-              Kuechenform
+              Küchenform
             </div>
             <ImageCardStep
               options={KITCHEN_FORMS.map((f) => ({
@@ -530,7 +535,7 @@ export function FunnelTraumkuecheClient({
           </div>
           <div>
             <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-              Ungefaehre Groesse
+              Ungefähre Größe
             </div>
             <CardStep
               options={KITCHEN_SIZES.map((s) => ({
@@ -552,34 +557,6 @@ export function FunnelTraumkuecheClient({
         </div>
       )}
 
-      {step.type === "generating" && (
-        <div className="space-y-4">
-          <GeneratingStep elapsedMs={renderElapsed} />
-          {renderError && (
-            <div className="space-y-2 rounded-lg border border-red-200 bg-red-50 p-3 text-center">
-              <div className="text-sm font-semibold text-red-700">
-                Generation fehlgeschlagen: {renderError}
-              </div>
-              <button type="button" onClick={retryGeneration} className="btn-secondary">
-                Erneut versuchen
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {step.type === "reveal" && (
-        <RevealBlock
-          renderResult={renderResult}
-          priceRangeFormatted={
-            renderResult?.priceRange
-              ? formatPriceRange(renderResult.priceRange)
-              : undefined
-          }
-          onContinue={() => goTo("kontakt")}
-        />
-      )}
-
       {step.type === "lead-gate" && (
         <LeadGateStep
           contact={data.contact ?? {}}
@@ -594,6 +571,16 @@ export function FunnelTraumkuecheClient({
               ? formatPriceRange(renderResult.priceRange)
               : undefined
           }
+          renderStatus={
+            renderError
+              ? "failed"
+              : renderResult?.imageUrl
+                ? "success"
+                : generating || generationStartedRef.current
+                  ? "pending"
+                  : "idle"
+          }
+          renderElapsedMs={renderElapsed}
         />
       )}
     </FunnelShell>
@@ -605,33 +592,6 @@ function SubheadlineBlock({ text }: { text: string }) {
     <p className="-mt-2 mb-5 text-center text-[14px] leading-relaxed text-ink-muted sm:text-[15px]">
       {text}
     </p>
-  );
-}
-
-function RevealBlock({
-  renderResult,
-  priceRangeFormatted,
-  onContinue,
-}: {
-  renderResult: RenderPollResponse | null;
-  priceRangeFormatted?: string;
-  onContinue: () => void;
-}) {
-  if (!renderResult || !renderResult.imageUrl) {
-    return (
-      <div className="text-center text-sm text-ink-muted">
-        Bild wird geladen ...
-      </div>
-    );
-  }
-  return (
-    <RevealStep
-      imageUrl={renderResult.imageUrl}
-      imageWidth={renderResult.imageWidth ?? 1920}
-      imageHeight={renderResult.imageHeight ?? 1080}
-      onContinue={onContinue}
-      priceRangeFormatted={priceRangeFormatted}
-    />
   );
 }
 

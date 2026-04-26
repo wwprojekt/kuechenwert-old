@@ -39,7 +39,7 @@ export function buildRefineTools(): LlmToolDefinition[] {
   return [
     {
       name: "change_style",
-      description: "Aendere den Grund-Stil der Kueche.",
+      description: "Ändere den Grund-Stil der Küche.",
       parameters: {
         type: "object",
         properties: {
@@ -51,7 +51,7 @@ export function buildRefineTools(): LlmToolDefinition[] {
     },
     {
       name: "change_surface_finish",
-      description: "Aendere die Oberflaechen-Charakteristik der Fronten.",
+      description: "Ändere die Oberflächen-Charakteristik der Fronten.",
       parameters: {
         type: "object",
         properties: {
@@ -63,7 +63,7 @@ export function buildRefineTools(): LlmToolDefinition[] {
     },
     {
       name: "change_color",
-      description: "Aendere die Farbe der Kuechenfront.",
+      description: "Ändere die Farbe der Küchenfront.",
       parameters: {
         type: "object",
         properties: {
@@ -75,7 +75,7 @@ export function buildRefineTools(): LlmToolDefinition[] {
     },
     {
       name: "change_worktop",
-      description: "Aendere die Arbeitsplatte (Material).",
+      description: "Ändere die Arbeitsplatte (Material).",
       parameters: {
         type: "object",
         properties: {
@@ -111,7 +111,7 @@ export function buildRefineTools(): LlmToolDefinition[] {
     },
     {
       name: "add_appliance_layout",
-      description: "Fuege eine Geraete-Anordnung hinzu (z.B. Backofen hoch + Kaffeemaschine).",
+      description: "Füge eine Geräte-Anordnung hinzu (z.B. Backofen hoch + Kaffeemaschine).",
       parameters: {
         type: "object",
         properties: {
@@ -123,7 +123,7 @@ export function buildRefineTools(): LlmToolDefinition[] {
     },
     {
       name: "remove_appliance_layout",
-      description: "Entferne eine Geraete-Anordnung.",
+      description: "Entferne eine Geräte-Anordnung.",
       parameters: {
         type: "object",
         properties: {
@@ -135,7 +135,7 @@ export function buildRefineTools(): LlmToolDefinition[] {
     },
     {
       name: "change_appliance_segment",
-      description: "Aendere die Qualitaetsstufe der Geraete.",
+      description: "Ändere die Qualitätsstufe der Geräte.",
       parameters: {
         type: "object",
         properties: {
@@ -147,7 +147,7 @@ export function buildRefineTools(): LlmToolDefinition[] {
     },
     {
       name: "change_kitchen_form",
-      description: "Aendere die Kuechenform.",
+      description: "Ändere die Küchenform.",
       parameters: {
         type: "object",
         properties: {
@@ -306,7 +306,7 @@ export function applyRefineToolCalls(
           next.storageFeatures = next.storageFeatures.filter((s) => s !== slug);
           applied.push({ tool: call.name, field: "storageFeatures", from: slug, to: null, ok: true });
         } else {
-          applied.push({ tool: call.name, field: "storageFeatures", from: slug, to: null, ok: false, reason: "Ungueltig" });
+          applied.push({ tool: call.name, field: "storageFeatures", from: slug, to: null, ok: false, reason: "Ungültig" });
         }
         break;
       }
@@ -328,7 +328,7 @@ export function applyRefineToolCalls(
           next.applianceLayouts = next.applianceLayouts.filter((s) => s !== slug);
           applied.push({ tool: call.name, field: "applianceLayouts", from: slug, to: null, ok: true });
         } else {
-          applied.push({ tool: call.name, field: "applianceLayouts", from: slug, to: null, ok: false, reason: "Ungueltig" });
+          applied.push({ tool: call.name, field: "applianceLayouts", from: slug, to: null, ok: false, reason: "Ungültig" });
         }
         break;
       }

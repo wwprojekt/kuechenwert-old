@@ -19,29 +19,29 @@ import { AnalyticsProvider } from "@/components/analytics-provider";
 export const metadata: Metadata = {
   title: "Deine Traumkueche - KI-Planer mit Moodboard & Preisrange",
   description:
-    "KI-gestuetzter Kuechen-Planer fuer Eigentuemer und Bauherren. Stil, Farben, Geraete waehlen - in 60 Sekunden ein persoenliches Moodboard plus Preisrange und Experten-Einschaetzung.",
+    "KI-gestützter Küchen-Planer für Eigentümer und Bauherren. Stil, Farben, Geräte wählen - in 60 Sekunden ein persönliches Moodboard plus Preisrange und Experten-Einschätzung.",
 };
 
 const FAQ_ITEMS = [
   {
     question: "Ist der KI-Planer wirklich kostenlos?",
     answer:
-      "Ja. Du planst, siehst dein Moodboard und bekommst eine erste Preisrange komplett kostenlos. Erst wenn du einen passenden Kuechenstudio-Partner kontaktiert werden moechtest, setzen wir uns mit dir in Verbindung - unverbindlich.",
+      "Ja. Du planst, siehst dein Moodboard und bekommst eine erste Preisrange komplett kostenlos. Erst wenn du einen passenden Küchenstudio-Partner kontaktiert werden möchtest, setzen wir uns mit dir in Verbindung - unverbindlich.",
   },
   {
     question: "Wie genau ist die Preisrange?",
     answer:
-      "Die angezeigte Range beruht auf realen Kuechen-Projekten aus unserem Netzwerk (Stil-Segment, Geraete-Qualitaet, Arbeitsplatten-Material und Kuechenform). Sie ist eine fundierte erste Einschaetzung, die der Experte anschliessend individuell auf dein Objekt zuspitzt.",
+      "Die angezeigte Range beruht auf realen Küchen-Projekten aus unserem Netzwerk (Stil-Segment, Geräte-Qualität, Arbeitsplatten-Material und Küchenform). Sie ist eine fundierte erste Einschätzung, die der Experte anschließend individuell auf dein Objekt zuspitzt.",
   },
   {
     question: "Was passiert mit meinen Daten?",
     answer:
-      "Deine Daten werden DSGVO-konform verarbeitet. Die KI-Bildgenerierung verwendet deine Auswahl als Prompt, speichert aber keine personenbezogenen Daten beim Anbieter. Weitergabe an einen Kuechenstudio-Partner erfolgt ausschliesslich mit deiner ausdruecklichen Einwilligung.",
+      "Deine Daten werden DSGVO-konform verarbeitet. Die KI-Bildgenerierung verwendet deine Auswahl als Prompt, speichert aber keine personenbezogenen Daten beim Anbieter. Weitergabe an einen Küchenstudio-Partner erfolgt ausschließlich mit deiner ausdrücklichen Einwilligung.",
   },
   {
-    question: "Ist das Moodboard 1:1 meine spaetere Kueche?",
+    question: "Ist das Moodboard 1:1 meine spätere Küche?",
     answer:
-      "Das Moodboard ist ein fotorealistisches KI-Rendering deiner Wuensche - keine technische Planungszeichnung. Es dient der Entscheidungsfindung und als Briefing fuer das Kuechenstudio. Die finale Planung erstellt dein Partner mit professioneller CAD-Software.",
+      "Das Moodboard ist ein fotorealistisches KI-Rendering deiner Wünsche - keine technische Planungszeichnung. Es dient der Entscheidungsfindung und als Briefing für das Küchenstudio. Die finale Planung erstellt dein Partner mit professioneller CAD-Software.",
   },
   {
     question: "Wie lange dauert die Planung?",
@@ -58,8 +58,8 @@ const FAQ_ITEMS = [
 const HOW_IT_WORKS = [
   {
     icon: <Wand2 className="h-5 w-5" />,
-    title: "1. Wuensche waehlen",
-    desc: "Stil, Farbe, Oberflaeche, Arbeitsplatte, Geraete, Stauraum - alles in wenigen Klicks.",
+    title: "1. Wünsche wählen",
+    desc: "Stil, Farbe, Oberfläche, Arbeitsplatte, Geräte, Stauraum - alles in wenigen Klicks.",
   },
   {
     icon: <ImagePlus className="h-5 w-5" />,
@@ -95,7 +95,7 @@ export default function TraumkuecheLandingPage() {
             href="/"
             className="inline-flex items-center gap-1 font-display text-lg font-bold tracking-tight-2 text-black"
           >
-            <span>Kuechen</span>
+            <span>Küchen</span>
             <span>Wert</span>
             <span
               className="ml-0.5 inline-block h-1.5 w-1.5 translate-y-1 rounded-full bg-brand-500"
@@ -121,7 +121,7 @@ export default function TraumkuecheLandingPage() {
             <div>
               <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-300">
                 <Sparkles className="h-3.5 w-3.5" aria-hidden />
-                Neu: KI-Kuechen-Planer
+                Neu: KI-Küchen-Planer
               </div>
               <h1 className="mt-4 font-display text-3xl font-bold leading-[1.1] tracking-tight-2 sm:text-4xl lg:text-[3rem]">
                 Deine Traumkueche.
@@ -129,9 +129,9 @@ export default function TraumkuecheLandingPage() {
                 <span className="text-accent-300">In unter 2 Minuten.</span>
               </h1>
               <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-brand-100 sm:text-base">
-                Stil, Farbe, Geraete, Ausstattung - waehle deine Wuensche. Unsere
-                KI rendert dein persoenliches Moodboard fotorealistisch und du
-                bekommst eine erste Preisrange plus Experten-Einschaetzung.
+                Stil, Farbe, Geräte, Ausstattung - wähle deine Wünsche. Unsere
+                KI rendert dein persönliches Moodboard fotorealistisch und du
+                bekommst eine erste Preisrange plus Experten-Einschätzung.
               </p>
 
               <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -143,7 +143,7 @@ export default function TraumkuecheLandingPage() {
                   <ArrowRight className="h-5 w-5" />
                 </Link>
                 <span className="text-[13px] text-brand-200">
-                  Kostenlos · Keine Anmeldung noetig
+                  Kostenlos · Keine Anmeldung nötig
                 </span>
               </div>
 
@@ -160,12 +160,12 @@ export default function TraumkuecheLandingPage() {
             <div className="relative">
               <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-tr from-accent-500/20 to-transparent blur-2xl" aria-hidden />
               <div className="relative grid grid-cols-3 gap-2 rounded-2xl bg-white/5 p-3 backdrop-blur">
-                <HeroTile src="/traumkueche/examples/hero-1.webp" alt="Moderne grifflose Kueche in Anthrazit" />
+                <HeroTile src="/traumkueche/examples/hero-1.webp" alt="Moderne grifflose Küche in Anthrazit" />
                 <HeroTile src="/traumkueche/examples/hero-2.webp" alt="Landhauskueche in Creme" />
-                <HeroTile src="/traumkueche/examples/hero-3.webp" alt="Industrial Kueche mit Holz" />
-                <HeroTile src="/traumkueche/examples/hero-4.webp" alt="Skandi-Kueche mit Insel" />
+                <HeroTile src="/traumkueche/examples/hero-3.webp" alt="Industrial Küche mit Holz" />
+                <HeroTile src="/traumkueche/examples/hero-4.webp" alt="Skandi-Küche mit Insel" />
                 <HeroTile src="/traumkueche/examples/hero-5.webp" alt="Luxus klassisch in Marmor" />
-                <HeroTile src="/traumkueche/examples/hero-6.webp" alt="Modern mit Salbeigruen" />
+                <HeroTile src="/traumkueche/examples/hero-6.webp" alt="Modern mit Salbeigrün" />
               </div>
               <div className="mt-2 text-center text-[11px] text-brand-300">
                 Beispiel-Renderings aus dem KI-Planer
@@ -225,11 +225,11 @@ export default function TraumkuecheLandingPage() {
               Beispiele
             </div>
             <h2 className="mt-2 font-display text-2xl font-bold tracking-tight-2 text-black sm:text-3xl">
-              Was die KI rendert - in fotorealistischer Qualitaet.
+              Was die KI rendert - in fotorealistischer Qualität.
             </h2>
             <p className="mt-2 text-[14px] text-ink-muted">
               Alle Bilder wurden vom KI-Planer auf Basis realer Kombinations-
-              Wuensche generiert.
+              Wünsche generiert.
             </p>
           </div>
           <div className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3">
@@ -264,11 +264,11 @@ export default function TraumkuecheLandingPage() {
           <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-3">
             <TrustCard
               label="2.400+"
-              description="geplante Kuechen im Jahr ueber unser Partner-Netzwerk"
+              description="geplante Küchen im Jahr über unser Partner-Netzwerk"
             />
             <TrustCard
               label="150+"
-              description="verifizierte Kuechenstudios deutschlandweit"
+              description="verifizierte Küchenstudios deutschlandweit"
             />
             <TrustCard
               label="4,8 / 5"
@@ -286,7 +286,7 @@ export default function TraumkuecheLandingPage() {
               Fragen
             </div>
             <h2 className="mt-2 font-display text-2xl font-bold tracking-tight-2 text-black sm:text-3xl">
-              Haeufig gefragt
+              Häufig gefragt
             </h2>
           </div>
           <div className="mt-8">
@@ -299,7 +299,7 @@ export default function TraumkuecheLandingPage() {
       <section className="bg-brand-950 py-14 text-white">
         <div className="section-container text-center">
           <h2 className="font-display text-2xl font-bold sm:text-3xl">
-            Bereit fuer deine Traumkueche?
+            Bereit für deine Traumkueche?
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-brand-200">
             Start in 10 Sekunden. Kein Account, keine Verpflichtung.
@@ -318,7 +318,7 @@ export default function TraumkuecheLandingPage() {
 
       <footer className="border-t border-neutral-200 bg-white py-6">
         <div className="section-container flex flex-wrap items-center justify-between gap-3 text-[12px] text-ink-muted">
-          <div>(C) KuechenWert - made in Berlin</div>
+          <div>(C) KüchenWert - made in Berlin</div>
           <div className="flex gap-4">
             <Link href="/impressum" className="hover:underline">
               Impressum

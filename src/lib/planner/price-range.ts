@@ -107,7 +107,7 @@ function buildExpertNote(
   const style = KITCHEN_STYLES.find((s) => s.slug === data.styleSlug);
   if (style) {
     parts.push(
-      `Ihre Wahl "${style.label}" deutet auf ${styleSegmentAdjective(styleSegment)} Kueche hin.`,
+      `Ihre Wahl „${style.label}“ deutet auf ${styleSegmentAdjective(styleSegment)} Küche hin.`,
     );
   }
 
@@ -115,7 +115,7 @@ function buildExpertNote(
   const segment = APPLIANCE_SEGMENTS.find((s) => s.slug === applianceSegment);
   if (segment) {
     parts.push(
-      `Bei den Geraeten haben Sie ${segment.label.toLowerCase()} gewaehlt (${segment.exampleBrands}).`,
+      `Bei den Geräten haben Sie ${segment.label.toLowerCase()} gewählt (${segment.exampleBrands}).`,
     );
   }
 
@@ -129,18 +129,18 @@ function buildExpertNote(
           ? "gehobene"
           : "praktische";
     parts.push(
-      `Als Arbeitsplatte eine ${tierLabel} Wahl (${worktop.label}) - ${worktopRationale(worktopTier)}.`,
+      `Als Arbeitsplatte eine ${tierLabel} Wahl (${worktop.label}) – ${worktopRationale(worktopTier)}.`,
     );
   }
 
   // Stimmigkeits-Hinweis
   if (styleSegment === "luxus" && applianceSegment === "budget") {
     parts.push(
-      "Hinweis: Der luxuriöse Stil passt nicht ganz zu Einstiegs-Geraeten - ein Experte kann hier gezielt nachjustieren.",
+      "Hinweis: Der luxuriöse Stil passt nicht ganz zu Einstiegs-Geräten – ein Experte kann hier gezielt nachjustieren.",
     );
   } else if (styleSegment === "budget" && applianceSegment === "luxus") {
     parts.push(
-      "Hinweis: Luxus-Geraete in einem preiswerten Stil - eine Uebergang zu Mittelklasse-Marken koennte das Verhaeltnis ausbalancieren.",
+      "Hinweis: Luxus-Geräte in einem preiswerten Stil – ein Übergang zu Mittelklasse-Marken könnte das Verhältnis ausbalancieren.",
     );
   } else if (isConsistent(styleSegment, applianceSegment)) {
     parts.push("Die Kombination ist in sich stimmig.");
@@ -149,12 +149,12 @@ function buildExpertNote(
   // Form / Groesse
   const form = KITCHEN_FORMS.find((f) => f.slug === data.kitchenForm);
   if (form) {
-    parts.push(`Fuer eine ${form.label} in Ihrer Groesse ist die genannte Range realistisch.`);
+    parts.push(`Für eine ${form.label} in Ihrer Größe ist die genannte Range realistisch.`);
   }
 
   // Abschluss
   parts.push(
-    "Die genaue Zahl haengt von Ausstattungs-Details (Auszuege, Beschlaege, Elektronik) ab. Unser Experte ruft Sie zurueck und schneidet das Angebot passgenau zu.",
+    "Die genaue Zahl hängt von Ausstattungs-Details (Auszüge, Beschläge, Elektronik) ab. Unser Experte ruft Sie zurück und schneidet das Angebot passgenau zu.",
   );
 
   return parts.join(" ");
@@ -176,11 +176,11 @@ function styleSegmentAdjective(s: Segment): string {
 function worktopRationale(tier: string): string {
   switch (tier) {
     case "premium":
-      return "extrem langlebig und praegt den Gesamt-Look";
+      return "extrem langlebig und prägt den Gesamt-Look";
     case "mid":
       return "ein guter Kompromiss aus Optik und Preis";
     default:
-      return "praktisch und pflegeleicht, spart Budget fuer andere Upgrades";
+      return "praktisch und pflegeleicht, spart Budget für andere Upgrades";
   }
 }
 

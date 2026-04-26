@@ -262,8 +262,8 @@ function buildMockResponse(opts: LlmChatOptions, model: string): LlmCompletionRe
   return {
     content:
       toolCalls.length > 0
-        ? "Alles klar, ich habe die Anpassung uebernommen."
-        : "Gerne. Sag mir konkret, was ich aendern soll (Farbe, Stil, Arbeitsplatte, Stauraum, Geraete-Layout).",
+        ? "Alles klar, ich habe die Anpassung übernommen."
+        : "Gerne. Sag mir konkret, was ich ändern soll (Farbe, Stil, Arbeitsplatte, Stauraum, Geräte-Layout).",
     toolCalls,
     model: `${model}-mock`,
     mock: true,

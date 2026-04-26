@@ -252,8 +252,8 @@ function validateBody(body: Partial<SaveContactBody>): string | null {
   if (!body.firstName || body.firstName.trim().length < 2) return "Vorname fehlt";
   if (!body.lastName || body.lastName.trim().length < 2) return "Nachname fehlt";
   if (!body.email || !body.email.includes("@") || !body.email.includes("."))
-    return "Gueltige E-Mail fehlt";
-  if (!body.plz || !/^\d{5}$/.test(body.plz)) return "Gueltige PLZ fehlt";
+    return "Gültige E-Mail fehlt";
+  if (!body.plz || !/^\d{5}$/.test(body.plz)) return "Gültige PLZ fehlt";
   if (!body.consentDatenschutz) return "Datenschutz-Einwilligung erforderlich";
   if (!body.consentAi) return "KI-Einwilligung erforderlich";
   if (body.phone && body.phone.replace(/\D/g, "").length < 6) {

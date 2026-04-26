@@ -140,7 +140,7 @@ export function summarizeSpec(data: TraumkuecheData): SpecSummary[] {
   if (style) summary.push({ label: "Stil", value: style.label });
 
   const finish = SURFACE_FINISHES.find((s) => s.slug === data.surfaceFinishSlug);
-  if (finish) summary.push({ label: "Oberflaeche", value: finish.label });
+  if (finish) summary.push({ label: "Oberfläche", value: finish.label });
 
   const color = FRONT_COLORS.find((c) => c.slug === data.frontColorSlug);
   if (color) summary.push({ label: "Farbe", value: color.label });
@@ -149,20 +149,20 @@ export function summarizeSpec(data: TraumkuecheData): SpecSummary[] {
   if (worktop) summary.push({ label: "Arbeitsplatte", value: worktop.label });
 
   const form = KITCHEN_FORMS.find((f) => f.slug === data.kitchenForm);
-  if (form) summary.push({ label: "Kuechenform", value: form.label });
+  if (form) summary.push({ label: "Küchenform", value: form.label });
 
   if (data.kitchenSize) {
     const sizeLabels: Record<string, string> = {
       klein: "bis 10 m²",
       mittel: "10-20 m²",
       gross: "20-35 m²",
-      xl: "ueber 35 m²",
+      xl: "über 35 m²",
     };
-    summary.push({ label: "Groesse", value: sizeLabels[data.kitchenSize] ?? data.kitchenSize });
+    summary.push({ label: "Größe", value: sizeLabels[data.kitchenSize] ?? data.kitchenSize });
   }
 
   const segment = APPLIANCE_SEGMENTS.find((s) => s.slug === data.applianceSegment);
-  if (segment) summary.push({ label: "Geraete-Stufe", value: segment.label });
+  if (segment) summary.push({ label: "Geräte-Stufe", value: segment.label });
 
   if (data.storageFeatures.length > 0) {
     const labels = STORAGE_FEATURES
@@ -175,7 +175,7 @@ export function summarizeSpec(data: TraumkuecheData): SpecSummary[] {
     const labels = APPLIANCE_LAYOUTS
       .filter((a) => data.applianceLayouts.includes(a.slug))
       .map((a) => a.label);
-    summary.push({ label: "Geraete", value: labels.join(", ") });
+    summary.push({ label: "Geräte", value: labels.join(", ") });
   }
 
   return summary;

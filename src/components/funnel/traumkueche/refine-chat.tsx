@@ -183,7 +183,7 @@ export function RefineChat({
   if (!enabled) {
     return (
       <section className="rounded-2xl border border-dashed border-neutral-300 bg-white/50 p-5 text-sm text-ink-muted">
-        Nach dem Sichern des Moodboards kannst du hier die Kueche per Chat
+        Nach dem Sichern des Moodboards kannst du hier die Küche per Chat
         weiter anpassen. (Kostenlos, bis zu {iterationLimit} Anpassungen.)
       </section>
     );
@@ -252,7 +252,7 @@ export function RefineChat({
                 }
                 className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-2 py-1 hover:bg-surface-soft"
               >
-                <ChevronLeft className="h-3 w-3" /> Aelter
+                <ChevronLeft className="h-3 w-3" /> Älter
               </button>
               <span>
                 Vergleich {(compareIndex ?? history.length - 1) + 1} / {history.length}
@@ -290,7 +290,7 @@ export function RefineChat({
                 <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-600" />
                 <div>
                   <strong className="text-ink">Assistent:</strong>{" "}
-                  {h.assistantMessage || "Aenderung uebernommen."}
+                  {h.assistantMessage || "Änderung übernommen."}
                   {h.appliedSummary && (
                     <div className="mt-0.5 text-[11px] uppercase tracking-wider text-ink-subtle">
                       {h.appliedSummary}
@@ -314,7 +314,7 @@ export function RefineChat({
       {remaining > 0 ? (
         <div className="space-y-2">
           <label htmlFor="refine-input" className="sr-only">
-            Aenderungswunsch
+            Änderungswunsch
           </label>
           <textarea
             id="refine-input"
@@ -334,7 +334,7 @@ export function RefineChat({
           />
           <div className="flex items-center justify-between">
             <span className="text-[11px] text-ink-subtle">
-              Tipp: sag es in einem Satz - z.B. Farbe, Material, Stauraum, Geraete-Layout.
+              Tipp: sag es in einem Satz – z.B. Farbe, Material, Stauraum, Geräte-Layout.
             </span>
             <button
               type="button"
@@ -345,7 +345,7 @@ export function RefineChat({
               {loading || polling ? (
                 <>
                   <RefreshCcw className="h-4 w-4 animate-spin" />
-                  {polling ? "Bild wird aktualisiert..." : "Denke nach..."}
+                  {polling ? "Bild wird aktualisiert …" : "Denke nach …"}
                 </>
               ) : (
                 <>
@@ -360,7 +360,7 @@ export function RefineChat({
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             Du hast die maximale Anzahl Anpassungen ({iterationLimit}) erreicht.
-            Unser Kuechenexperte meldet sich in Kuerze fuer den persoenlichen
+            Unser Küchenexperte meldet sich in Kürze für den persönlichen
             Feinschliff.
           </div>
         </div>

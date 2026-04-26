@@ -146,8 +146,8 @@ export async function POST(req: NextRequest) {
         {
           role: "user",
           content: [
-            { type: "text", text: `Aktuelle Kueche: ${JSON.stringify(specForLlm(currentSpec))}` },
-            { type: "text", text: `Aenderungswunsch: ${message}` },
+            { type: "text", text: `Aktuelle Küche: ${JSON.stringify(specForLlm(currentSpec))}` },
+            { type: "text", text: `Änderungswunsch: ${message}` },
           ],
         },
       ],
@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("[planner/refine] LLM failed:", msg);
     return NextResponse.json(
-      { error: "KI-Assistent gerade nicht verfuegbar.", detail: msg },
+      { error: "KI-Assistent gerade nicht verfügbar.", detail: msg },
       { status: 502 },
     );
   }
@@ -175,7 +175,7 @@ export async function POST(req: NextRequest) {
       applied: [],
       assistantMessage:
         llmResult.content ??
-        "Ich konnte deinen Wunsch nicht einordnen. Sag mir konkret, was ich aendern soll (Farbe, Stil, Arbeitsplatte, Stauraum, Geraete).",
+        "Ich konnte deinen Wunsch nicht einordnen. Sag mir konkret, was ich ändern soll (Farbe, Stil, Arbeitsplatte, Stauraum, Geräte).",
       updatedSpec: currentSpec,
       mock: llmResult.mock,
     });
@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
       iterationLimit: REFINE_ITERATION_LIMIT,
       applied,
       assistantMessage:
-        "Die gewuenschte Aenderung konnte ich leider nicht eindeutig zuordnen. Bitte nenne die Option konkret.",
+        "Die gewünschte Änderung konnte ich leider nicht eindeutig zuordnen. Bitte nenne die Option konkret.",
       updatedSpec: currentSpec,
       mock: llmResult.mock,
     });
@@ -250,7 +250,7 @@ export async function POST(req: NextRequest) {
       iterationCount: iterationCount + 1,
       iterationLimit: REFINE_ITERATION_LIMIT,
       applied,
-      assistantMessage: llmResult.content ?? "Ich habe deine Aenderungen uebernommen.",
+      assistantMessage: llmResult.content ?? "Ich habe deine Änderungen übernommen.",
       updatedSpec: newSpec,
       mock: llmResult.mock,
     });

@@ -274,7 +274,7 @@ function pickDims(spec: TraumkuecheData, opts: FloorplanSvgOptions): RoomDims {
 function labelForForm(slug: KitchenFormSlug): string {
   switch (slug) {
     case "zeile":
-      return "Kuechenzeile";
+      return "Küchenzeile";
     case "l":
       return "L-Form";
     case "u":

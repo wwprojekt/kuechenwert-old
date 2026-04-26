@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!body?.sessionToken || typeof body.sessionToken !== "string" || body.sessionToken.length < 8) {
-    return NextResponse.json({ error: "sessionToken fehlt oder ungueltig" }, { status: 400 });
+    return NextResponse.json({ error: "sessionToken fehlt oder ungültig" }, { status: 400 });
   }
   if (!body.spec) {
     return NextResponse.json({ error: "spec fehlt" }, { status: 400 });

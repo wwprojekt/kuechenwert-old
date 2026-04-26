@@ -176,8 +176,8 @@ export function FloorplanUpload({
             Optional: Grundriss hochladen
           </div>
           <p className="mt-0.5 text-[12px] leading-relaxed text-ink-muted">
-            JPG, PNG oder WebP (max 8 MB). Die KI erkennt Kuechenform und
-            ungefaehre Masse automatisch.
+            JPG, PNG oder WebP (max 8 MB). Die KI erkennt Küchenform und
+            ungefähre Maße automatisch.
           </p>
         </div>
       </div>
@@ -195,19 +195,19 @@ export function FloorplanUpload({
           onClick={() => inputRef.current?.click()}
           disabled={loading || awaitingTurnstile}
           className="btn-secondary text-xs"
-          title={awaitingTurnstile ? "Sicherheitscheck laeuft..." : undefined}
+          title={awaitingTurnstile ? "Sicherheitscheck läuft …" : undefined}
         >
           {loading ? (
             <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Analysiere...
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Analysiere …
             </>
           ) : awaitingTurnstile ? (
             <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Sicherheitscheck...
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Sicherheitscheck …
             </>
           ) : (
             <>
-              <Upload className="h-3.5 w-3.5" /> Datei waehlen
+              <Upload className="h-3.5 w-3.5" /> Datei wählen
             </>
           )}
         </button>
@@ -246,14 +246,14 @@ export function FloorplanUpload({
               <div className="font-semibold">
                 {result.analysis.usable
                   ? "Grundriss erkannt"
-                  : "Nicht eindeutig - bitte Form manuell waehlen"}
+                  : "Nicht eindeutig – bitte Form manuell wählen"}
               </div>
               {result.analysis.kitchenForm && (
                 <div>Form: {labelForForm(result.analysis.kitchenForm)}</div>
               )}
               {(result.analysis.approxLengthMeters || result.analysis.approxDepthMeters) && (
                 <div>
-                  Masse ca. {fmt(result.analysis.approxLengthMeters)} m x{" "}
+                  Maße ca. {fmt(result.analysis.approxLengthMeters)} m ×{" "}
                   {fmt(result.analysis.approxDepthMeters)} m
                 </div>
               )}
@@ -296,7 +296,7 @@ export function FloorplanUpload({
 function labelForForm(slug: KitchenFormSlug): string {
   switch (slug) {
     case "zeile":
-      return "Kuechenzeile";
+      return "Küchenzeile";
     case "l":
       return "L-Form";
     case "u":
